@@ -1,0 +1,85 @@
+.intro-section {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 0;
+  position: relative;
+  overflow-y: auto;
+}
+
+.intro-content {
+  max-width: 800px;
+  animation: fadeInUp 1s ease-out;
+  padding: 0 2rem;
+}
+
+.name {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: #b0b8da;
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+}
+
+.experience {
+  font-size: 1.2rem;
+  color: #8892b0;
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #a8b2d1;
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .intro-content {
+    padding: 0 1rem;
+  }
+  
+  .name {
+    font-size: 2.5rem;
+  }
+  
+  .title {
+    font-size: 1.4rem;
+  }
+  
+  .experience {
+    font-size: 1rem;
+  }
+  
+  .description {
+    font-size: 1rem;
+  }
+} 

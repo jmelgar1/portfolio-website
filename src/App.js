@@ -1,23 +1,53 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import IntroSection from './components/IntroSection';
+import WorkHistory from './components/WorkHistory';
+import ProjectsSection from './components/ProjectsSection';
+import ThreeJSBackground from './components/ThreeJSBackground';
+import { useHorizontalScroll } from './hooks/useHorizontalScroll';
 
 function App() {
+  const sections = ['intro', 'work', 'projects'];
+  const {
+    scrollPosition,
+    scrollToSection,
+    getCurrentSection,
+    getSectionProgress,
+    maxScroll
+  } = useHorizontalScroll(200, 0.6); // maxScroll, sensitivity
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ThreeJSBackground scrollPosition={scrollPosition} />
+      <main 
+        className="main-content" 
+        style={{ transform: `translateX(-${scrollPosition}vw)` }}
+      >
+        <IntroSection />
+        <WorkHistory />
+        <ProjectsSection />
+      </main>
+      
+      <div className="section-indicators">
+        {sections.map((_, index) => (
+          <div
+            key={index}
+            className={`indicator ${getCurrentSection() === index ? 'active' : ''}`}
+            onClick={() => scrollToSection(index)}
+            title={`Go to ${sections[index]} section`}
+            style={{
+              opacity: getCurrentSection() === index ? 
+                Math.max(0.4, 1 - getSectionProgress() * 0.6) : 0.3
+            }}
+          />
+        ))}
+        <div className="scroll-progress">
+          <div 
+            className="progress-bar"
+            style={{ width: `${(scrollPosition / maxScroll) * 100}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

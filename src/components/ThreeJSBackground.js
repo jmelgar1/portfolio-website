@@ -1,46 +1,9 @@
-import React, { useRef, Suspense, useMemo } from 'react';
+import React, { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
+import * as THREE from 'three';
+import { getSceneConfig, validateSceneConfig } from '../config/scenes';
 import './ThreeJSBackground.css';
-
-// Static model paths - defined outside component to prevent recreation (TEMPORARY)
-const MODEL_PATHS = {
-  trees: [
-    '/kenny_nature-kit/Models/GLTF format/tree_default.glb',
-    '/kenny_nature-kit/Models/GLTF format/tree_oak.glb',
-    '/kenny_nature-kit/Models/GLTF format/tree_pineTallA.glb',
-    '/kenny_nature-kit/Models/GLTF format/tree_pineTallB.glb',
-    '/kenny_nature-kit/Models/GLTF format/tree_simple.glb',
-    '/kenny_nature-kit/Models/GLTF format/tree_detailed.glb'
-  ],
-  rocks: [
-    '/kenny_nature-kit/Models/GLTF format/rock_largeA.glb',
-    '/kenny_nature-kit/Models/GLTF format/rock_largeB.glb',
-    '/kenny_nature-kit/Models/GLTF format/rock_smallA.glb',
-    '/kenny_nature-kit/Models/GLTF format/rock_smallB.glb'
-  ],
-  plants: [
-    '/kenny_nature-kit/Models/GLTF format/plant_bush.glb',
-    '/kenny_nature-kit/Models/GLTF format/plant_bushLarge.glb',
-    '/kenny_nature-kit/Models/GLTF format/grass.glb',
-    '/kenny_nature-kit/Models/GLTF format/grass_large.glb'
-  ],
-  flowers: [
-    '/kenny_nature-kit/Models/GLTF format/flower_purpleA.glb',
-    '/kenny_nature-kit/Models/GLTF format/flower_redA.glb',
-    '/kenny_nature-kit/Models/GLTF format/flower_yellowA.glb'
-  ],
-  cliffs: [
-    '/kenny_nature-kit/Models/GLTF format/cliff_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_large_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_block_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_blockSlope_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_cave_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_corner_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_half_rock.glb',
-    '/kenny_nature-kit/Models/GLTF format/cliff_blockDiagonal_rock.glb'
-  ]
-};
 
 // Component to load and render a single model - simplified without individual parallax
 const Model = ({ url, position, rotation = [0, 0, 0], scale = 1 }) => {
@@ -56,6 +19,18 @@ const Model = ({ url, position, rotation = [0, 0, 0], scale = 1 }) => {
     }
   });
 
+  // Enable shadows on the model
+  React.useEffect(() => {
+    if (scene) {
+      scene.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+    }
+  }, [scene]);
+
   return (
     <primitive 
       ref={modelRef}
@@ -67,34 +42,219 @@ const Model = ({ url, position, rotation = [0, 0, 0], scale = 1 }) => {
   );
 };
 
-// Function to generate positions for foreground forest only
-const getForestPosition = (index, totalInLayer) => {
-  const layerWidth = 30; // Extended width for continuous scene
-  const spacing = layerWidth / (totalInLayer + 1);
-  const x = -layerWidth/2 + spacing * (index + 1) + (Math.random() - 0.5) * 0.8;
-  const z = 1.75 + (Math.random() - 0.5) * 1.2;
-  const y = 0;
+// Component for smooth, hilly terrain with natural curves
+const HillyTerrain = () => {
+  const terrainRef = useRef();
   
-  return [x, y, z];
+  // Helper function to apply smooth hill displacement to any geometry
+  const applyHillDisplacement = (geometry, intensity = 1, frequency = 1) => {
+    const vertices = geometry.attributes.position.array;
+    
+    for (let i = 0; i < vertices.length; i += 3) {
+      const x = vertices[i];
+      const z = vertices[i + 1];
+      
+      // Create gentle rolling hills with multiple wave frequencies
+      const hill1 = Math.sin(x * 0.015 * frequency) * (1.2 * intensity);
+      const hill2 = Math.sin(z * 0.02 * frequency) * (0.9 * intensity);
+      const hill3 = Math.sin(x * 0.03 * frequency + z * 0.025 * frequency) * (0.6 * intensity);
+      const hill4 = Math.cos(x * 0.02 * frequency + z * 0.015 * frequency) * (0.4 * intensity);
+      const hill5 = Math.sin(x * 0.05 * frequency + z * 0.04 * frequency) * (0.2 * intensity);
+      const hill6 = Math.cos(x * 0.04 * frequency - z * 0.03 * frequency) * (0.15 * intensity);
+      
+      // Combine all waves for natural, smooth terrain
+      const elevation = hill1 + hill2 + hill3 + hill4 + hill5 + hill6;
+      vertices[i + 2] = elevation;
+    }
+    
+    geometry.attributes.position.needsUpdate = true;
+    geometry.computeVertexNormals();
+    return geometry;
+  };
+
+  // Create main hilly terrain
+  const createMainTerrain = () => {
+    const geometry = new THREE.PlaneGeometry(100, 60, 120, 80);
+    return applyHillDisplacement(geometry, 1.0, 1.0);
+  };
+
+  // Create foreground hills
+  const createForegroundHills = () => {
+    const geometry = new THREE.PlaneGeometry(80, 20, 60, 20);
+    return applyHillDisplacement(geometry, 0.8, 1.2);
+  };
+
+  // Create background hills
+  const createBackgroundHills = () => {
+    const geometry = new THREE.PlaneGeometry(140, 50, 80, 30);
+    return applyHillDisplacement(geometry, 0.6, 0.8);
+  };
+
+  const mainGeometry = createMainTerrain();
+  const foregroundGeometry = createForegroundHills();
+  const backgroundGeometry = createBackgroundHills();
+  
+  return (
+    <group>
+      {/* Main hilly terrain - light green grass */}
+      <mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]} receiveShadow>
+        <primitive object={mainGeometry} />
+        <meshLambertMaterial 
+          color="#90EE90"
+          wireframe={false}
+        />
+      </mesh>
+      
+      {/* Foreground rolling hills - bright light green */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, 8]} receiveShadow>
+        <primitive object={foregroundGeometry} />
+        <meshLambertMaterial color="#98FB98" />
+      </mesh>
+      
+      {/* Background gentle hills - slightly muted light green */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -20]} receiveShadow>
+        <primitive object={backgroundGeometry} />
+        <meshLambertMaterial color="#8FBC8F" />
+      </mesh>
+    </group>
+  );
 };
 
-// Function to generate positions for cliff backdrop
-const getCliffPosition = (index, totalCliffs) => {
-  const cliffWidth = 35; // Wider than forest for complete backdrop
-  const spacing = cliffWidth / (totalCliffs + 1);
-  const x = -cliffWidth/2 + spacing * (index + 1) + (Math.random() - 0.5) * 2;
-  const z = -8 + (Math.random() - 0.5) * 3; // Behind the trees
-  const y = -1; // Slightly lower to create natural cliff base
+// Realistic Sun Lighting Component
+const SunLighting = () => {
+  const sunRef = useRef();
+  const volumetricRef = useRef();
   
-  return [x, y, z];
+  // Sun position (top right, elevated)
+  const sunPosition = [25, 20, 15];
+  
+  useFrame((state) => {
+    // Subtle sun movement simulation (very slow)
+    if (sunRef.current) {
+      const time = state.clock.getElapsedTime() * 0.02;
+      sunRef.current.position.x = sunPosition[0] + Math.sin(time) * 2;
+      sunRef.current.position.y = sunPosition[1] + Math.cos(time) * 0.5;
+    }
+
+    // Animate volumetric light rays
+    if (volumetricRef.current) {
+      const time = state.clock.getElapsedTime() * 0.5;
+      volumetricRef.current.rotation.z = Math.sin(time) * 0.02;
+      volumetricRef.current.material.opacity = 0.15 + Math.sin(time * 2) * 0.05;
+    }
+  });
+
+  return (
+    <group>
+      {/* Main Sun Light - Directional from top right */}
+      <directionalLight
+        ref={sunRef}
+        position={sunPosition}
+        intensity={2.5}
+        color="#FFF8DC" // Warm sunlight color
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={100}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
+        shadow-bias={-0.0001}
+      />
+
+      {/* Ambient Light - Sky illumination */}
+      <ambientLight 
+        intensity={0.4} 
+        color="#87CEEB" // Sky blue tint
+      />
+
+      {/* Fill Light - Bounce light from opposite side */}
+      <directionalLight
+        position={[-15, 8, -5]}
+        intensity={0.3}
+        color="#B0E0E6" // Soft blue fill light
+      />
+
+      {/* Atmospheric/Rim Light - For depth */}
+      <directionalLight
+        position={[0, 5, -30]}
+        intensity={0.2}
+        color="#FFE4B5" // Warm atmospheric light
+      />
+
+      {/* Volumetric Light Rays Effect */}
+      <mesh
+        ref={volumetricRef}
+        position={[20, 15, 10]}
+        rotation={[0, 0, -Math.PI / 6]}
+      >
+        <coneGeometry args={[15, 40, 8, 1, true]} />
+        <meshBasicMaterial
+          color="#FFFACD"
+          transparent
+          opacity={0.15}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Additional Light Ray Cones for depth */}
+      <mesh position={[18, 12, 8]} rotation={[0, 0, -Math.PI / 5]}>
+        <coneGeometry args={[12, 35, 6, 1, true]} />
+        <meshBasicMaterial
+          color="#F0E68C"
+          transparent
+          opacity={0.1}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      <mesh position={[22, 18, 12]} rotation={[0, 0, -Math.PI / 7]}>
+        <coneGeometry args={[10, 30, 6, 1, true]} />
+        <meshBasicMaterial
+          color="#FFFFF0"
+          transparent
+          opacity={0.08}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Sun Glow Effect */}
+      <mesh position={sunPosition}>
+        <sphereGeometry args={[3, 16, 16]} />
+        <meshBasicMaterial
+          color="#FFFF00"
+          transparent
+          opacity={0.6}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Larger Sun Halo */}
+      <mesh position={sunPosition}>
+        <sphereGeometry args={[8, 16, 16]} />
+        <meshBasicMaterial
+          color="#FFF8DC"
+          transparent
+          opacity={0.1}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+    </group>
+  );
 };
 
-const getRandomRotation = () => [0, Math.random() * Math.PI * 0.3, 0];
-
-const NatureScene = ({ scrollPosition = 0 }) => {
+const NatureScene = ({ scrollPosition = 0, sceneName = 'forestScene' }) => {
   const groupRef = useRef();
   
+  // Load the static scene configuration
+  const sceneConfig = getSceneConfig(sceneName);
+  
   // Simple, smooth parallax movement - no choppy layer calculations
+  // Hook must be called before any early returns
   useFrame(() => {
     if (groupRef.current) {
       // Smooth parallax movement - background moves slower than content
@@ -103,86 +263,21 @@ const NatureScene = ({ scrollPosition = 0 }) => {
     }
   });
 
-  // Generate layered forest scene - ONLY ONCE
-  const sceneElements = useMemo(() => {
-    const elements = [];
+  // Validate scene configuration after hooks are called
+  if (!sceneConfig || !validateSceneConfig(sceneConfig)) {
+    console.error(`Invalid or missing scene configuration: ${sceneName}`);
+    return null;
+  }
 
-    // Add cliff backdrop behind everything
-    for (let i = 0; i < 15; i++) {
-      const cliffPath = MODEL_PATHS.cliffs[Math.floor(Math.random() * MODEL_PATHS.cliffs.length)];
-      elements.push({
-        type: 'cliff',
-        layer: 'background',
-        url: cliffPath,
-        position: getCliffPosition(i, 15),
-        rotation: getRandomRotation(),
-        scale: 1.2 + Math.random() * 0.8 // Larger for dramatic backdrop
-      });
-    }
-
-    // Foreground trees (larger, closer) - Move fastest
-    for (let i = 0; i < 150; i++) {
-      const treePath = MODEL_PATHS.trees[Math.floor(Math.random() * MODEL_PATHS.trees.length)];
-      elements.push({
-        type: 'tree',
-        layer: 'foreground',
-        url: treePath,
-        position: getForestPosition(i, 150),
-        rotation: getRandomRotation(),
-        scale: 0.8 + Math.random() * 0.5
-      });
-    }
-
-    // Add rocks in foreground only
-    for (let i = 0; i < 35; i++) {
-      const rockPath = MODEL_PATHS.rocks[Math.floor(Math.random() * MODEL_PATHS.rocks.length)];
-      
-      elements.push({
-        type: 'rock',
-        layer: 'foreground',
-        url: rockPath,
-        position: getForestPosition(Math.floor(Math.random() * 150), 150),
-        rotation: getRandomRotation(),
-        scale: 0.3 + Math.random() * 0.15
-      });
-    }
-
-    // Add plants and grass in foreground only
-    for (let i = 0; i < 40; i++) {
-      const plantPath = MODEL_PATHS.plants[Math.floor(Math.random() * MODEL_PATHS.plants.length)];
-      
-      elements.push({
-        type: 'plant',
-        layer: 'foreground',
-        url: plantPath,
-        position: getForestPosition(Math.floor(Math.random() * 150), 150),
-        rotation: getRandomRotation(),
-        scale: 0.4 + Math.random() * 0.15
-      });
-    }
-
-    // Add flowers in foreground
-    for (let i = 0; i < 30; i++) {
-      const flowerPath = MODEL_PATHS.flowers[Math.floor(Math.random() * MODEL_PATHS.flowers.length)];
-      elements.push({
-        type: 'flower',
-        layer: 'foreground',
-        url: flowerPath,
-        position: getForestPosition(Math.floor(Math.random() * 150), 150),
-        rotation: getRandomRotation(),
-        scale: 0.5 + Math.random() * 0.25
-      });
-    }
-
-    return elements;
-  }, []); // Empty dependency array - generate scene only once
+  // Get scene elements from static configuration
+  const sceneElements = sceneConfig.elements;
 
   return (
     <group ref={groupRef}>
       {/* Render all scene elements */}
-      {sceneElements.map((element, index) => (
+      {sceneElements.map((element) => (
         <Model
-          key={index}
+          key={element.id}
           url={element.url}
           position={element.position}
           rotation={element.rotation}
@@ -190,51 +285,30 @@ const NatureScene = ({ scrollPosition = 0 }) => {
         />
       ))}
       
-      {/* Ground plane - extended to reach cliff backdrop */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, -3]}>
-        <planeGeometry args={[90, 50]} />
-        <meshLambertMaterial color="#2d5016" />
-      </mesh>
+      {/* Hilly terrain with smooth curves and light green grass */}
+      <HillyTerrain />
 
-      {/* Foreground ground patch */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 2]}>
-        <planeGeometry args={[60, 15]} />
-        <meshLambertMaterial color="#3a6b1a" />
-      </mesh>
-
-      {/* Cliff base ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, -8]}>
-        <planeGeometry args={[70, 20]} />
-        <meshLambertMaterial color="#1f3a0d" />
-      </mesh>
-
-      {/* Lighting optimized for side view */}
-      <ambientLight intensity={0.5} />
-      <directionalLight 
-        position={[15, 10, 5]} 
-        intensity={1.0}
-        color="#ffffff"
-        castShadow
-      />
-      <directionalLight 
-        position={[-10, 8, -10]} 
-        intensity={0.4}
-        color="#87CEEB"
-      />
+      {/* Realistic Sun Lighting System */}
+      <SunLighting />
     </group>
   );
 };
 
-const ThreeJSBackground = ({ scrollPosition = 0 }) => {
+const ThreeJSBackground = ({ scrollPosition = 0, sceneName = 'forestScene' }) => {
   return (
     <div className="threejs-background">
       <Canvas 
-        camera={{ position: [0, 0.3, 3], fov: 75 }}
-        shadows
+        camera={{ position: [0, 0.2, 6], fov: 75 }}
+        shadows={{ type: THREE.PCFSoftShadowMap }}
+        gl={{ 
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance"
+        }}
       >
         <Suspense fallback={null}>
-          <NatureScene scrollPosition={scrollPosition} />
-          <Environment preset="forest" />
+          <NatureScene scrollPosition={scrollPosition} sceneName={sceneName} />
+          <Environment preset="sunset" intensity={0.3} />
         </Suspense>
         <OrbitControls 
           enableZoom={false} 

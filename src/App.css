@@ -25,7 +25,6 @@ body {
   position: relative;
   z-index: 2;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
   display: flex;
   flex-direction: row;
   width: 300vw; /* 3 sections = 300% width */

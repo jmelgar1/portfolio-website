@@ -205,6 +205,150 @@ export const addComprehensiveGrassCoverage = (sceneBuilder) => {
   return sceneBuilder;
 };
 
+// Helper function to create cosine-shaped tree arrangement around valley edges
+export const addCosineTreeArrangement = (sceneBuilder, options) => {
+  const {
+    valleyWidth,           // Total width of the valley (side to side)
+    centerDepth,           // How far back the center trees are (z position)
+    edgeDepth,             // How close the edge trees come (z position)
+    treesPerSide,          // Number of trees on each side of the valley
+    centerTrees,           // Number of trees at the center (deepest point)
+    thickness,             // How many layers deep the trees are (1 = single line, 2+ = clusters)
+    minTreeDistance,       // Minimum distance between any two trees (prevents clipping)
+    scaleRange,            // [min, max] scale for trees
+    layer,                 // Which layer to place trees on
+    treeVariety            // Array of tree model variations
+  } = options;
+
+  // Validate required parameters
+  if (!valleyWidth || !centerDepth || !edgeDepth || !treesPerSide || !centerTrees || !thickness || !minTreeDistance || !scaleRange || !layer || !treeVariety) {
+    throw new Error('addCosineTreeArrangement requires all parameters: valleyWidth, centerDepth, edgeDepth, treesPerSide, centerTrees, thickness, minTreeDistance, scaleRange, layer, treeVariety');
+  }
+
+  const trees = [];
+  const placedPositions = []; // Track all placed tree positions for collision detection
+  
+  // Calculate the amplitude of the cosine wave (how much it curves)
+  const amplitude = (centerDepth - edgeDepth) / 2;
+  const offset = (centerDepth + edgeDepth) / 2;
+
+  // Helper function to check if a position is too close to existing trees
+  const isPositionValid = (x, z) => {
+    return placedPositions.every(pos => {
+      const distance = Math.sqrt((x - pos.x) ** 2 + (z - pos.z) ** 2);
+      return distance >= minTreeDistance;
+    });
+  };
+
+  // Helper function to find a valid position near the desired location
+  const findValidPosition = (targetX, targetZ, maxAttempts = 10) => {
+    // First try the exact target position
+    if (isPositionValid(targetX, targetZ)) {
+      return { x: targetX, z: targetZ };
+    }
+
+    // Try positions in expanding circles around the target
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const radius = (minTreeDistance * 0.5) * attempt; // Gradually expand search radius
+      const angleStep = (Math.PI * 2) / (4 + attempt); // More positions per circle as we expand
+      
+      for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
+        const x = targetX + Math.cos(angle) * radius;
+        const z = targetZ + Math.sin(angle) * radius;
+        
+        if (isPositionValid(x, z)) {
+          return { x, z };
+        }
+      }
+    }
+    
+    // If no valid position found, return null (skip this tree)
+    return null;
+  };
+
+  // Helper function to create a cluster of trees at a given base position
+  const createTreeCluster = (baseX, baseZ, clusterPrefix, clusterIndex) => {
+    for (let depth = 0; depth < thickness; depth++) {
+      // Calculate depth variation - spread trees forward and backward from base position
+      const depthOffset = thickness === 1 ? 0 : (depth - (thickness - 1) / 2) * (9.5 / (thickness - 1 || 1));
+      const targetZ = baseZ + depthOffset + (Math.random() - 0.5) * 0.4; // Small random variation
+      
+      // Add slight x variation for natural clustering
+      const xOffset = thickness === 1 ? 0 : (Math.random() - 0.5) * 6.5;
+      const targetX = baseX + xOffset;
+      
+      // Find a valid position that maintains minimum distance
+      const validPosition = findValidPosition(targetX, targetZ);
+      
+      if (validPosition) {
+        // Record the position to prevent future collisions
+        placedPositions.push({ x: validPosition.x, z: validPosition.z });
+        
+        const scale = scaleRange[0] + Math.random() * (scaleRange[1] - scaleRange[0]);
+        const rotation = (Math.random() - 0.5) * 0.8; // Random rotation
+        const treeType = treeVariety[Math.floor(Math.random() * treeVariety.length)];
+        
+        trees.push({
+          id: `${clusterPrefix}_${clusterIndex}_depth_${depth}`,
+          type: 'tree',
+          url: `/nature_assets/${treeType}.glb`,
+          position: [validPosition.x, -2.5, validPosition.z],
+          rotation: [0, rotation, 0],
+          scale,
+          layer
+        });
+      }
+      // If no valid position found, skip this tree (prevents infinite loops)
+    }
+  };
+
+  // Generate center trees (deepest point) with thickness
+  for (let i = 0; i < centerTrees; i++) {
+    const xSpread = centerTrees > 1 ? 4 : 0; // Spread center trees across 4 units
+    const baseX = centerTrees === 1 ? 0 : (i - (centerTrees - 1) / 2) * (xSpread / (centerTrees - 1));
+    const baseZ = centerDepth;
+    
+    createTreeCluster(baseX, baseZ, 'cosine_tree_center', i + 1);
+  }
+
+  // Generate left side trees (cosine curve) with thickness
+  for (let i = 0; i < treesPerSide; i++) {
+    const progress = (i + 1) / (treesPerSide + 1); // 0 to 1, excluding endpoints
+    const baseX = -valleyWidth * progress / 2; // Negative x for left side
+    
+    // Cosine calculation: starts near center depth, curves to edge depth
+    const cosineValue = Math.cos(progress * Math.PI / 2); // 0 to π/2 for smooth curve
+    const baseZ = offset + amplitude * cosineValue;
+    
+    createTreeCluster(baseX, baseZ, 'cosine_tree_left', i + 1);
+  }
+
+  // Generate right side trees (mirror of left side) with thickness
+  for (let i = 0; i < treesPerSide; i++) {
+    const progress = (i + 1) / (treesPerSide + 1);
+    const baseX = valleyWidth * progress / 2; // Positive x for right side
+    
+    const cosineValue = Math.cos(progress * Math.PI / 2);
+    const baseZ = offset + amplitude * cosineValue;
+    
+    createTreeCluster(baseX, baseZ, 'cosine_tree_right', i + 1);
+  }
+
+  // Add edge tree clusters for completion
+  const edgeDistance = valleyWidth * 0.6;
+  
+  // Far left edge cluster
+  createTreeCluster(-edgeDistance, edgeDepth + Math.random() * 0.6, 'cosine_tree_far_left', 1);
+  
+  // Far right edge cluster  
+  createTreeCluster(edgeDistance, edgeDepth + Math.random() * 0.6, 'cosine_tree_far_right', 1);
+
+  // Add all generated trees to the scene builder
+  trees.forEach(tree => sceneBuilder.addElement(tree));
+  
+  return sceneBuilder;
+};
+
 // Helper function to add wildflowers to a pasture
 export const addWildflowers = (sceneBuilder, options = {}) => {
   const {

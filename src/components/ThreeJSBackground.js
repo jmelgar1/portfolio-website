@@ -42,28 +42,112 @@ const Model = ({ url, position, rotation = [0, 0, 0], scale = 1 }) => {
   );
 };
 
-// Component for smooth, hilly terrain with natural curves
-const HillyTerrain = () => {
+// Individual Cloud Component - Creates blob-like shape from spheres
+const Cloud = ({ position, scale = 1, speed = 1 }) => {
+  const cloudRef = useRef();
+  const initialX = useRef(position[0]);
+  
+  useFrame((state) => {
+    if (cloudRef.current) {
+      // Move cloud from left to right
+      const elapsedTime = state.clock.getElapsedTime();
+      const movementSpeed = speed * 0.5;
+      
+      // Reset cloud position when it goes too far right
+      const newX = initialX.current + (elapsedTime * movementSpeed) % 120;
+      cloudRef.current.position.x = newX > 60 ? newX - 120 : newX;
+      
+      // Subtle floating animation
+      cloudRef.current.position.y = position[1] + Math.sin(elapsedTime * 0.3 + position[0]) * 0.2;
+    }
+  });
+
+  // Create blob-like cloud from multiple spheres
+  const cloudParts = [
+    { pos: [0, 0, 0], scale: 1.0 },      // Main body
+    { pos: [-0.8, 0.2, 0.1], scale: 0.7 }, // Left bump
+    { pos: [0.8, 0.1, -0.1], scale: 0.8 }, // Right bump
+    { pos: [0.2, 0.6, 0.2], scale: 0.6 },  // Top bump
+    { pos: [-0.3, 0.4, -0.2], scale: 0.5 }, // Top left
+    { pos: [0.4, 0.3, 0.3], scale: 0.4 },  // Top right
+  ];
+
+  return (
+    <group ref={cloudRef} position={position} scale={scale}>
+      {cloudParts.map((part, index) => (
+        <mesh key={index} position={part.pos} scale={part.scale}>
+          <sphereGeometry args={[1, 8, 6]} />
+          <meshBasicMaterial 
+            color="white" 
+            transparent 
+            opacity={0.85}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+// Cloud System Component - Manages multiple clouds
+const CloudSystem = () => {
+  // Generate cloud configurations
+  const clouds = React.useMemo(() => {
+    const cloudConfigs = [];
+    const numClouds = 12; // Number of clouds in the sky
+    
+    for (let i = 0; i < numClouds; i++) {
+      cloudConfigs.push({
+        id: i,
+        position: [
+          -60 + Math.random() * 120,  // X: Spread across wide area
+          18 + Math.random() * 12,    // Y: High sky height (18-30 units up)
+          -40 + Math.random() * 15    // Z: Far behind trees (-40 to -25 units back)
+        ],
+        scale: 0.8 + Math.random() * 1.2,  // Random size (0.8 - 2.0)
+        speed: 0.5 + Math.random() * 1.0   // Random speed (0.5 - 1.5)
+      });
+    }
+    
+    return cloudConfigs;
+  }, []);
+
+  return (
+    <group>
+      {clouds.map((cloud) => (
+        <Cloud
+          key={cloud.id}
+          position={cloud.position}
+          scale={cloud.scale}
+          speed={cloud.speed}
+        />
+      ))}
+    </group>
+  );
+};
+
+// Component for smooth valley terrain with natural curves
+const ValleyTerrain = () => {
   const terrainRef = useRef();
   
-  // Helper function to apply smooth hill displacement to any geometry
-  const applyHillDisplacement = (geometry, intensity = 1, frequency = 1) => {
+  // Helper function to create a subtle valley displacement
+  const applyValleyDisplacement = (geometry, intensity = 1, frequency = 1) => {
     const vertices = geometry.attributes.position.array;
     
     for (let i = 0; i < vertices.length; i += 3) {
       const x = vertices[i];
       const z = vertices[i + 1];
       
-      // Create gentle rolling hills with multiple wave frequencies
-      const hill1 = Math.sin(x * 0.015 * frequency) * (1.2 * intensity);
-      const hill2 = Math.sin(z * 0.02 * frequency) * (0.9 * intensity);
-      const hill3 = Math.sin(x * 0.03 * frequency + z * 0.025 * frequency) * (0.6 * intensity);
-      const hill4 = Math.cos(x * 0.02 * frequency + z * 0.015 * frequency) * (0.4 * intensity);
-      const hill5 = Math.sin(x * 0.05 * frequency + z * 0.04 * frequency) * (0.2 * intensity);
-      const hill6 = Math.cos(x * 0.04 * frequency - z * 0.03 * frequency) * (0.15 * intensity);
+      // Create a subtle valley - lowest at center, rising toward edges
+      const distanceFromCenter = Math.sqrt(x * x + z * z);
+      const valleyDepth = (distanceFromCenter * distanceFromCenter) * 0.002 * intensity;
       
-      // Combine all waves for natural, smooth terrain
-      const elevation = hill1 + hill2 + hill3 + hill4 + hill5 + hill6;
+      // Add subtle natural variation to avoid perfectly smooth valley
+      const naturalVariation1 = Math.sin(x * 0.02 * frequency) * (0.15 * intensity);
+      const naturalVariation2 = Math.sin(z * 0.025 * frequency) * (0.12 * intensity);
+      const naturalVariation3 = Math.sin(x * 0.03 * frequency + z * 0.02 * frequency) * (0.08 * intensity);
+      
+      // Combine valley shape with subtle natural variations
+      const elevation = valleyDepth + naturalVariation1 + naturalVariation2 + naturalVariation3;
       vertices[i + 2] = elevation;
     }
     
@@ -72,31 +156,31 @@ const HillyTerrain = () => {
     return geometry;
   };
 
-  // Create main hilly terrain
+  // Create main valley terrain
   const createMainTerrain = () => {
     const geometry = new THREE.PlaneGeometry(100, 60, 120, 80);
-    return applyHillDisplacement(geometry, 1.0, 1.0);
+    return applyValleyDisplacement(geometry, 1.0, 1.0);
   };
 
-  // Create foreground hills
-  const createForegroundHills = () => {
+  // Create foreground valley
+  const createForegroundValley = () => {
     const geometry = new THREE.PlaneGeometry(80, 20, 60, 20);
-    return applyHillDisplacement(geometry, 0.8, 1.2);
+    return applyValleyDisplacement(geometry, 0.8, 1.2);
   };
 
-  // Create background hills
-  const createBackgroundHills = () => {
+  // Create background valley
+  const createBackgroundValley = () => {
     const geometry = new THREE.PlaneGeometry(140, 50, 80, 30);
-    return applyHillDisplacement(geometry, 0.6, 0.8);
+    return applyValleyDisplacement(geometry, 0.6, 0.8);
   };
 
   const mainGeometry = createMainTerrain();
-  const foregroundGeometry = createForegroundHills();
-  const backgroundGeometry = createBackgroundHills();
+  const foregroundGeometry = createForegroundValley();
+  const backgroundGeometry = createBackgroundValley();
   
   return (
     <group>
-      {/* Main hilly terrain - light green grass */}
+      {/* Main valley terrain - light green grass */}
       <mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]} receiveShadow>
         <primitive object={mainGeometry} />
         <meshLambertMaterial 
@@ -105,13 +189,13 @@ const HillyTerrain = () => {
         />
       </mesh>
       
-      {/* Foreground rolling hills - bright light green */}
+      {/* Foreground valley - bright light green */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, 8]} receiveShadow>
         <primitive object={foregroundGeometry} />
         <meshLambertMaterial color="#98FB98" />
       </mesh>
       
-      {/* Background gentle hills - slightly muted light green */}
+      {/* Background valley - slightly muted light green */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -20]} receiveShadow>
         <primitive object={backgroundGeometry} />
         <meshLambertMaterial color="#8FBC8F" />
@@ -176,52 +260,6 @@ const SunLighting = () => {
         color="#B0E0E6" // Soft blue fill light
       />
 
-      {/* Atmospheric/Rim Light - For depth */}
-      <directionalLight
-        position={[0, 5, -30]}
-        intensity={0.2}
-        color="#FFE4B5" // Warm atmospheric light
-      />
-
-      {/* Volumetric Light Rays Effect */}
-      <mesh
-        ref={volumetricRef}
-        position={[20, 15, 10]}
-        rotation={[0, 0, -Math.PI / 6]}
-      >
-        <coneGeometry args={[15, 40, 8, 1, true]} />
-        <meshBasicMaterial
-          color="#FFFACD"
-          transparent
-          opacity={0.15}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* Additional Light Ray Cones for depth */}
-      <mesh position={[18, 12, 8]} rotation={[0, 0, -Math.PI / 5]}>
-        <coneGeometry args={[12, 35, 6, 1, true]} />
-        <meshBasicMaterial
-          color="#F0E68C"
-          transparent
-          opacity={0.1}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      <mesh position={[22, 18, 12]} rotation={[0, 0, -Math.PI / 7]}>
-        <coneGeometry args={[10, 30, 6, 1, true]} />
-        <meshBasicMaterial
-          color="#FFFFF0"
-          transparent
-          opacity={0.08}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
       {/* Sun Glow Effect */}
       <mesh position={sunPosition}>
         <sphereGeometry args={[3, 16, 16]} />
@@ -229,17 +267,6 @@ const SunLighting = () => {
           color="#FFFF00"
           transparent
           opacity={0.6}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* Larger Sun Halo */}
-      <mesh position={sunPosition}>
-        <sphereGeometry args={[8, 16, 16]} />
-        <meshBasicMaterial
-          color="#FFF8DC"
-          transparent
-          opacity={0.1}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
@@ -285,11 +312,14 @@ const NatureScene = ({ scrollPosition = 0, sceneName = 'forestScene' }) => {
         />
       ))}
       
-      {/* Hilly terrain with smooth curves and light green grass */}
-      <HillyTerrain />
+      {/* Valley terrain with smooth curves and light green grass */}
+      <ValleyTerrain />
 
       {/* Realistic Sun Lighting System */}
       <SunLighting />
+
+      {/* Animated Cloud System */}
+      <CloudSystem />
     </group>
   );
 };

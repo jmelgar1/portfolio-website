@@ -3,7 +3,7 @@ import './App.css';
 import IntroSection from './components/IntroSection';
 import WorkHistory from './components/WorkHistory';
 import ProjectsSection from './components/ProjectsSection';
-import ThreeJSBackground from './components/ThreeJSBackground';
+import ThreeJSBackground from './components/threejs/ThreeJSBackground';
 import { useHorizontalScroll } from './hooks/useHorizontalScroll';
 
 function App() {
@@ -14,11 +14,12 @@ function App() {
     getCurrentSection,
     getSectionProgress,
     maxScroll
-  } = useHorizontalScroll(200, 0.6); // maxScroll, sensitivity
+  } = useHorizontalScroll(350, 0.6); // maxScroll, sensitivity
+
 
   return (
     <div className="App">
-      <ThreeJSBackground scrollPosition={scrollPosition} />
+      <ThreeJSBackground scrollPosition={scrollPosition} maxScroll={maxScroll} />
       <main 
         className="main-content" 
         style={{ transform: `translateX(-${scrollPosition}vw)` }}

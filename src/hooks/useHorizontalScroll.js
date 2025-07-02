@@ -2,19 +2,49 @@ import { useState, useEffect, useRef } from 'react';
 
 export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) => {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const targetScrollPosition = useRef(0);
+  const animationFrame = useRef(null);
+
   const keysPressed = useRef(new Set());
   const keyScrollInterval = useRef(null);
 
+  const startAnimation = useRef(() => {});
+
   useEffect(() => {
+    targetScrollPosition.current = 0;
+
+    const animateScroll = () => {
+      setScrollPosition(currentPosition => {
+        const target = targetScrollPosition.current;
+        const diff = target - currentPosition;
+
+        if (Math.abs(diff) < 0.1) {
+          if (animationFrame.current) {
+            cancelAnimationFrame(animationFrame.current);
+            animationFrame.current = null;
+          }
+          return target;
+        }
+
+        const newPosition = currentPosition + diff * 0.1;
+        animationFrame.current = requestAnimationFrame(animateScroll);
+        return newPosition;
+      });
+    };
+
+    startAnimation.current = () => {
+      if (!animationFrame.current) {
+        animationFrame.current = requestAnimationFrame(animateScroll);
+      }
+    };
+
     const handleWheel = (e) => {
       e.preventDefault();
       
       const deltaY = e.deltaY * scrollSensitivity;
       
-      setScrollPosition(prev => {
-        const newPosition = prev + (deltaY * 0.05);
-        return Math.max(0, Math.min(newPosition, maxScroll));
-      });
+      targetScrollPosition.current = Math.max(0, Math.min(targetScrollPosition.current + (deltaY * 0.2), maxScroll));
+      startAnimation.current();
     };
 
     const handleKeyDown = (e) => {
@@ -59,10 +89,8 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
         }
         
         if (scrollDirection !== 0) {
-          setScrollPosition(prev => {
-            const newPosition = prev + (scrollDirection * scrollSpeed);
-            return Math.max(0, Math.min(newPosition, maxScroll));
-          });
+          targetScrollPosition.current = Math.max(0, Math.min(targetScrollPosition.current + (scrollDirection * scrollSpeed), maxScroll));
+          startAnimation.current();
         }
       }, 16);
     };
@@ -79,30 +107,24 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
       if (keyScrollInterval.current) {
         clearInterval(keyScrollInterval.current);
       }
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+      }
     };
   }, [maxScroll, scrollSensitivity]);
 
   const scrollToSection = (index) => {
-    const targetPosition = index * 100;
-    const startPosition = scrollPosition;
-    const distance = targetPosition - startPosition;
-    const duration = 800;
-    const startTime = Date.now();
+    if (keyScrollInterval.current) {
+      clearInterval(keyScrollInterval.current);
+      keyScrollInterval.current = null;
+    }
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
+      animationFrame.current = null;
+    }
     
-    const animateScroll = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-      const newPosition = startPosition + (distance * easeOutCubic);
-      
-      setScrollPosition(newPosition);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
-    
-    requestAnimationFrame(animateScroll);
+    targetScrollPosition.current = Math.max(0, Math.min(index * 100, maxScroll));
+    startAnimation.current();
   };
 
   const getCurrentSection = () => Math.floor(scrollPosition / 100);

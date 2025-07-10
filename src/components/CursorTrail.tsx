@@ -20,8 +20,12 @@ const MouseParticleTrail = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const updateCanvasSize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    updateCanvasSize();
     
     let particles: Particle[] = [];
     let hue = 0;
@@ -92,10 +96,12 @@ const MouseParticleTrail = () => {
     };
     
     document.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("resize", updateCanvasSize);
     animate();
     
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("resize", updateCanvasSize);
     };
   }, []);
 

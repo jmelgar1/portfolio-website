@@ -1,10 +1,19 @@
 import React, { Suspense, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import NodeNetwork from './NodeNetwork';
+import * as THREE from 'three';
 import './ThreeJSBackground.css';
 
-const Starfield = ({ scrollPosition }) => {
-  const starfieldRef = useRef();
+interface StarfieldProps {
+  scrollPosition: number;
+}
+
+interface ThreeJSBackgroundProps {
+  scrollPosition?: number;
+  maxScroll?: number;
+}
+
+const Starfield = ({ scrollPosition }: StarfieldProps) => {
+  const starfieldRef = useRef<THREE.Points>(null);
   const starCount = 2000;
   const positions = new Float32Array(starCount * 3);
   
@@ -26,6 +35,7 @@ const Starfield = ({ scrollPosition }) => {
           array={positions}
           count={starCount}
           itemSize={3}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial
@@ -40,7 +50,7 @@ const Starfield = ({ scrollPosition }) => {
   );
 };
 
-const ThreeJSBackground = ({ scrollPosition = 0, maxScroll = 350 }) => {
+const ThreeJSBackground = ({ scrollPosition = 0, maxScroll = 350 }: ThreeJSBackgroundProps) => {
   return (
     <div className="threejs-background">
       <Canvas 
@@ -58,9 +68,6 @@ const ThreeJSBackground = ({ scrollPosition = 0, maxScroll = 350 }) => {
           {/* Lighting */}
           <ambientLight intensity={0.3} />
           <directionalLight position={[10, 10, 5]} intensity={0.8} />
-          
-          {/* Main node network - stays stationary */}
-          <NodeNetwork scrollPosition={scrollPosition} maxScroll={maxScroll} />
         </Suspense>
       </Canvas>
     </div>

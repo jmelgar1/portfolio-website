@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) => {
+export const useHorizontalScroll = (maxScroll: number = 200, scrollSensitivity: number = 0.6) => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const targetScrollPosition = useRef(0);
-  const animationFrame = useRef(null);
+  const animationFrame = useRef<number | null>(null);
 
-  const keysPressed = useRef(new Set());
-  const keyScrollInterval = useRef(null);
+  const keysPressed = useRef(new Set<string>());
+  const keyScrollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startAnimation = useRef(() => {});
 
@@ -38,7 +38,7 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
       }
     };
 
-    const handleWheel = (e) => {
+    const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
       const deltaY = e.deltaY * scrollSensitivity;
@@ -47,7 +47,7 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
       startAnimation.current();
     };
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) {
         return;
       }
@@ -60,7 +60,7 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
       }
     };
 
-    const handleKeyUp = (e) => {
+    const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current.delete(e.key);
       
       if (keysPressed.current.size === 0 && keyScrollInterval.current) {
@@ -74,8 +74,10 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
       
       keyScrollInterval.current = setInterval(() => {
         if (keysPressed.current.size === 0) {
-          clearInterval(keyScrollInterval.current);
-          keyScrollInterval.current = null;
+          if (keyScrollInterval.current) {
+            clearInterval(keyScrollInterval.current);
+            keyScrollInterval.current = null;
+          }
           return;
         }
         
@@ -113,7 +115,7 @@ export const useHorizontalScroll = (maxScroll = 200, scrollSensitivity = 0.6) =>
     };
   }, [maxScroll, scrollSensitivity]);
 
-  const scrollToSection = (index) => {
+  const scrollToSection = (index: number) => {
     if (keyScrollInterval.current) {
       clearInterval(keyScrollInterval.current);
       keyScrollInterval.current = null;

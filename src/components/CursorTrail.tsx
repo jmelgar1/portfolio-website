@@ -1,23 +1,33 @@
 import React, { useEffect, useRef } from "react";
 import './CursorTrail.css';
 
+interface Particle {
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  speedX: number;
+  speedY: number;
+}
+
 const MouseParticleTrail = () => {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    let particles = [];
+    let particles: Particle[] = [];
     let hue = 0;
     const maxDistance = 90;
     
-    const createParticle = (x, y) => {
+    const createParticle = (x: number, y: number): Particle => {
       return {
         x: x,
         y: y,
@@ -74,7 +84,7 @@ const MouseParticleTrail = () => {
       });
     };
     
-    const handleMouseMove = (event) => {
+    const handleMouseMove = (event: MouseEvent) => {
       const x = event.clientX;
       const y = event.clientY;
       

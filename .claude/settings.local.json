@@ -7,7 +7,9 @@
       "Bash(touch:*)",
       "Bash(ls:*)",
       "Bash(rm:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

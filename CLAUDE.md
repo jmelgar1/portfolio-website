@@ -65,4 +65,4 @@ When making modifications to this codebase, maintain a record of changes in `log
 - Files modified
 - Key decisions made
 - Any breaking changes or considerations for future development
-- For changelogs created during sessions in the @logs/ folder, ensure they are named properly in the following format (dd-mm-yyyy s1,2,3,etc), the "s" stands for session and we will increment as necessary.
+- For changelogs created during sessions in the @logs/ folder, ensure they are named properly in the following format (mm-dd-yyyy s1,2,3,etc), the "s" stands for session and we will increment as necessary.

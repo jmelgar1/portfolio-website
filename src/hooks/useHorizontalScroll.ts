@@ -1,50 +1,42 @@
 import { useState, useEffect, useRef } from 'react';
 
+// Custom hook for smooth horizontal scrolling
 export const useHorizontalScroll = (maxScroll: number = 200, scrollSensitivity: number = 0.6) => {
   const [scrollPosition, setScrollPosition] = useState(0);
-  const targetScrollPosition = useRef(0);
-  const animationFrame = useRef<number | null>(null);
+  const scrollData = useRef({
+    current: 0,
+    previous: 0,
+    ease: 0.1,
+    rounded: 0
+  });
 
   const keysPressed = useRef(new Set<string>());
   const keyScrollInterval = useRef<NodeJS.Timeout | null>(null);
-
-  const startAnimation = useRef(() => {});
+  const animationFrame = useRef<number | null>(null);
 
   useEffect(() => {
-    targetScrollPosition.current = 0;
-
     const animateScroll = () => {
-      setScrollPosition(currentPosition => {
-        const target = targetScrollPosition.current;
-        const diff = target - currentPosition;
+      // Apply easing: previous += (current - previous) * ease
+      scrollData.current.previous += (scrollData.current.current - scrollData.current.previous) * scrollData.current.ease;
+      scrollData.current.rounded = Math.round(scrollData.current.previous * 100) / 100;
 
-        if (Math.abs(diff) < 0.1) {
-          if (animationFrame.current) {
-            cancelAnimationFrame(animationFrame.current);
-            animationFrame.current = null;
-          }
-          return target;
-        }
+      // Update React state
+      setScrollPosition(scrollData.current.rounded);
 
-        const newPosition = currentPosition + diff * 0.1;
-        animationFrame.current = requestAnimationFrame(animateScroll);
-        return newPosition;
-      });
+      // Continue animation
+      animationFrame.current = requestAnimationFrame(animateScroll);
     };
 
-    startAnimation.current = () => {
-      if (!animationFrame.current) {
-        animationFrame.current = requestAnimationFrame(animateScroll);
-      }
-    };
+    // Start the animation loop
+    animationFrame.current = requestAnimationFrame(animateScroll);
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
       const deltaY = e.deltaY * scrollSensitivity;
       
-      targetScrollPosition.current = Math.max(0, Math.min(targetScrollPosition.current + (deltaY * 0.2), maxScroll));
-      startAnimation.current();
+      // Update current scroll position with bounds checking
+      scrollData.current.current = Math.max(0, Math.min(scrollData.current.current + (deltaY * 0.2), maxScroll));
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -91,8 +83,8 @@ export const useHorizontalScroll = (maxScroll: number = 200, scrollSensitivity: 
         }
         
         if (scrollDirection !== 0) {
-          targetScrollPosition.current = Math.max(0, Math.min(targetScrollPosition.current + (scrollDirection * scrollSpeed), maxScroll));
-          startAnimation.current();
+          // Update current scroll position with bounds checking
+          scrollData.current.current = Math.max(0, Math.min(scrollData.current.current + (scrollDirection * scrollSpeed), maxScroll));
         }
       }, 16);
     };
@@ -120,13 +112,9 @@ export const useHorizontalScroll = (maxScroll: number = 200, scrollSensitivity: 
       clearInterval(keyScrollInterval.current);
       keyScrollInterval.current = null;
     }
-    if (animationFrame.current) {
-      cancelAnimationFrame(animationFrame.current);
-      animationFrame.current = null;
-    }
     
-    targetScrollPosition.current = Math.max(0, Math.min(index * 100, maxScroll));
-    startAnimation.current();
+    // Update current scroll position directly for section navigation
+    scrollData.current.current = Math.max(0, Math.min(index * 100, maxScroll));
   };
 
   const getCurrentSection = () => Math.floor(scrollPosition / 100);

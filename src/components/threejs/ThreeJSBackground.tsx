@@ -1,34 +1,30 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense, useRef, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import './ThreeJSBackground.css';
-
-interface StarfieldProps {
-  scrollPosition: number;
-}
 
 interface ThreeJSBackgroundProps {
   scrollPosition?: number;
   maxScroll?: number;
 }
 
-const Starfield = ({ scrollPosition }: StarfieldProps) => {
+const Starfield = () => {
   const starfieldRef = useRef<THREE.Points>(null);
   const starCount = 2000;
-  const positions = new Float32Array(starCount * 3);
   
-  for (let i = 0; i < starCount; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 400; // x - wider spread
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 400; // y - wider spread
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 400; // z - wider spread
-  }
-  
-  // Move starfield based on scroll position
-  const offsetX = (scrollPosition / 100) * 2; // Subtle horizontal movement
-  const offsetY = (scrollPosition / 100) * 1; // Subtle vertical movement
+  // Memoize star positions to prevent regeneration on re-renders
+  const positions = useMemo(() => {
+    const pos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 400; // x - wider spread
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 400; // y - wider spread
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 400; // z - wider spread
+    }
+    return pos;
+  }, [starCount]);
   
   return (
-    <points ref={starfieldRef} position={[offsetX, offsetY, 0]}>
+    <points ref={starfieldRef} position={[0, 0, 0]}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -62,8 +58,8 @@ const ThreeJSBackground = ({ scrollPosition = 0, maxScroll = 350 }: ThreeJSBackg
         }}
       >
         <Suspense fallback={null}>
-          {/* Subtle starfield background - moves with scroll */}
-          <Starfield scrollPosition={scrollPosition} />
+          {/* Static starfield background */}
+          <Starfield />
           
           {/* Lighting */}
           <ambientLight intensity={0.3} />

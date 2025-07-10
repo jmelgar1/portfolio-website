@@ -15,7 +15,7 @@ function App() {
     getCurrentSection,
     getSectionProgress,
     maxScroll
-  } = useHorizontalScroll(350, 0.6); // maxScroll, sensitivity
+  } = useHorizontalScroll(200, 0.6); // maxScroll, sensitivity
 
 
   return (

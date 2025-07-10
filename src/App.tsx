@@ -4,6 +4,7 @@ import IntroSection from './components/IntroSection';
 import WorkHistory from './components/WorkHistory';
 import ProjectsSection from './components/ProjectsSection';
 import ThreeJSBackground from './components/threejs/ThreeJSBackground';
+import MouseParticleTrail from './components/CursorTrail';
 import { useHorizontalScroll } from './hooks/useHorizontalScroll';
 
 function App() {
@@ -14,11 +15,12 @@ function App() {
     getCurrentSection,
     getSectionProgress,
     maxScroll
-  } = useHorizontalScroll(350, 0.6); // maxScroll, sensitivity
+  } = useHorizontalScroll(200, 0.6); // maxScroll, sensitivity
 
 
   return (
     <div className="App">
+      <MouseParticleTrail />
       <ThreeJSBackground scrollPosition={scrollPosition} maxScroll={maxScroll} />
       <main 
         className="main-content" 

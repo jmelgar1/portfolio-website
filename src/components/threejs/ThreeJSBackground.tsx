@@ -43,19 +43,38 @@ const TwinklingStarGroup = ({ positions, phase, speed }: { positions: Float32Arr
 };
 
 const Starfield = () => {
-  const totalStars = 2000;
-  const twinklingStars = 700; // 700 stars will twinkle
-  const staticStars = 1300; // 1300 stars won't twinkle
-  const twinklingGroups = 50; // Number of twinkling groups
+  const twinklingStars = 800; // Reasonable twinkling count
+  const staticStars = 1500; // Reasonable static count  
+  const twinklingGroups = 25; // Fewer groups for better performance
   
   // Memoize star data to prevent regeneration on re-renders
   const starData = useMemo(() => {
+    // Camera settings (matching the Canvas camera prop)
+    const cameraFov = 75;
+    const cameraAspect = window.innerWidth / window.innerHeight;
+    const cameraPosition = 5;
+    
+    // Calculate frustum dimensions at various depths
+    const generateStarInFrustum = (depth: number) => {
+      const fovRad = (cameraFov * Math.PI) / 180;
+      const halfHeight = Math.tan(fovRad / 2) * depth;
+      const halfWidth = halfHeight * cameraAspect;
+      
+      return {
+        x: (Math.random() - 0.5) * 2 * halfWidth,
+        y: (Math.random() - 0.5) * 2 * halfHeight,
+        z: -depth
+      };
+    };
+    
     // Create static stars
     const staticPositions = new Float32Array(staticStars * 3);
     for (let i = 0; i < staticStars; i++) {
-      staticPositions[i * 3] = (Math.random() - 0.5) * 400;
-      staticPositions[i * 3 + 1] = (Math.random() - 0.5) * 400;
-      staticPositions[i * 3 + 2] = -Math.random() * 400; // Only negative z values (in front of camera)
+      const depth = Math.random() * 400; // Random depth from 0 to 400
+      const star = generateStarInFrustum(depth);
+      staticPositions[i * 3] = star.x;
+      staticPositions[i * 3 + 1] = star.y;
+      staticPositions[i * 3 + 2] = star.z;
     }
     
     // Create twinkling groups
@@ -65,9 +84,11 @@ const Starfield = () => {
     for (let g = 0; g < twinklingGroups; g++) {
       const groupPositions = new Float32Array(starsPerGroup * 3);
       for (let i = 0; i < starsPerGroup; i++) {
-        groupPositions[i * 3] = (Math.random() - 0.5) * 400;
-        groupPositions[i * 3 + 1] = (Math.random() - 0.5) * 400;
-        groupPositions[i * 3 + 2] = -Math.random() * 400; // Only negative z values (in front of camera)
+        const depth = Math.random() * 400; // Random depth from 0 to 400
+        const star = generateStarInFrustum(depth);
+        groupPositions[i * 3] = star.x;
+        groupPositions[i * 3 + 1] = star.y;
+        groupPositions[i * 3 + 2] = star.z;
       }
       
       groups.push({

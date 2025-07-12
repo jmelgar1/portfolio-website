@@ -3,7 +3,7 @@ import './App.css';
 import IntroSection from './components/IntroSection';
 import WorkHistory from './components/WorkHistory';
 import ProjectsSection from './components/ProjectsSection';
-import ThreeJSBackground from './components/threejs/ThreeJSBackground';
+import ThreeJSBackground from './background/ThreeJSBackground';
 import MouseParticleTrail from './components/CursorTrail';
 import { useHorizontalScroll } from './hooks/useHorizontalScroll';
 
@@ -15,7 +15,7 @@ function App() {
     getCurrentSection,
     getSectionProgress,
     maxScroll
-  } = useHorizontalScroll(200, 0.6); // maxScroll, sensitivity
+  } = useHorizontalScroll(200, 0.5);
 
 
   return (

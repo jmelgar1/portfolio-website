@@ -23,7 +23,6 @@ This is a React-based portfolio website featuring a unique horizontal scrolling 
 - Integrates `ThreeJSBackground` component for 3D canvas background
 - Includes `CursorTrail` component for interactive particle effects
 - Includes section indicators and scroll progress bar
-- Configured with 350 maxScroll and 0.6 sensitivity for scroll interactions
 
 **Horizontal Scrolling System (`src/hooks/useHorizontalScroll.ts`)**:
 - Custom hook managing scroll position with smooth animations using requestAnimationFrame

@@ -4,6 +4,7 @@ import { Camera, Vector3, Euler } from 'three';
 import Starfield from './stars/star-field/Starfield';
 import ShootingStars from './stars/shooting-star/ShootingStars';
 import AstronautHelmet from '../astronaut-helmet/AstronautHelmet';
+import { HolographicPanel } from '../components/holographic-panel/HolographicPanel';
 import './ThreeJSBackground.css';
 
 interface ThreeJSBackgroundProps {
@@ -90,7 +91,7 @@ const ThreeJSBackground = ({ lookAt }: ThreeJSBackgroundProps) => {
   return (
     <div className="threejs-background">
       <Canvas 
-        camera={{ position: [0, 2, 1], fov: 40 }}
+        camera={{ position: [0, 2.2, 1.6], fov: 40 }}
         gl={{ 
           antialias: true,
           alpha: true,
@@ -102,6 +103,11 @@ const ThreeJSBackground = ({ lookAt }: ThreeJSBackgroundProps) => {
           <Starfield />
           <ShootingStars />
           <AstronautHelmet />
+          <HolographicPanel
+            position={[2, 0, -0.5]}
+            rotation={[0, -0.5, 0]}
+            onClick={() => console.log('Holographic panel activated!')}
+          />
 
           <ambientLight intensity={0.3} />
           <directionalLight position={[10, 10, 5]} intensity={0.8} />

@@ -1,10 +1,10 @@
 import React from 'react';
 import './App.css';
-import IntroSection from './components/IntroSection';
-import WorkHistory from './components/WorkHistory';
-import ProjectsSection from './components/ProjectsSection';
+import IntroSection from './components/content/intro-section/IntroSection';
+import WorkHistory from './components/content/work-history/WorkHistory';
+import ProjectsSection from './components/content/projects-section/ProjectsSection';
 import ThreeJSBackground from './background/ThreeJSBackground';
-import MouseParticleTrail from './components/CursorTrail';
+import MouseParticleTrail from './components/cursor-trail/CursorTrail';
 import { useHorizontalScroll } from './hooks/useHorizontalScroll';
 
 function App() {

@@ -13,58 +13,90 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a React-based portfolio website featuring a unique horizontal scrolling design with a Three.js background canvas. The application is built with Create React App and uses React Three Fiber for 3D graphics integration.
+This is a React-based portfolio website featuring an interactive 3D space scene as the primary interface. The application is built with Create React App and uses React Three Fiber for immersive 3D graphics.
+
+### Current Project Structure
+
+```
+src/
+├── App.tsx (main component with ThreeJSBackground)
+├── background/
+│   ├── ThreeJSBackground.tsx (main 3D scene controller)
+│   ├── ThreeJSBackground.css
+│   ├── stars/
+│   │   ├── shooting-star/ (animated shooting stars)
+│   │   └── star-field/ (static + twinkling stars)
+│   ├── types.ts
+│   └── utils.ts
+├── astronaut-helmet/
+│   └── AstronautHelmet.tsx (3D GLTF helmet model)
+├── components/
+│   ├── content/ (portfolio sections - currently not integrated)
+│   │   ├── intro-section/
+│   │   ├── projects-section/
+│   │   └── work-history/
+│   └── cursor-trail/ (particle trail system)
+└── hooks/
+    └── useHorizontalScroll.ts (available but not currently used)
+```
 
 ### Core Components Structure
 
 **Main App (`src/App.tsx`)**:
-- Orchestrates horizontal scrolling through three main sections: intro, work, projects
-- Uses `useHorizontalScroll` custom hook for smooth scrolling with wheel and keyboard controls
-- Integrates `ThreeJSBackground` component for 3D canvas background
-- Includes `CursorTrail` component for interactive particle effects
-- Includes section indicators and scroll progress bar
-- Configured with 350 maxScroll and 0.6 sensitivity for scroll interactions
+- Simplified design focusing on the 3D space scene
+- Integrates `ThreeJSBackground` as the primary interface
+- Currently does not include content sections or horizontal scrolling
+
+**Three.js Background (`src/background/ThreeJSBackground.tsx`)**:
+- Interactive 3D space scene with mouse-controlled camera
+- Features astronaut helmet, starfield, and shooting stars
+- Mouse tracking with smooth camera rotation and auto-return functionality
+- Performance-optimized rendering with advanced lighting
+
+**Astronaut Helmet (`src/astronaut-helmet/AstronautHelmet.tsx`)**:
+- 3D GLTF model component loading space_helmet.glb
+- Positioned and scaled as central focal point
+- Uses React Three Fiber GLTF loader with Suspense
+
+**Star System (`src/background/stars/`)**:
+- **Starfield**: 1500 static stars + 800 twinkling stars for depth
+- **TwinklingStarGroup**: Performance-optimized grouped twinkling animation
+- **ShootingStars**: Animated meteors with particle trails
+- Frustum-based generation for realistic star distribution
+
+**Cursor Trail (`src/components/cursor-trail/CursorTrail.tsx`)**:
+- HTML5 Canvas-based particle system
+- Rainbow color cycling particles that connect when in proximity
+- Smooth fade-out effects with size reduction over time
+- Fixed overlay positioning with pointer-events disabled
 
 **Horizontal Scrolling System (`src/hooks/useHorizontalScroll.ts`)**:
-- Custom hook managing scroll position with smooth animations using requestAnimationFrame
-- Supports both mouse wheel and arrow key navigation with configurable sensitivity
-- Provides utilities: getCurrentSection(), getSectionProgress(), scrollToSection()
-- Uses 0.1 easing factor for smooth scroll animations
-- Handles continuous key press for smooth keyboard scrolling
+- Available but not currently integrated
+- Full implementation with smooth animations using requestAnimationFrame
+- Supports mouse wheel and keyboard navigation
+- Provides section utilities and progress tracking
 
-**Three.js Integration (`src/components/threejs/ThreeJSBackground.tsx`)**:
-- Three.js canvas setup using React Three Fiber with Starfield component
-- Contains ambient and directional lighting for enhanced 3D scene illumination
-- Features animated starfield with 2000 stars that respond to scroll position
-- Uses high-performance rendering with antialias and alpha support
+### Available Content Sections (Not Currently Active)
 
-**Cursor Trail (`src/components/CursorTrail.tsx`)**:
-- Interactive particle system that follows mouse movement
-- Canvas-based rendering with dynamic hue cycling for rainbow effects
-- Particle connection system with distance-based opacity
-- Fixed positioning overlay with pointer-events disabled
-- Particles fade out over time with size reduction for smooth trail effect
-
-### Content Sections
-
-- **IntroSection** (`src/components/IntroSection.tsx`) - Landing/hero section
-- **WorkHistory** (`src/components/WorkHistory.tsx`) - Professional experience display  
-- **ProjectsSection** (`src/components/ProjectsSection.tsx`) - Portfolio project showcase
-
-Each section is 100vw wide and slides horizontally based on scroll position controlled by `translateX`.
+- **IntroSection** (`src/components/content/intro-section/`) - Landing/hero section
+- **WorkHistory** (`src/components/content/work-history/`) - Professional experience
+- **ProjectsSection** (`src/components/content/projects-section/`) - Portfolio showcase
 
 ## Development Notes
 
-- Built with React 19.1.0 and React Three Fiber
+- Built with React 19.1.0 and React Three Fiber ecosystem
 - Uses Create React App configuration with React Scripts 5.0.1
-- Three.js version 0.177.0 with @react-three/fiber 9.1.2 and @react-three/drei 10.1.2
+- Dependencies: Three.js 0.177.0, @react-three/fiber 9.1.2, @react-three/drei 10.1.2
 - Includes @react-spring/three 10.0.1 for enhanced animations
 - Full TypeScript support with strict type checking enabled
-- Custom horizontal scrolling replaces traditional vertical scrolling
-- Scroll position controls both content translation and Three.js scene updates
-- Section navigation includes visual indicators and progress tracking
-- Features dual canvas system: Three.js for 3D graphics and HTML5 canvas for cursor trail
-- Extensive 3D asset collections available in public/ directory
+- Features dual canvas system: React Three Fiber for 3D and HTML5 for cursor trail
+- 3D assets available in public/ directory (space_helmet.glb)
+- Mouse-controlled camera with rotation limits and smooth interpolation
+- Performance optimizations including frustum culling and grouped animations
+
+## keep everything below and organize as you wish with new claude.md
+
+**Important**: Do not run `npm start` or attempt to start the development server. Assume the user already has the application running locally.
 
 ## Change Tracking
 

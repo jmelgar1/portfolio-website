@@ -1,10 +1,9 @@
 import React, { Suspense, useRef, useEffect, useState } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { Camera, Vector3, Euler } from 'three';
 import Starfield from './stars/star-field/Starfield';
 import ShootingStars from './stars/shooting-star/ShootingStars';
 import AstronautHelmet from '../astronaut-helmet/AstronautHelmet';
-import { HolographicPanel } from '../components/holographic-panel/HolographicPanel';
+import { HolographicPanel } from '../astronaut-helmet/holographic-panel/HolographicPanel';
 import './ThreeJSBackground.css';
 
 interface ThreeJSBackgroundProps {

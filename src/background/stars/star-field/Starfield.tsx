@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import TwinklingStarGroup from './TwinklingStarGroup';
-import { generateStarInFrustum } from '../../utils';
+import {generateStarInFrustum} from "./util";
 
 const Starfield: React.FC = () => {
   const TWINKLING_STAR_COUNT = 800; // Reasonable twinkling count

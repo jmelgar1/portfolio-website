@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getCanvasBounds, isOutOfBounds } from '../../utils';
 import {ShootingStar} from "./types";
+import {getCanvasBounds, isOutOfBounds} from "./util";
 
 const ShootingStars: React.FC = () => {
   const [stars, setStars] = useState<ShootingStar[]>([]);

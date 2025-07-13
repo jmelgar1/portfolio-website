@@ -23,6 +23,67 @@ export const getCanvasBounds = (depth: number): CanvasBounds => {
     };
 };
 
+export const generateEdgePositions = (edge: number, bounds: CanvasBounds, spawnMargin: number, depth: number): { startPos: THREE.Vector3; endPos: THREE.Vector3 } => {
+    let startPos: THREE.Vector3;
+    let endPos: THREE.Vector3;
+
+    switch (edge) {
+        case 0: // Left edge
+            startPos = new THREE.Vector3(
+                bounds.left - spawnMargin,
+                Math.random() * bounds.height + bounds.bottom,
+                depth
+            );
+            endPos = new THREE.Vector3(
+                bounds.right + spawnMargin,
+                Math.random() * bounds.height + bounds.bottom,
+                depth
+            );
+            break;
+        case 1: // Right edge
+            startPos = new THREE.Vector3(
+                bounds.right + spawnMargin,
+                Math.random() * bounds.height + bounds.bottom,
+                depth
+            );
+            endPos = new THREE.Vector3(
+                bounds.left - spawnMargin,
+                Math.random() * bounds.height + bounds.bottom,
+                depth
+            );
+            break;
+        case 2: // Top edge
+            startPos = new THREE.Vector3(
+                Math.random() * bounds.width + bounds.left,
+                bounds.top + spawnMargin,
+                depth
+            );
+            endPos = new THREE.Vector3(
+                Math.random() * bounds.width + bounds.left,
+                bounds.bottom - spawnMargin,
+                depth
+            );
+            break;
+        case 3: // Bottom edge
+            startPos = new THREE.Vector3(
+                Math.random() * bounds.width + bounds.left,
+                bounds.bottom - spawnMargin,
+                depth
+            );
+            endPos = new THREE.Vector3(
+                Math.random() * bounds.width + bounds.left,
+                bounds.top + spawnMargin,
+                depth
+            );
+            break;
+        default:
+            startPos = new THREE.Vector3(bounds.left - spawnMargin, 0, depth);
+            endPos = new THREE.Vector3(bounds.right + spawnMargin, 0, depth);
+    }
+
+    return { startPos, endPos };
+};
+
 export const isOutOfBounds = (position: THREE.Vector3, bounds: CanvasBounds): boolean => {
     const buffer = 2;
     return position.x < bounds.left - buffer ||

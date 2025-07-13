@@ -1,11 +1,11 @@
 import React from 'react';
 import './App.css';
-import ThreeJSBackground from './background/ThreeJSBackground';
+import SpaceBackground from './background/SpaceBackground';
 
 function App() {
   return (
     <div className="App">
-      <ThreeJSBackground lookAt={[0, 1.4, 0]} />
+      <SpaceBackground lookAt={[0, 1.4, 0]} />
     </div>
   );
 }

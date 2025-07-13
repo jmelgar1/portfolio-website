@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { Text, Plane } from '@react-three/drei'
 import * as THREE from 'three'
-import HolographicMaterial from './HolographicMaterial'
+import HolographicMaterial from './HolographicMaterial.jsx'
 
 interface HolographicPanelProps {
   position: [number, number, number]

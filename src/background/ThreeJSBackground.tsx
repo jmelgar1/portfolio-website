@@ -106,7 +106,18 @@ const ThreeJSBackground = ({ lookAt }: ThreeJSBackgroundProps) => {
           <HolographicPanel
             position={[2, 0, -0.5]}
             rotation={[0, -0.5, 0]}
+            title={"TITLE"}
+            status={"STATUS"}
+            description={"DESCRIPTION"}
             onClick={() => console.log('Holographic panel activated!')}
+          />
+          <HolographicPanel
+              position={[0, 0.35, -0.7]}
+              rotation={[-0.3, 0, 0]}
+              title={"Welcome to my website!"}
+              status={"Status thing here"}
+              description={"Description here"}
+              onClick={() => console.log('Welcome!')}
           />
 
           <ambientLight intensity={0.3} />

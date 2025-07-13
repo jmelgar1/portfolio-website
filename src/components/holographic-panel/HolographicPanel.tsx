@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { Text, Plane } from '@react-three/drei'
 import * as THREE from 'three'
 import HolographicMaterial from './HolographicMaterial'
@@ -8,12 +7,24 @@ interface HolographicPanelProps {
   position: [number, number, number]
   rotation?: [number, number, number]
   onClick?: () => void
+  title?: string
+  status?: string
+  description?: string
+  titleColor?: string
+  statusColor?: string
+  descriptionColor?: string
 }
 
 export const HolographicPanel: React.FC<HolographicPanelProps> = ({
   position,
   rotation = [0, 0, 0],
-  onClick
+  onClick,
+  title = "HOLOGRAPHIC DISPLAY",
+  status = "Status: ACTIVE",
+  description = "Click to interact",
+  titleColor = "#ffffff",
+  statusColor = "#00ffff",
+  descriptionColor = "#88ffff"
 }) => {
   const meshRef = useRef<THREE.Mesh>(null)
   const [hovered, setHovered] = useState(false)
@@ -55,31 +66,31 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
       <Text
         position={[0, 0.15, 0.01]}
         fontSize={0.06}
-        color="#ffffff"
+        color={titleColor}
         anchorX="center"
         anchorY="middle"
       >
-        HOLOGRAPHIC DISPLAY
+        {title}
       </Text>
 
       <Text
         position={[0, 0, 0.01]}
         fontSize={0.04}
-        color="#00ffff"
+        color={statusColor}
         anchorX="center"
         anchorY="middle"
       >
-        Status: ACTIVE
+        {status}
       </Text>
 
       <Text
         position={[0, -0.15, 0.01]}
         fontSize={0.03}
-        color="#88ffff"
+        color={descriptionColor}
         anchorX="center"
         anchorY="middle"
       >
-        Click to interact
+        {description}
       </Text>
     </group>
   )

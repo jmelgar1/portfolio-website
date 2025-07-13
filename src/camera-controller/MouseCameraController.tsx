@@ -1,19 +1,8 @@
-import React, { Suspense, useRef, useEffect, useState } from 'react';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import Starfield from './stars/star-field/Starfield';
-import ShootingStars from './stars/shooting-star/ShootingStars';
-import AstronautHelmet from '../astronaut-helmet/AstronautHelmet';
-import { HolographicPanel } from '../astronaut-helmet/holographic-panel/HolographicPanel';
-import './ThreeJSBackground.css';
-
-interface ThreeJSBackgroundProps {
-  scrollPosition?: number;
-  maxScroll?: number;
-  lookAt?: [number, number, number];
-}
+import { useRef, useEffect, useState } from 'react';
+import { useThree, useFrame } from '@react-three/fiber';
 
 const MouseCameraController = ({ lookAt }: { lookAt?: [number, number, number] }) => {
-  const { camera, gl } = useThree();
+  const { camera } = useThree();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const defaultRotation = useRef({ x: 0, y: 0 });
   const lastMouseActivity = useRef(Date.now());
@@ -85,46 +74,4 @@ const MouseCameraController = ({ lookAt }: { lookAt?: [number, number, number] }
   return null;
 };
 
-
-const ThreeJSBackground = ({ lookAt }: ThreeJSBackgroundProps) => {
-  return (
-    <div className="threejs-background">
-      <Canvas 
-        camera={{ position: [0, 2.2, 1.6], fov: 40 }}
-        gl={{ 
-          antialias: true,
-          alpha: true,
-          powerPreference: "high-performance"
-        }}
-      >
-        <Suspense fallback={null}>
-          <MouseCameraController lookAt={lookAt} />
-          <Starfield />
-          <ShootingStars />
-          <AstronautHelmet />
-          <HolographicPanel
-            position={[2, 0, -0.5]}
-            rotation={[0, -0.5, 0]}
-            title={"TITLE"}
-            status={"STATUS"}
-            description={"DESCRIPTION"}
-            onClick={() => console.log('Holographic panel activated!')}
-          />
-          <HolographicPanel
-              position={[0, 0.35, -0.7]}
-              rotation={[-0.3, 0, 0]}
-              title={"Welcome to my website!"}
-              status={"Status thing here"}
-              description={"Description here"}
-              onClick={() => console.log('Welcome!')}
-          />
-
-          <ambientLight intensity={0.3} />
-          <directionalLight position={[10, 10, 5]} intensity={0.8} />
-        </Suspense>
-      </Canvas>
-    </div>
-  );
-};
-
-export default ThreeJSBackground;
+export default MouseCameraController;

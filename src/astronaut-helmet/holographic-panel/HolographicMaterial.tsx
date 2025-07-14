@@ -15,19 +15,19 @@ import {
     NormalBlending
 } from 'three'
 
-/**
- * @param {Number} fresnelAmount - Controls the value of the Fresnel effect. Ranges from 0.0 to 1.0.
- * @param {Number} fresnelOpacity - Controls the opacity of the Fresnel effect. Ranges from 0.0 to 1.0.
- * @param {Number} scanlineSize - Controls the size of the scanlines. Ranges from 1 to 15.
- * @param {Number} hologramBrightness - Controls the brightness of the hologram. Ranges from 0.0 to 2.0.
- * @param {Number} signalSpeed - Controls the speed of the signal effect. Ranges from 0.0 to 2.0.
- * @param {String} hologramColor - Specifies the color of the hologram. Use hexadecimal format.
- * @param {Number} hologramOpacity - Specifies the opacity of the hologram. Defaults to 1.0.
- * @param {Boolean} enableBlinking - Enables or disables the blinking effect. Defaults to true.
- * @param {Boolean} blinkFresnelOnly - Enables or disables the blinking effect for the Fresnel only. Defaults to true.
- * @param {Boolean} enableAdditive - Enables or disables the Additive Blend Mode. Defaults to true.
- * @param {String} side - Specifies side for the material, as String. Options are "FrontSide", "BackSide", "DoubleSide". Defaults to "FrontSide".
- */
+interface HolographicMaterialProps {
+  fresnelAmount?: number;
+  fresnelOpacity?: number;
+  scanlineSize?: number;
+  hologramBrightness?: number;
+  signalSpeed?: number;
+  hologramColor?: string;
+  enableBlinking?: boolean;
+  blinkFresnelOnly?: boolean;
+  enableAdditive?: boolean;
+  hologramOpacity?: number;
+  side?: 'FrontSide' | 'BackSide' | 'DoubleSide';
+}
 
 export default function HolographicMaterial({
                                                 fresnelAmount = 0.45,
@@ -41,7 +41,7 @@ export default function HolographicMaterial({
                                                 enableAdditive = true,
                                                 hologramOpacity = 1.0,
                                                 side = 'FrontSide'
-                                            }) {
+                                            }: HolographicMaterialProps) {
     const HolographicMaterial = useMemo(() => {
         return shaderMaterial(
             {
@@ -200,13 +200,16 @@ export default function HolographicMaterial({
 
     extend({ HolographicMaterial })
 
+    const ref = useRef<any>(null)
+
     useFrame((state, delta) => {
-        ref.current.time += delta
+        if (ref.current) {
+            ref.current.time += delta
+        }
     })
 
-    const ref = useRef()
-
     return (
+        // @ts-ignore
         <holographicMaterial
             key={HolographicMaterial.key}
             side={

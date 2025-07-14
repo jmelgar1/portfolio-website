@@ -54,15 +54,6 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
         />
       </mesh>
 
-      <Plane args={[0.85, 0.65]} position={[0, 0, -0.01]}>
-        <meshBasicMaterial
-          color="#00ffff"
-          transparent
-          opacity={0.2}
-          side={THREE.DoubleSide}
-        />
-      </Plane>
-
       <Text
         position={[0, 0.15, 0.01]}
         fontSize={0.06}

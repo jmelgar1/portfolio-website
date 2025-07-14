@@ -12,5 +12,7 @@ global.ResizeObserver = class ResizeObserver {
     disconnect() {}
 };
 
+global.IS_REACT_ACT_ENVIRONMENT = true
+
 // Mock HTMLCanvasElement.getContext for Three.js
 HTMLCanvasElement.prototype.getContext = vi.fn();

@@ -17,7 +17,7 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
   return (
     <div className="space-background">
       <Canvas 
-        camera={{ position: [0, 2.2, 1.6], fov: 40 }}
+        camera={{ position: [0, 2, 1.1], fov: 40 }}
         gl={{ 
           antialias: true,
           alpha: true,
@@ -29,24 +29,39 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           <Starfield />
           <ShootingStars />
           <AstronautHelmet>
-            <HolographicPanel
-              position={[-2, -0.8, 2.3]}
-              rotation={[0.5, -0.8, 0]}
-              title={"TITLE"}
-              status={"STATUS"}
-              description={"DESCRIPTION"}
-              onClick={() => console.log('Holographic panel activated!')}
-              attachedToHelmet={true}
-            />
-            <HolographicPanel
-              position={[0, -0.8, 2.3]}
-              rotation={[0, 0, 0]}
-              title={"Welcome to my website!"}
-              status={"Status thing here"}
-              description={"Description here"}
-              onClick={() => console.log('Welcome!')}
-              attachedToHelmet={true}
-            />
+              <HolographicPanel
+                  position={[2, -0.6, 1.3]}
+                  rotation={[0.7, 0.8, 0]}
+                  title={"Hologram1"}
+                  status={"STATUS"}
+                  description={"DESCRIPTION"}
+                  width={0.6}
+                  height={0.3}
+                  onClick={() => console.log('Holographic panel activated!')}
+                  attachedToHelmet={true}
+              />
+              <HolographicPanel
+                  position={[0, -1, 1.6]}
+                  rotation={[1, 0, 0]}
+                  title={"Welcome to my website!"}
+                  status={"Status thing here"}
+                  description={"Description here"}
+                  width={0.8}
+                  height={0.4}
+                  onClick={() => console.log('Welcome!')}
+                  attachedToHelmet={true}
+              />
+              <HolographicPanel
+                  position={[-2, -0.6, 1.3]}
+                  rotation={[0.7, -0.8, 0]}
+                  title={"Hologram3"}
+                  status={"STATUS"}
+                  description={"DESCRIPTION"}
+                  width={0.6}
+                  height={0.3}
+                  onClick={() => console.log('Holographic panel activated!')}
+                  attachedToHelmet={true}
+              />
           </AstronautHelmet>
 
           <ambientLight intensity={0.3} />

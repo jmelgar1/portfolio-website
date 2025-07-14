@@ -16,17 +16,17 @@ import {
 } from 'three'
 
 interface HolographicMaterialProps {
-  fresnelAmount?: number;
-  fresnelOpacity?: number;
-  scanlineSize?: number;
-  hologramBrightness?: number;
-  signalSpeed?: number;
-  hologramColor?: string;
-  enableBlinking?: boolean;
-  blinkFresnelOnly?: boolean;
-  enableAdditive?: boolean;
-  hologramOpacity?: number;
-  side?: 'FrontSide' | 'BackSide' | 'DoubleSide';
+    fresnelAmount?: number;
+    fresnelOpacity?: number;
+    scanlineSize?: number;
+    hologramBrightness?: number;
+    signalSpeed?: number;
+    hologramColor?: string;
+    enableBlinking?: boolean;
+    blinkFresnelOnly?: boolean;
+    enableAdditive?: boolean;
+    hologramOpacity?: number;
+    side?: 'FrontSide' | 'BackSide' | 'DoubleSide';
 }
 
 export default function HolographicMaterial({
@@ -168,8 +168,14 @@ export default function HolographicMaterial({
 
         // Blinkin effect
         //Suggested by Octano - https://x.com/OtanoDesign?s=20
-        float blinkValue = enableBlinking ? 0.6 - signalSpeed : 1.0;
-        float blink = flicker(blinkValue, time * signalSpeed * .02);
+        float amt = 0.6 - signalSpeed;
+        float blink;
+        if(enableBlinking) {
+          blink = flicker(amt, time * signalSpeed * .02);
+        } else {
+          float effective_amt = max(amt, 0.0);
+          blink = 0.5 * (effective_amt * effective_amt + 1.0);
+        }
     
         // Final shader composition
         vec3 finalColor;

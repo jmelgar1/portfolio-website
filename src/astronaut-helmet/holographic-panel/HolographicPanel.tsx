@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { Text, Plane } from '@react-three/drei'
+import { Text } from '@react-three/drei'
 import * as THREE from 'three'
 import HolographicMaterial from './HolographicMaterial.jsx'
 
@@ -14,6 +14,8 @@ interface HolographicPanelProps {
   statusColor?: string
   descriptionColor?: string
   attachedToHelmet?: boolean
+  width?: number
+  height?: number
 }
 
 export const HolographicPanel: React.FC<HolographicPanelProps> = ({
@@ -26,7 +28,9 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
   titleColor = "#ffffff",
   statusColor = "#00ffff",
   descriptionColor = "#88ffff",
-  attachedToHelmet = false
+  attachedToHelmet = false,
+  width = 0.8,
+  height = 0.6
 }) => {
   const meshRef = useRef<THREE.Mesh>(null)
   const [hovered, setHovered] = useState(false)
@@ -38,13 +42,16 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
 
   // When attached to helmet, we need to account for the helmet's scale and rotation
   // The helmet is scaled by 3 and rotated by [0, Math.PI, 0]
-  const adjustedPosition = attachedToHelmet 
+  const adjustedPosition = attachedToHelmet
     ? [position[0] / 3, position[1] / 3, position[2] / 3] as [number, number, number]
     : position;
 
-  const adjustedRotation = attachedToHelmet 
+  const adjustedRotation = attachedToHelmet
     ? [rotation[0], rotation[1] - Math.PI, rotation[2]] as [number, number, number]
     : rotation;
+
+  // Calculate scaling factor based on panel size for text elements
+  const sizeScale = Math.min(width, height) / 0.7;
 
   return (
     <group position={adjustedPosition} rotation={adjustedRotation}>
@@ -55,22 +62,22 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
         >
-          <planeGeometry args={[0.8, 0.6]} />
+          <planeGeometry args={[width, height]} />
           <HolographicMaterial
-            hologramOpacity={0.8}
-            fresnelAmount={0.4}
-            scanlineSize={6.0}
+            hologramOpacity={0.4}
+            fresnelAmount={0.3}
+            scanlineSize={10.0}
             signalSpeed={0.6}
-            hologramColor={hovered ? '#00bbff' : '#0088ff'}
-            enableBlinking={true}
+            hologramColor={hovered ? '#0048ff' : '#0015ff'}
+            enableBlinking={false}
             enableAdditive={true}
           />
         </mesh>
       </group>
 
       <Text
-        position={[0, 0.15, 0.01]}
-        fontSize={0.06}
+        position={[0, height * 0.25, 0.01]}
+        fontSize={0.06 * sizeScale}
         color={titleColor}
         anchorX="center"
         anchorY="middle"
@@ -80,7 +87,7 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
 
       <Text
         position={[0, 0, 0.01]}
-        fontSize={0.04}
+        fontSize={0.04 * sizeScale}
         color={statusColor}
         anchorX="center"
         anchorY="middle"
@@ -89,8 +96,8 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
       </Text>
 
       <Text
-        position={[0, -0.15, 0.01]}
-        fontSize={0.03}
+        position={[0, -height * 0.25, 0.01]}
+        fontSize={0.03 * sizeScale}
         color={descriptionColor}
         anchorX="center"
         anchorY="middle"

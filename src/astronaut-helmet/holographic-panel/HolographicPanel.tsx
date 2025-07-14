@@ -13,6 +13,7 @@ interface HolographicPanelProps {
   titleColor?: string
   statusColor?: string
   descriptionColor?: string
+  attachedToHelmet?: boolean
 }
 
 export const HolographicPanel: React.FC<HolographicPanelProps> = ({
@@ -24,7 +25,8 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
   description = "Click to interact",
   titleColor = "#ffffff",
   statusColor = "#00ffff",
-  descriptionColor = "#88ffff"
+  descriptionColor = "#88ffff",
+  attachedToHelmet = false
 }) => {
   const meshRef = useRef<THREE.Mesh>(null)
   const [hovered, setHovered] = useState(false)
@@ -34,25 +36,37 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
     onClick?.()
   }
 
+  // When attached to helmet, we need to account for the helmet's scale and rotation
+  // The helmet is scaled by 3 and rotated by [0, Math.PI, 0]
+  const adjustedPosition = attachedToHelmet 
+    ? [position[0] / 3, position[1] / 3, position[2] / 3] as [number, number, number]
+    : position;
+
+  const adjustedRotation = attachedToHelmet 
+    ? [rotation[0], rotation[1] - Math.PI, rotation[2]] as [number, number, number]
+    : rotation;
+
   return (
-    <group position={position} rotation={rotation}>
-      <mesh
-        ref={meshRef}
-        onClick={handleClick}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      >
-        <planeGeometry args={[0.8, 0.6]} />
-        <HolographicMaterial
-          hologramOpacity={0.8}
-          fresnelAmount={0.4}
-          scanlineSize={6.0}
-          signalSpeed={0.6}
-          hologramColor={hovered ? '#00bbff' : '#0088ff'}
-          enableBlinking={true}
-          enableAdditive={true}
-        />
-      </mesh>
+    <group position={adjustedPosition} rotation={adjustedRotation}>
+      <group position={[0, 0, 0]}>
+        <mesh
+          ref={meshRef}
+          onClick={handleClick}
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+        >
+          <planeGeometry args={[0.8, 0.6]} />
+          <HolographicMaterial
+            hologramOpacity={0.8}
+            fresnelAmount={0.4}
+            scanlineSize={6.0}
+            signalSpeed={0.6}
+            hologramColor={hovered ? '#00bbff' : '#0088ff'}
+            enableBlinking={true}
+            enableAdditive={true}
+          />
+        </mesh>
+      </group>
 
       <Text
         position={[0, 0.15, 0.01]}

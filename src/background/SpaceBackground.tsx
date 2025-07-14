@@ -28,23 +28,26 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           <MouseCameraController lookAt={lookAt} />
           <Starfield />
           <ShootingStars />
-          <AstronautHelmet />
-          <HolographicPanel
-            position={[2, 0, -0.5]}
-            rotation={[0, -0.5, 0]}
-            title={"TITLE"}
-            status={"STATUS"}
-            description={"DESCRIPTION"}
-            onClick={() => console.log('Holographic panel activated!')}
-          />
-          <HolographicPanel
-              position={[0, 0.35, -0.7]}
-              rotation={[-0.3, 0, 0]}
+          <AstronautHelmet>
+            <HolographicPanel
+              position={[-2, -0.8, 2.3]}
+              rotation={[0.5, -0.8, 0]}
+              title={"TITLE"}
+              status={"STATUS"}
+              description={"DESCRIPTION"}
+              onClick={() => console.log('Holographic panel activated!')}
+              attachedToHelmet={true}
+            />
+            <HolographicPanel
+              position={[0, -0.8, 2.3]}
+              rotation={[0, 0, 0]}
               title={"Welcome to my website!"}
               status={"Status thing here"}
               description={"Description here"}
               onClick={() => console.log('Welcome!')}
-          />
+              attachedToHelmet={true}
+            />
+          </AstronautHelmet>
 
           <ambientLight intensity={0.3} />
           <directionalLight position={[10, 10, 5]} intensity={0.8} />

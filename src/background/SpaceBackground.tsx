@@ -1,10 +1,12 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Starfield from './stars/star-field/Starfield';
 import ShootingStars from './stars/shooting-star/ShootingStars';
+import HyperDriveStars from './stars/hyperdrive/HyperDriveStars';
 import AstronautHelmet from '../astronaut-helmet/AstronautHelmet';
 import { HolographicPanel } from '../astronaut-helmet/holographic-panel/HolographicPanel';
 import MouseCameraController from '../camera-controller/MouseCameraController';
+import ModeToggle from '../components/ui/ModeToggle';
 import './SpaceBackground.css';
 
 interface SpaceBackgroundProps {
@@ -14,8 +16,14 @@ interface SpaceBackgroundProps {
 }
 
 const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
+  const [isHyperdriveMode, setIsHyperdriveMode] = useState(false);
+
   return (
     <div className="space-background">
+      <ModeToggle 
+        isHyperdriveMode={isHyperdriveMode} 
+        onToggle={setIsHyperdriveMode} 
+      />
       <Canvas 
         camera={{ position: [0, 2, 1.1], fov: 40 }}
         gl={{ 
@@ -26,8 +34,14 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
       >
         <Suspense fallback={null}>
           <MouseCameraController lookAt={lookAt} />
-          <Starfield />
-          <ShootingStars />
+          {isHyperdriveMode ? (
+            <HyperDriveStars />
+          ) : (
+            <>
+              <Starfield />
+              <ShootingStars />
+            </>
+          )}
           <AstronautHelmet>
               <HolographicPanel
                   position={[2, -0.6, 1.3]}

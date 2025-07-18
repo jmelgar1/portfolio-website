@@ -1,75 +1,15 @@
-import { useRef, useEffect, useState } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
+import { useRef, useEffect } from 'react';
+import { useThree } from '@react-three/fiber';
 
 const MouseCameraController = ({ lookAt }: { lookAt?: [number, number, number] }) => {
   const { camera } = useThree();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const defaultRotation = useRef({ x: 0, y: 0 });
-  const lastMouseActivity = useRef(Date.now());
   
-  // Store default rotation on mount
+  // Store default rotation on mount - camera stays stationary
   useEffect(() => {
     if (lookAt) {
       camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
-      defaultRotation.current = { x: camera.rotation.x, y: camera.rotation.y };
-    } else {
-      // Store current rotation as default if no lookAt specified
-      defaultRotation.current = { x: camera.rotation.x, y: camera.rotation.y };
     }
   }, [camera, lookAt]);
-
-  // Mouse move handler - use window instead of canvas
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      // Normalize mouse position to -1 to 1 range
-      const x = (event.clientX / window.innerWidth) * 2 - 1;
-      const y = -(event.clientY / window.innerHeight) * 2 + 1;
-      
-      setMousePosition({ x, y });
-      lastMouseActivity.current = Date.now();
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Smooth camera rotation and auto-return
-  useFrame(() => {
-    const timeSinceLastMove = Date.now() - lastMouseActivity.current;
-    const returnDelay = 2000;
-    const lerpFactor = 0.1; // Increased for more responsive movement
-    const sensitivity = 0.3; // Increased sensitivity
-    
-    let targetX, targetY;
-    
-    if (timeSinceLastMove > returnDelay) {
-      // Return to default position
-      targetX = defaultRotation.current.x;
-      targetY = defaultRotation.current.y;
-    } else {
-      // Follow mouse - apply rotation directly based on mouse position
-      const maxUpRotation = Math.PI / 6; // 30 degrees up
-      const maxDownRotation = Math.PI / 20; // 7.5 degrees down
-      const maxHorizontalRotation = Math.PI / 2; // 90 degrees left/right
-      
-      const rawTargetX = defaultRotation.current.x + mousePosition.y * sensitivity;
-      const rawTargetY = defaultRotation.current.y - mousePosition.x * sensitivity;
-      
-      // Clamp rotations to limits with different up/down ranges
-      targetX = Math.max(
-        defaultRotation.current.x - maxDownRotation,
-        Math.min(defaultRotation.current.x + maxUpRotation, rawTargetX)
-      );
-      targetY = Math.max(
-        defaultRotation.current.y - maxHorizontalRotation,
-        Math.min(defaultRotation.current.y + maxHorizontalRotation, rawTargetY)
-      );
-    }
-    
-    // Apply smooth interpolation
-    camera.rotation.x += (targetX - camera.rotation.x) * lerpFactor;
-    camera.rotation.y += (targetY - camera.rotation.y) * lerpFactor;
-  });
   
   return null;
 };

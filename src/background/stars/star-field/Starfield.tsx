@@ -51,22 +51,12 @@ const Starfield: React.FC = () => {
   // Handle mouse-based movement with parallax effect
   useFrame(() => {
     if (groupRef.current) {
-      const timeSinceLastMove = Date.now() - lastMouseActivity;
-      const returnDelay = 2000;
       const lerpFactor = 0.1;
       const sensitivity = 30.0; // Increased parallax sensitivity
       
-      let targetX, targetY;
-      
-      if (timeSinceLastMove > returnDelay) {
-        // Return to default position
-        targetX = 0;
-        targetY = 0;
-      } else {
-        // Create parallax effect - move opposite to mouse for depth illusion
-        targetX = -mousePosition.x * sensitivity;
-        targetY = -mousePosition.y * sensitivity;
-      }
+      // Create parallax effect - move opposite to mouse for depth illusion
+      const targetX = -mousePosition.x * sensitivity;
+      const targetY = -mousePosition.y * sensitivity;
       
       // Apply smooth interpolation
       groupRef.current.position.x += (targetX - groupRef.current.position.x) * lerpFactor;

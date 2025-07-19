@@ -147,16 +147,14 @@ const Galaxy: React.FC<GalaxyProps> = ({
         <bufferAttribute
           ref={positionAttributeRef}
           attach="attributes-position"
+          args={[initialShape.positions, 3]}
           count={NUM_STARS}
-          array={initialShape.positions}
-          itemSize={3}
         />
         <bufferAttribute
           ref={colorAttributeRef}
           attach="attributes-color"
+          args={[initialShape.colors, 3]}
           count={NUM_STARS}
-          array={initialShape.colors}
-          itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial 

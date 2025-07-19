@@ -23,7 +23,7 @@ export class Galaxy {
   public stars: Star[] = [];
   public haze: Haze[] = [];
   private materials: THREE.SpriteMaterial[] = [];
-  private hazeSprite: THREE.SpriteMaterial;
+  private hazeSprite!: THREE.SpriteMaterial;
 
   constructor(scene: THREE.Scene) {
     this.createMaterials();

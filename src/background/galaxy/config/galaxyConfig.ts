@@ -6,7 +6,7 @@ export type GalaxyType = "spiral" | "elliptical" | "irregular";
 
 // Common Parameters
 export const GALAXY_THICKNESS = 5;
-export const TRANSITION_DURATION = 2000; // ms
+export const TRANSITION_DURATION_MS = 1000;
 
 // Spiral Galaxy Parameters
 export const SPIRAL = {

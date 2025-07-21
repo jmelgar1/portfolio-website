@@ -4,7 +4,7 @@ import * as THREE from "three";
 import {
   GalaxyType,
   NUM_STARS,
-  TRANSITION_DURATION,
+  TRANSITION_DURATION_MS,
 } from "./config/galaxyConfig";
 import {
   generateGalaxyShape,
@@ -116,7 +116,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
       colorAttributeRef.current
     ) {
       const newProgress = Math.min(
-        transitionData.progress + (delta * 1000) / TRANSITION_DURATION,
+        transitionData.progress + (delta * 1000) / TRANSITION_DURATION_MS,
         1,
       );
       const easedProgress = easeInOutCubic(newProgress);

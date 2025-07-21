@@ -1,11 +1,14 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Vector3 } from "three";
 import { ShootingStar } from "./types";
 import { getCanvasBounds, isOutOfBounds, generateEdgePositions } from "./util";
 
 const ShootingStars: React.FC = () => {
   const [stars, setStars] = useState<ShootingStar[]>([]);
   const lastSpawnTime = useRef<number>(0);
+  
+  const tempVector = useMemo(() => new Vector3(), []);
 
   const createShootingStar = (): ShootingStar => {
     const depth = -Math.random() * 150 - 15;
@@ -48,10 +51,11 @@ const ShootingStars: React.FC = () => {
       return prevStars
         .map((star) => {
           // Update position
-          star.position.add(star.velocity.clone().multiplyScalar(deltaTime));
+          tempVector.copy(star.velocity).multiplyScalar(deltaTime);
+          star.position.add(tempVector);
 
           // Add to trail
-          star.trailPositions.push(star.position.clone());
+          star.trailPositions.push(new Vector3().copy(star.position));
           if (star.trailPositions.length > star.maxTrailLength) {
             star.trailPositions.shift();
           }

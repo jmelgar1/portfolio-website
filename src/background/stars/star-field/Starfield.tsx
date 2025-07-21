@@ -10,7 +10,7 @@ const Starfield: React.FC = () => {
   const STATIC_STAR_COUNT = 1500; // Reasonable static count
   const TWINKLE_GROUP_COUNT = 25; // Fewer groups for better performance
   const groupRef = useRef<THREE.Group>(null);
-  const { mousePosition, lastMouseActivity } = useMousePosition();
+  const { mousePosition } = useMousePosition();
 
   // Memoize star data to prevent regeneration on re-renders
   const starData = useMemo(() => {

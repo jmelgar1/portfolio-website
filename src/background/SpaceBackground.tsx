@@ -21,10 +21,7 @@ interface SpaceBackgroundProps {
 
 const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
   const {
-    scrollPosition,
-    scrollToSection,
-    getCurrentSection,
-    getSectionProgress,
+    scrollPosition
   } = useHorizontalScroll(200);
   const [galaxyType, setGalaxyType] = useState<GalaxyType>("spiral");
   const [isTransitioning, setIsTransitioning] = useState(false);

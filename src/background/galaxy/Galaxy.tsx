@@ -9,8 +9,7 @@ import {
 import {
   generateGalaxyShape,
   interpolatePositions,
-  interpolateColors,
-  GalaxyPositions,
+  interpolateColors
 } from "./utils/galaxyShapes";
 
 interface GalaxyProps {

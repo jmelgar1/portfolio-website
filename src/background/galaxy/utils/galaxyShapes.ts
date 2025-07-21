@@ -23,9 +23,6 @@ export function generateSpiralGalaxy(): GalaxyPositions {
   const colorInside = new THREE.Color(GALAXY_CORE_COLOR);
   const colorOutside = new THREE.Color(GALAXY_EDGE_COLOR);
 
-  // Add some entropy to ensure different results
-  const entropy = Math.random() * 1000;
-
   for (let i = 0; i < NUM_STARS; i++) {
     const i3 = i * 3;
 
@@ -76,9 +73,6 @@ export function generateEllipticalGalaxy(): GalaxyPositions {
   const maxRadius = 8;
   const semiMajor = maxRadius;
   const semiMinor = maxRadius * 0.6; // Make it elliptical
-
-  // Add some entropy to ensure different results
-  const entropy = Math.random() * 2000;
 
   for (let i = 0; i < NUM_STARS; i++) {
     const i3 = i * 3;
@@ -133,9 +127,6 @@ export function generateIrregularGalaxy(): GalaxyPositions {
   const maxRadius = 8;
   const clusterSpread = maxRadius * 1.2;
   const clusterRadius = maxRadius * 0.4;
-
-  // Add some entropy to ensure different results
-  const entropy = Math.random() * 3000;
 
   // Generate cluster centers
   const clusterCenters: THREE.Vector3[] = [];

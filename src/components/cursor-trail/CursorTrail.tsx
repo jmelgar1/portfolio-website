@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./CursorTrail.css";
 
 interface Particle {
@@ -27,7 +27,7 @@ const MouseParticleTrail = () => {
 
     updateCanvasSize();
 
-    let particles: Particle[] = [];
+    const particles: Particle[] = [];
     let hue = 0;
     const maxDistance = 90;
 

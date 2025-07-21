@@ -18,7 +18,7 @@ export class Haze {
   public updateScale(camera: THREE.Camera): void {
     if (!this.obj) return;
 
-    let dist = this.position.distanceTo(camera.position) / 250;
+    const dist = this.position.distanceTo(camera.position) / 250;
     const material = this.obj.material as THREE.SpriteMaterial;
     material.opacity = clamp(
       HAZE_OPACITY * Math.pow(dist / 2.5, 2),

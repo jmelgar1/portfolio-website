@@ -26,7 +26,7 @@ export class Star {
   public updateScale(camera: THREE.Camera): void {
     if (!this.obj) return;
 
-    let dist = this.position.distanceTo(camera.position) / 250;
+    const dist = this.position.distanceTo(camera.position) / 250;
     let starSize = dist * starTypes.size[this.starType];
     starSize = clamp(starSize, STAR_MIN, STAR_MAX);
     this.obj.scale.copy(new THREE.Vector3(starSize, starSize, starSize));

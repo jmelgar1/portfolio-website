@@ -1,21 +1,21 @@
-import React, { useRef, useState } from 'react'
-import { Text } from '@react-three/drei'
-import * as THREE from 'three'
-import HolographicMaterial from './HolographicMaterial.js'
+import React, { useRef, useState } from "react";
+import { Text } from "@react-three/drei";
+import * as THREE from "three";
+import HolographicMaterial from "./HolographicMaterial.js";
 
 interface HolographicPanelProps {
-  position: [number, number, number]
-  rotation?: [number, number, number]
-  onClick?: () => void
-  title?: string
-  status?: string
-  description?: string
-  titleColor?: string
-  statusColor?: string
-  descriptionColor?: string
-  attachedToHelmet?: boolean
-  width?: number
-  height?: number
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  onClick?: () => void;
+  title?: string;
+  status?: string;
+  description?: string;
+  titleColor?: string;
+  statusColor?: string;
+  descriptionColor?: string;
+  attachedToHelmet?: boolean;
+  width?: number;
+  height?: number;
 }
 
 export const HolographicPanel: React.FC<HolographicPanelProps> = ({
@@ -30,24 +30,32 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
   descriptionColor = "#88ffff",
   attachedToHelmet = false,
   width = 0.8,
-  height = 0.6
+  height = 0.6,
 }) => {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const [hovered, setHovered] = useState(false)
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
 
   const handleClick = () => {
-    console.log('Holographic panel clicked!')
-    onClick?.()
-  }
+    console.log("Holographic panel clicked!");
+    onClick?.();
+  };
 
   // When attached to helmet, we need to account for the helmet's scale and rotation
   // The helmet is scaled by 3 and rotated by [0, Math.PI, 0]
   const adjustedPosition = attachedToHelmet
-    ? [position[0] / 3, position[1] / 3, position[2] / 3] as [number, number, number]
+    ? ([position[0] / 3, position[1] / 3, position[2] / 3] as [
+        number,
+        number,
+        number,
+      ])
     : position;
 
   const adjustedRotation = attachedToHelmet
-    ? [rotation[0], rotation[1] - Math.PI, rotation[2]] as [number, number, number]
+    ? ([rotation[0], rotation[1] - Math.PI, rotation[2]] as [
+        number,
+        number,
+        number,
+      ])
     : rotation;
 
   // Calculate scaling factor based on panel size for text elements
@@ -68,7 +76,7 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
             fresnelAmount={0.3}
             scanlineSize={10.0}
             signalSpeed={0.6}
-            hologramColor={hovered ? '#0048ff' : '#0015ff'}
+            hologramColor={hovered ? "#0048ff" : "#0015ff"}
             enableBlinking={false}
             enableAdditive={true}
           />
@@ -105,5 +113,5 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
         {description}
       </Text>
     </group>
-  )
-}
+  );
+};

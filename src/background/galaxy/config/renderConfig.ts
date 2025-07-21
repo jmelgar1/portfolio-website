@@ -17,5 +17,5 @@ export const BLOOM_PARAMS = {
   exposure: 1,
   bloomStrength: 1.5,
   bloomThreshold: 0.4,
-  bloomRadius: 0
+  bloomRadius: 0,
 };

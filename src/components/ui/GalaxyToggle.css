@@ -9,7 +9,7 @@
   padding: 16px;
   backdrop-filter: blur(10px);
   color: white;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   min-width: 200px;
 }
 
@@ -55,14 +55,22 @@
 }
 
 .galaxy-toggle__button--active {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(139, 92, 246, 0.3));
+  background: linear-gradient(
+    135deg,
+    rgba(96, 165, 250, 0.3),
+    rgba(139, 92, 246, 0.3)
+  );
   border-color: rgba(96, 165, 250, 0.6);
   color: white;
   box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
 }
 
 .galaxy-toggle__button--active:hover {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.4), rgba(139, 92, 246, 0.4));
+  background: linear-gradient(
+    135deg,
+    rgba(96, 165, 250, 0.4),
+    rgba(139, 92, 246, 0.4)
+  );
   transform: translateY(-1px);
 }
 
@@ -86,7 +94,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -104,7 +113,7 @@
     padding: 12px;
     min-width: 180px;
   }
-  
+
   .galaxy-toggle__button {
     padding: 10px 12px;
     font-size: 12px;

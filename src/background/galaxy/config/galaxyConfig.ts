@@ -2,7 +2,7 @@
 export const NUM_STARS = 50000;
 
 // Galaxy Types
-export type GalaxyType = 'spiral' | 'elliptical' | 'irregular';
+export type GalaxyType = "spiral" | "elliptical" | "irregular";
 
 // Common Parameters
 export const GALAXY_THICKNESS = 5;

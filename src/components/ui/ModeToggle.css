@@ -45,7 +45,11 @@
 }
 
 .toggle-button.hyperdrive {
-  background: linear-gradient(90deg, rgba(0, 255, 255, 0.2), rgba(0, 150, 255, 0.2));
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 255, 0.2),
+    rgba(0, 150, 255, 0.2)
+  );
   border-color: rgba(0, 255, 255, 0.4);
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
 }
@@ -65,7 +69,9 @@
 .toggle-button.hyperdrive .toggle-slider {
   transform: translateX(26px);
   background: #00ffff;
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 10px rgba(0, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-button:active .toggle-slider {
@@ -79,21 +85,21 @@
     padding: 6px 12px;
     gap: 8px;
   }
-  
+
   .mode-label {
     font-size: 10px;
   }
-  
+
   .toggle-button {
     width: 40px;
     height: 20px;
   }
-  
+
   .toggle-slider {
     width: 16px;
     height: 16px;
   }
-  
+
   .toggle-button.hyperdrive .toggle-slider {
     transform: translateX(20px);
   }

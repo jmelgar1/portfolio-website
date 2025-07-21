@@ -3,61 +3,61 @@
  * Dec 7th - Added useMemo for better performance
  */
 
-import React, { useRef, useMemo } from 'react'
-import { shaderMaterial } from '@react-three/drei'
-import { extend, useFrame } from '@react-three/fiber'
+import React, { useRef, useMemo } from "react";
+import { shaderMaterial } from "@react-three/drei";
+import { extend, useFrame } from "@react-three/fiber";
 import {
-    Color,
-    FrontSide,
-    BackSide,
-    DoubleSide,
-    AdditiveBlending,
-    NormalBlending
-} from 'three'
+  Color,
+  FrontSide,
+  BackSide,
+  DoubleSide,
+  AdditiveBlending,
+  NormalBlending,
+} from "three";
 
 interface HolographicMaterialProps {
-    fresnelAmount?: number;
-    fresnelOpacity?: number;
-    scanlineSize?: number;
-    hologramBrightness?: number;
-    signalSpeed?: number;
-    hologramColor?: string;
-    enableBlinking?: boolean;
-    blinkFresnelOnly?: boolean;
-    enableAdditive?: boolean;
-    hologramOpacity?: number;
-    side?: 'FrontSide' | 'BackSide' | 'DoubleSide';
+  fresnelAmount?: number;
+  fresnelOpacity?: number;
+  scanlineSize?: number;
+  hologramBrightness?: number;
+  signalSpeed?: number;
+  hologramColor?: string;
+  enableBlinking?: boolean;
+  blinkFresnelOnly?: boolean;
+  enableAdditive?: boolean;
+  hologramOpacity?: number;
+  side?: "FrontSide" | "BackSide" | "DoubleSide";
 }
 
 export default function HolographicMaterial({
-                                                fresnelAmount = 0.45,
-                                                fresnelOpacity = 1.0,
-                                                scanlineSize = 8.0,
-                                                hologramBrightness = 1.2,
-                                                signalSpeed = 0.45,
-                                                hologramColor = '#51a4de',
-                                                enableBlinking = true,
-                                                blinkFresnelOnly = true,
-                                                enableAdditive = true,
-                                                hologramOpacity = 1.0,
-                                                side = 'FrontSide'
-                                            }: HolographicMaterialProps) {
-    const HolographicMaterial = useMemo(() => {
-        return shaderMaterial(
-            {
-                time: 0,
-                fresnelOpacity: fresnelOpacity,
-                fresnelAmount: fresnelAmount,
-                scanlineSize: scanlineSize,
-                hologramBrightness: hologramBrightness,
-                signalSpeed: signalSpeed,
-                hologramColor: new Color(hologramColor),
-                enableBlinking: enableBlinking,
-                blinkFresnelOnly: blinkFresnelOnly,
-                hologramOpacity: hologramOpacity
-            },
-            /*GLSL */
-            `
+  fresnelAmount = 0.45,
+  fresnelOpacity = 1.0,
+  scanlineSize = 8.0,
+  hologramBrightness = 1.2,
+  signalSpeed = 0.45,
+  hologramColor = "#51a4de",
+  enableBlinking = true,
+  blinkFresnelOnly = true,
+  enableAdditive = true,
+  hologramOpacity = 1.0,
+  side = "FrontSide",
+}: HolographicMaterialProps) {
+  const HolographicMaterial = useMemo(() => {
+    return shaderMaterial(
+      {
+        time: 0,
+        fresnelOpacity: fresnelOpacity,
+        fresnelAmount: fresnelAmount,
+        scanlineSize: scanlineSize,
+        hologramBrightness: hologramBrightness,
+        signalSpeed: signalSpeed,
+        hologramColor: new Color(hologramColor),
+        enableBlinking: enableBlinking,
+        blinkFresnelOnly: blinkFresnelOnly,
+        hologramOpacity: hologramOpacity,
+      },
+      /*GLSL */
+      `
       #define STANDARD
       varying vec3 vViewPosition;
       #ifdef USE_TRANSMISSION
@@ -116,8 +116,8 @@ export default function HolographicMaterial({
         gl_Position = modelViewProjectionMatrix * vec4( transformed, 1.0 );
 
       }`,
-            /*GLSL */
-            ` 
+      /*GLSL */
+      ` 
       varying vec2 vUv;
       varying vec3 vPositionW;
       varying vec4 vPos;
@@ -188,46 +188,46 @@ export default function HolographicMaterial({
 
         gl_FragColor = vec4( finalColor, hologramOpacity);
 
-      }`
-        )
-    }, [
-        fresnelAmount,
-        fresnelOpacity,
-        scanlineSize,
-        hologramBrightness,
-        signalSpeed,
-        hologramColor,
-        enableBlinking,
-        blinkFresnelOnly,
-        enableAdditive,
-        hologramOpacity,
-        side
-    ])
+      }`,
+    );
+  }, [
+    fresnelAmount,
+    fresnelOpacity,
+    scanlineSize,
+    hologramBrightness,
+    signalSpeed,
+    hologramColor,
+    enableBlinking,
+    blinkFresnelOnly,
+    enableAdditive,
+    hologramOpacity,
+    side,
+  ]);
 
-    extend({ HolographicMaterial })
+  extend({ HolographicMaterial });
 
-    const ref = useRef<any>(null)
+  const ref = useRef<any>(null);
 
-    useFrame((state, delta) => {
-        if (ref.current) {
-            ref.current.time += delta
-        }
-    })
+  useFrame((state, delta) => {
+    if (ref.current) {
+      ref.current.time += delta;
+    }
+  });
 
-    return (
-        // @ts-ignore
-        <holographicMaterial
-            key={HolographicMaterial.key}
-            side={
-                side === 'DoubleSide'
-                    ? DoubleSide
-                    : side === 'BackSide'
-                        ? BackSide
-                        : FrontSide
-            }
-            transparent={true}
-            blending={enableAdditive ? AdditiveBlending : NormalBlending}
-            ref={ref}
-        />
-    )
+  return (
+    // @ts-ignore
+    <holographicMaterial
+      key={HolographicMaterial.key}
+      side={
+        side === "DoubleSide"
+          ? DoubleSide
+          : side === "BackSide"
+            ? BackSide
+            : FrontSide
+      }
+      transparent={true}
+      blending={enableAdditive ? AdditiveBlending : NormalBlending}
+      ref={ref}
+    />
+  );
 }

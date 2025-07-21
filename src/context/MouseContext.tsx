@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface MouseContextType {
   mousePosition: { x: number; y: number };
@@ -10,7 +16,7 @@ const MouseContext = createContext<MouseContextType | undefined>(undefined);
 export const useMousePosition = () => {
   const context = useContext(MouseContext);
   if (!context) {
-    throw new Error('useMousePosition must be used within a MouseProvider');
+    throw new Error("useMousePosition must be used within a MouseProvider");
   }
   return context;
 };
@@ -27,13 +33,13 @@ export const MouseProvider: React.FC<MouseProviderProps> = ({ children }) => {
     const handleMouseMove = (event: MouseEvent) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = -(event.clientY / window.innerHeight) * 2 + 1;
-      
+
       setMousePosition({ x, y });
       setLastMouseActivity(Date.now());
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   return (

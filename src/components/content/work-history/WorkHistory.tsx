@@ -1,5 +1,5 @@
-import React from 'react';
-import './WorkHistory.css';
+import React from "react";
+import "./WorkHistory.css";
 
 const WorkHistory = () => {
   const workExperience = [
@@ -8,17 +8,33 @@ const WorkHistory = () => {
       company: "Tech Solutions Inc.",
       position: "Full Stack Developer",
       duration: "2022 - Present",
-      description: "Developed and maintained web applications using React, Node.js, and MongoDB. Collaborated with cross-functional teams to deliver high-quality software solutions.",
-      technologies: ["React", "Node.js", "MongoDB", "JavaScript", "CSS3", "HTML5"]
+      description:
+        "Developed and maintained web applications using React, Node.js, and MongoDB. Collaborated with cross-functional teams to deliver high-quality software solutions.",
+      technologies: [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "JavaScript",
+        "CSS3",
+        "HTML5",
+      ],
     },
     {
       id: 2,
       company: "Digital Innovations LLC",
       position: "Junior Web Developer",
       duration: "2021 - 2022",
-      description: "Assisted in building responsive web applications and contributed to both frontend and backend development. Gained experience in modern web development practices.",
-      technologies: ["JavaScript", "HTML5", "CSS3", "Bootstrap", "PHP", "MySQL"]
-    }
+      description:
+        "Assisted in building responsive web applications and contributed to both frontend and backend development. Gained experience in modern web development practices.",
+      technologies: [
+        "JavaScript",
+        "HTML5",
+        "CSS3",
+        "Bootstrap",
+        "PHP",
+        "MySQL",
+      ],
+    },
   ];
 
   return (
@@ -36,7 +52,9 @@ const WorkHistory = () => {
               <p className="job-description">{job.description}</p>
               <div className="technologies">
                 {job.technologies.map((tech, index) => (
-                  <span key={index} className="tech-tag">{tech}</span>
+                  <span key={index} className="tech-tag">
+                    {tech}
+                  </span>
                 ))}
               </div>
             </div>
@@ -47,4 +65,4 @@ const WorkHistory = () => {
   );
 };
 
-export default WorkHistory; 
+export default WorkHistory;

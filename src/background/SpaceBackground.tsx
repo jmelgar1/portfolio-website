@@ -49,7 +49,7 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           <Suspense fallback={null}>
             <MouseCameraController lookAt={lookAt} />
             <Galaxy 
-              position={[0, 0, -30]} 
+              position={[0, -3.5, -40]} 
               rotation={[0, 0, 2]} 
               scale={1.5}
               galaxyType={galaxyType}

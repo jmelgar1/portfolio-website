@@ -12,7 +12,7 @@ export function spiral(x: number, y: number, z: number, offset: number): THREE.V
   let r = Math.sqrt(x**2 + y**2);
   let theta = offset;
   theta += x > 0 ? Math.atan(y/x) : Math.atan(y/x) + Math.PI;
-  theta += (r/ARM_X_DIST) * SPIRAL;
+  theta += (r/ARM_X_DIST) * SPIRAL.SPIRAL_FACTOR;
   return new THREE.Vector3(r*Math.cos(theta), r*Math.sin(theta), z);
 }
 

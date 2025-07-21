@@ -13,7 +13,6 @@ import {
   ARM_Y_DIST,
   ARM_X_MEAN,
   ARM_Y_MEAN,
-  ARMS_CONSTANT,
   HAZE_RATIO
 } from '../config/galaxyConfig';
 import { starTypes } from '../config/starDistributions';

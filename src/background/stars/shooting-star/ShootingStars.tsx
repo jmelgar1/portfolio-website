@@ -8,7 +8,7 @@ const ShootingStars: React.FC = () => {
   const lastSpawnTime = useRef<number>(0);
   
   const createShootingStar = (): ShootingStar => {
-    const depth = -Math.random() * 30 - 15;
+    const depth = -Math.random() * 150 - 15;
     const bounds = getCanvasBounds(depth);
     const spawnMargin = 2;
     
@@ -16,7 +16,7 @@ const ShootingStars: React.FC = () => {
     const { startPos, endPos } = generateEdgePositions(edge, bounds, spawnMargin, depth);
     
     const direction = endPos.clone().sub(startPos).normalize();
-    const speed = 8 + Math.random() * 12;
+    const speed = 20 + Math.random() * 50;
     
     return {
       id: Date.now() + Math.random(),

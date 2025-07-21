@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { GalaxyType, SPIRAL, ELLIPTICAL, IRREGULAR, NUM_STARS } from '../config/galaxyConfig';
 
+// Galaxy color constants
+const GALAXY_CORE_COLOR = 0xff6030;  // Warm orange for galaxy centers
+const GALAXY_EDGE_COLOR = 0x391eb9;  // Deep purple for galaxy edges
+
 export interface GalaxyPositions {
   positions: Float32Array;
   colors: Float32Array;
@@ -10,8 +14,8 @@ export function generateSpiralGalaxy(): GalaxyPositions {
   const positions = new Float32Array(NUM_STARS * 3);
   const colors = new Float32Array(NUM_STARS * 3);
 
-  const colorInside = new THREE.Color(0xff6030);
-  const colorOutside = new THREE.Color(0x391eb9);
+  const colorInside = new THREE.Color(GALAXY_CORE_COLOR);
+  const colorOutside = new THREE.Color(GALAXY_EDGE_COLOR);
 
   // Add some entropy to ensure different results
   const entropy = Math.random() * 1000;
@@ -49,8 +53,8 @@ export function generateEllipticalGalaxy(): GalaxyPositions {
   const positions = new Float32Array(NUM_STARS * 3);
   const colors = new Float32Array(NUM_STARS * 3);
 
-  const colorCore = new THREE.Color(0xffffff);
-  const colorEdge = new THREE.Color(0x804020);
+  const colorCore = new THREE.Color(GALAXY_CORE_COLOR);
+  const colorEdge = new THREE.Color(GALAXY_EDGE_COLOR);
 
   // Scale to match spiral galaxy size (8 units radius)
   const maxRadius = 8;
@@ -106,8 +110,8 @@ export function generateIrregularGalaxy(): GalaxyPositions {
   const positions = new Float32Array(NUM_STARS * 3);
   const colors = new Float32Array(NUM_STARS * 3);
 
-  const colorCluster = new THREE.Color(0x60a0ff);
-  const colorSparse = new THREE.Color(0x200040);
+  const colorCluster = new THREE.Color(GALAXY_CORE_COLOR);
+  const colorSparse = new THREE.Color(GALAXY_EDGE_COLOR);
 
   // Scale to match spiral galaxy size (8 units radius)
   const maxRadius = 8;

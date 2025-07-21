@@ -2,75 +2,67 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
-
-This is a React-based portfolio website built with Three.js and React Three Fiber. It features an immersive 3D space theme with an astronaut helmet, holographic panels, and various stellar effects. The site uses horizontal scrolling to navigate between content sections.
-
 ## Development Commands
 
-### Start Development Server
-```bash
-npm run dev
-# or
-npm start
-```
-Both commands start the Vite development server on port 3000 and automatically open the browser.
+- `npm start` - Start development server (default port 3000)
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run eject` - Eject from Create React App (avoid unless necessary)
 
-### Build and Preview
-```bash
-npm run build    # Build for production
-npm run preview  # Preview production build
-```
+## Architecture Overview
 
-### Testing
-```bash
-npm test         # Run all tests with Vitest
-```
+This is a React-based portfolio website featuring a unique horizontal scrolling design with a Three.js background canvas. The application is built with Create React App and uses React Three Fiber for 3D graphics integration.
 
-The project uses Vitest for testing with jsdom environment and React Testing Library.
+### Core Components Structure
 
-## Architecture
+**Main App (`src/App.js`)**:
+- Orchestrates horizontal scrolling through three main sections: intro, work, projects
+- Uses `useHorizontalScroll` custom hook for smooth scrolling with wheel and keyboard controls
+- Integrates `ThreeJSBackground` component for 3D canvas background
+- Includes section indicators and scroll progress bar
 
-### Main Application Structure
-- **Entry Point**: `src/index.tsx` → `src/App.tsx`
-- **Core Component**: `SpaceBackground` serves as the main container that renders both the 3D Three.js scene and the content sections
-- **3D Scene**: Built with `@react-three/fiber` Canvas containing lighting, camera controls, and 3D objects
-- **Content Layout**: Horizontal scrolling sections (Intro, Projects, Work History) overlaid on the 3D scene
+**Horizontal Scrolling System (`src/hooks/useHorizontalScroll.js`)**:
+- Custom hook managing scroll position with smooth animations using requestAnimationFrame
+- Supports both mouse wheel and arrow key navigation with configurable sensitivity
+- Provides utilities: getCurrentSection(), getSectionProgress(), scrollToSection()
+- Uses 0.1 easing factor for smooth scroll animations
+- Handles continuous key press for smooth keyboard scrolling
 
-### Key Architectural Patterns
+**Three.js Integration (`src/components/threejs/ThreeJSBackground.js`)**:
+- Three.js canvas setup using React Three Fiber with NodeNetwork component
+- Contains ambient and directional lighting for 3D scene illumination
+- Features animated 3-node network that becomes visible when scrolling past the main sections
+- Uses high-performance rendering with antialias and alpha support
 
-**3D Scene Architecture:**
-- `SpaceBackground.tsx`: Main container with Canvas and content sections
-- `Starfield.tsx`: Background star field with twinkling effects
-- `ShootingStars.tsx`: Animated shooting star effects
-- `AstronautHelmet.tsx`: Central 3D model with holographic panels
-- `MouseCameraController.tsx`: Handles camera movement based on mouse input
+**Node Network (`src/components/threejs/NodeNetwork.js`)**:
+- 3D animated node network with triangular formation of connected spheres
+- Nodes feature rotating animations and emissive materials in different colors
+- Connecting edges with pulsing opacity animations
+- Visibility controlled by scroll position - appears when scrolling beyond 300vw
+- Network scales and positions dynamically based on scroll progress
 
-**Content Sections:**
-- Each section (Intro, Projects, Work History) is a separate component
-- Uses horizontal scrolling with `useHorizontalScroll` hook
-- Positioned absolutely over the 3D scene
+### Content Sections
 
-**Component Organization:**
-- `background/`: 3D scene components and star effects
-- `astronaut-helmet/`: Helmet model and holographic panels
-- `components/content/`: Content sections for the portfolio
-- `camera-controller/`: Camera interaction logic
-- `hooks/`: Custom React hooks
+- **IntroSection** (`src/components/IntroSection.js`) - Landing/hero section
+- **WorkHistory** (`src/components/WorkHistory.js`) - Professional experience display  
+- **ProjectsSection** (`src/components/ProjectsSection.js`) - Portfolio project showcase
 
-### Key Dependencies
-- **Three.js Ecosystem**: `three`, `@react-three/fiber`, `@react-three/drei`
-- **Animation**: `@react-spring/three` for smooth animations
-- **Testing**: `vitest`, `@testing-library/react`, `@react-three/test-renderer`
+Each section is 100vw wide and slides horizontally based on scroll position controlled by `translateX`.
 
-### File Structure Notes
-- 3D assets (`.glb` files) are supported via Vite configuration
-- TypeScript strict mode enabled
-- Component-specific CSS files are co-located with components
-- Test files follow `.test.tsx` naming convention
+## Development Notes
 
-### Development Notes
-- The project uses Vite for fast development and building
-- Hot reload is enabled for both React components and 3D scenes
-- Browser opens automatically when starting development server
-- Build output goes to `build/` directory
+- Built with React 19 and React Three Fiber
+- Uses Create React App configuration with React Scripts 5.0.1
+- Three.js version 0.177.0 with @react-three/fiber 9.1.2 and @react-three/drei 10.1.2
+- Custom horizontal scrolling replaces traditional vertical scrolling
+- Scroll position controls both content translation and can be used for Three.js scene updates
+- Section navigation includes visual indicators and progress tracking
+
+## Change Tracking
+
+When making modifications to this codebase, maintain a record of session changes in `logs/`. Include:
+- What was changed and why
+- Files modified
+- Key decisions made
+- Any breaking changes or considerations for future development
+- For changelogs created during sessions in the @logs/ folder, ensure they are named properly in the following format (mm-dd-yyyy s1,2,3,etc), the "s" stands for session and we will increment as necessary.

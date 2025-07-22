@@ -2,15 +2,17 @@
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
 // Add ResizeObserver polyfill for tests
 global.ResizeObserver = class ResizeObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
 };
+
+global.IS_REACT_ACT_ENVIRONMENT = true;
 
 // Mock HTMLCanvasElement.getContext for Three.js
 HTMLCanvasElement.prototype.getContext = vi.fn();

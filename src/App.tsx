@@ -1,6 +1,6 @@
-import React from 'react';
-import './App.css';
-import SpaceBackground from './background/SpaceBackground';
+import React from "react";
+import "./App.css";
+import SpaceBackground from "./background/SpaceBackground";
 
 function App() {
   return (

@@ -139,31 +139,31 @@
   .projects-section {
     padding: 1rem 0;
   }
-  
+
   .projects-section .section-content {
     padding: 0 1rem;
   }
-  
+
   .projects-grid {
     grid-template-columns: 1fr;
     gap: 1.2rem;
     max-height: 75vh;
   }
-  
+
   .project-content {
     padding: 1.2rem;
   }
-  
+
   .project-title {
     font-size: 1.2rem;
   }
-  
+
   .project-links {
     flex-direction: column;
     gap: 0.8rem;
   }
-  
+
   .project-link {
     text-align: center;
   }
-} 
+}

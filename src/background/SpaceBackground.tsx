@@ -19,7 +19,9 @@ interface SpaceBackgroundProps {
 
 const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
   const {
-    scrollPosition
+    scrollPosition,
+    scrollToSection,
+    getCurrentSection
   } = useHorizontalScroll(200);
 
   return (
@@ -46,6 +48,28 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
             <directionalLight position={[10, 10, 5]} intensity={0.8} />
           </Suspense>
         </Canvas>
+
+        {/* Simple Navigation */}
+        <nav className="simple-nav">
+          <button 
+            className={`nav-item ${getCurrentSection() === 0 ? 'active' : ''}`}
+            onClick={() => scrollToSection(0)}
+          >
+            About Me
+          </button>
+          <button 
+            className={`nav-item ${getCurrentSection() === 1 ? 'active' : ''}`}
+            onClick={() => scrollToSection(1)}
+          >
+            Projects
+          </button>
+          <button 
+            className={`nav-item ${getCurrentSection() === 2 ? 'active' : ''}`}
+            onClick={() => scrollToSection(2)}
+          >
+            Experience
+          </button>
+        </nav>
 
         <div
           className="content-sections"

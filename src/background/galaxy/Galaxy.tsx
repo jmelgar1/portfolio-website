@@ -30,7 +30,6 @@ const Galaxy: React.FC<GalaxyProps> = ({
 
   // Real-time transformation state with randomized targets
   const [currentTransformationProgress, setCurrentTransformationProgress] = useState(0);
-  const [setIsTransforming] = useState(false);
   const [transformationTarget, setTransformationTarget] = useState<{
     type: GalaxyType;
     subtype: number;
@@ -90,7 +89,6 @@ const Galaxy: React.FC<GalaxyProps> = ({
   // Dynamic transformation system with random targets
   useEffect(() => {
     if (isMouseMoving) {
-      setIsTransforming(true);
       // Generate new random target when starting transformation
       if (currentTransformationProgress === 0) {
         setTransformationTarget(generateRandomTarget());
@@ -112,7 +110,6 @@ const Galaxy: React.FC<GalaxyProps> = ({
       });
     } else {
       // Mouse stopped - bias toward returning to spiral variants
-      setIsTransforming(false);
       if (currentGalaxyState.type !== 'spiral') {
         setCurrentTransformationProgress(prev => {
           if (prev > 0) {

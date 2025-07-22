@@ -1,11 +1,15 @@
-import React, { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import Starfield from './stars/star-field/Starfield';
-import ShootingStars from './stars/shooting-star/ShootingStars';
-import AstronautHelmet from '../astronaut-helmet/AstronautHelmet';
-import { HolographicPanel } from '../astronaut-helmet/holographic-panel/HolographicPanel';
-import MouseCameraController from '../camera-controller/MouseCameraController';
-import './SpaceBackground.css';
+import React, { Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import Starfield from "./stars/star-field/Starfield";
+import ShootingStars from "./stars/shooting-star/ShootingStars";
+import Galaxy from "./galaxy/Galaxy";
+import MouseCameraController from "../camera-controller/MouseCameraController";
+import { useHorizontalScroll } from "../hooks/useHorizontalScroll";
+import IntroSection from "../components/content/intro-section/IntroSection";
+import ProjectsSection from "../components/content/projects-section/ProjectsSection";
+import WorkHistory from "../components/content/work-history/WorkHistory";
+import { MouseProvider } from "../context/MouseContext";
+import "./SpaceBackground.css";
 
 interface SpaceBackgroundProps {
   scrollPosition?: number;
@@ -14,43 +18,45 @@ interface SpaceBackgroundProps {
 }
 
 const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
-  return (
-    <div className="space-background">
-      <Canvas 
-        camera={{ position: [0, 2.2, 1.6], fov: 40 }}
-        gl={{ 
-          antialias: true,
-          alpha: true,
-          powerPreference: "high-performance"
-        }}
-      >
-        <Suspense fallback={null}>
-          <MouseCameraController lookAt={lookAt} />
-          <Starfield />
-          <ShootingStars />
-          <AstronautHelmet />
-          <HolographicPanel
-            position={[2, 0, -0.5]}
-            rotation={[0, -0.5, 0]}
-            title={"TITLE"}
-            status={"STATUS"}
-            description={"DESCRIPTION"}
-            onClick={() => console.log('Holographic panel activated!')}
-          />
-          <HolographicPanel
-              position={[0, 0.35, -0.7]}
-              rotation={[-0.3, 0, 0]}
-              title={"Welcome to my website!"}
-              status={"Status thing here"}
-              description={"Description here"}
-              onClick={() => console.log('Welcome!')}
-          />
+  const {
+    scrollPosition
+  } = useHorizontalScroll(200);
 
-          <ambientLight intensity={0.3} />
-          <directionalLight position={[10, 10, 5]} intensity={0.8} />
-        </Suspense>
-      </Canvas>
-    </div>
+  return (
+    <MouseProvider>
+      <div className="space-background">
+        <Canvas
+          camera={{ position: [0, 1.5, 1], fov: 40 }}
+          gl={{
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance",
+          }}
+        >
+          <Suspense fallback={null}>
+            <MouseCameraController lookAt={lookAt} />
+            <Galaxy
+              position={[0, -3.5, -40]}
+              rotation={[0, 0, 2]}
+              scale={1.5}
+            />
+            <Starfield />
+            <ShootingStars />
+            <ambientLight intensity={0.3} />
+            <directionalLight position={[10, 10, 5]} intensity={0.8} />
+          </Suspense>
+        </Canvas>
+
+        <div
+          className="content-sections"
+          style={{ transform: `translateX(-${scrollPosition}vw)` }}
+        >
+          <IntroSection />
+          <ProjectsSection />
+          <WorkHistory />
+        </div>
+      </div>
+    </MouseProvider>
   );
 };
 

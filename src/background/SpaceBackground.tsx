@@ -5,10 +5,9 @@ import ShootingStars from "./stars/shooting-star/ShootingStars";
 import Galaxy from "./galaxy/Galaxy";
 import MouseCameraController from "../camera-controller/MouseCameraController";
 import { useHorizontalScroll } from "../hooks/useHorizontalScroll";
-import IntroSection from "../components/content/intro-section/IntroSection";
-import ProjectsSection from "../components/content/projects-section/ProjectsSection";
-import WorkHistory from "../components/content/work-history/WorkHistory";
 import { MouseProvider } from "../context/MouseContext";
+import GithubIcon from "../assets/icons/github.svg?react";
+import LinkedinIcon from "../assets/icons/linkedin.svg?react";
 import "./SpaceBackground.css";
 
 interface SpaceBackgroundProps {
@@ -49,25 +48,38 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           </Suspense>
         </Canvas>
 
+        {/* Bottom Left Buttons */}
+        <div className="bottom-left-buttons">
+          <button className="resume-button">
+            MY RESUME
+          </button>
+          <button className="icon-button github-button">
+            <GithubIcon />
+          </button>
+          <button className="icon-button linkedin-button">
+            <LinkedinIcon />
+          </button>
+        </div>
+
         {/* Simple Navigation */}
         <nav className="simple-nav">
           <button 
             className={`nav-item ${getCurrentSection() === 0 ? 'active' : ''}`}
             onClick={() => scrollToSection(0)}
           >
-            About Me
+            ABOUT ME
           </button>
           <button 
             className={`nav-item ${getCurrentSection() === 1 ? 'active' : ''}`}
             onClick={() => scrollToSection(1)}
           >
-            Projects
+            PROJECTS
           </button>
           <button 
             className={`nav-item ${getCurrentSection() === 2 ? 'active' : ''}`}
             onClick={() => scrollToSection(2)}
           >
-            Experience
+            EXPERIENCE
           </button>
         </nav>
 
@@ -75,9 +87,9 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           className="content-sections"
           style={{ transform: `translateX(-${scrollPosition}vw)` }}
         >
-          <IntroSection />
+          {/* <IntroSection />
           <ProjectsSection />
-          <WorkHistory />
+          <WorkHistory /> */}
         </div>
       </div>
     </MouseProvider>

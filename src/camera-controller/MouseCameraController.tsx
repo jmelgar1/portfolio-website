@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 
 const MouseCameraController = ({
-  lookAt,
+  lookAt
 }: {
   lookAt?: [number, number, number];
 }) => {
@@ -15,6 +15,9 @@ const MouseCameraController = ({
     }
   }, [camera, lookAt]);
 
+  // This component doesn't directly control camera movement anymore
+  // The galaxy itself will rotate based on mouse position
+  // Keeping this component for future camera-specific controls
   return null;
 };
 

@@ -28,3 +28,4 @@ public/
 CLAUDE.md
 .claude/
 .vscode/
+.claude/settings.local.json

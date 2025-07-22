@@ -37,6 +37,51 @@
   right: 0 !important;
 }
 
+/* Bottom Left Buttons */
+.bottom-left-buttons {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.resume-button {
+  background: none;
+  border: none;
+  color: white;
+  font-family: 'Monda', sans-serif;
+  font-size: 2.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: opacity 0.3s ease;
+  opacity: 0.9;
+}
+
+.resume-button:hover {
+  opacity: 1;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: opacity 0.3s ease;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button:hover {
+  opacity: 1;
+}
+
 /* Simple Navigation */
 .simple-nav {
   position: fixed;
@@ -51,12 +96,15 @@
   background: none;
   border: none;
   color: white;
+  font-family: 'Instrument Sans', sans-serif;
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
   padding: 0.5rem 0;
   transition: opacity 0.3s ease;
   opacity: 0.7;
+  text-decoration: underline;
+  text-underline-offset: 8px;
 }
 
 .nav-item:hover {
@@ -65,17 +113,4 @@
 
 .nav-item.active {
   opacity: 1;
-}
-
-/* Responsive navigation */
-@media (max-width: 768px) {
-  .simple-nav {
-    top: 1rem;
-    right: 1rem;
-    gap: 1.5rem;
-  }
-  
-  .nav-item {
-    font-size: 1rem;
-  }
 }

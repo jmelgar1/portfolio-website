@@ -3,7 +3,6 @@ import { GalaxyType, NUM_STARS } from "../config/galaxyConfig";
 import { FastSeededRandom } from "./FastSeededRandom";
 
 // Pre-allocated reusable arrays and objects for performance
-const tempVector = new THREE.Vector3();
 const colorCache = new Map<number, THREE.Color>();
 
 // Extensive color palette for galaxy randomization
@@ -176,8 +175,7 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
   // Randomness and chaos
   const outerRandomness = rng.next() * 0.6 + 0.05; // 0.05-0.65
   const innerRandomness = rng.next() * 0.3 + 0.05; // Less chaos in core
-  const chaosLevel = rng.next(); // Overall chaos factor
-  
+   
   // 3D orientation
   const thicknessVariation = rng.next() * 1.2 + 0.8; // 0.8-2.0
   const tiltX = (rng.next() - 0.5) * 0.8; // -0.4 to 0.4
@@ -329,7 +327,7 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
     
     // Apply rotations in sequence: X, Z, then roll
     let rotX = x * cosX - y * sinX;
-    let rotY = x * sinX + y * cosX;
+    const rotY = x * sinX + y * cosX;
     let rotZ = z;
     
     let finalX = rotX * cosZ - rotZ * sinZ;
@@ -434,7 +432,6 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   // Stellar population variations
   const stellarAge = rng.next(); // 0 = young, 1 = old
   const metallicity = rng.next(); // affects color
-  const starFormationRate = rng.next() * 0.3; // Low for ellipticals
   
   // Randomness and chaos
   const outerSparseness = rng.next() * 0.6 + 0.05; // 0.05-0.65
@@ -720,7 +717,6 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
   const verticalChaos = rng.next() * 1.8 + 0.8; // 0.8 to 2.6
   const globalTiltX = (rng.next() - 0.5) * Math.PI; // Full tilt range
   const globalTiltY = (rng.next() - 0.5) * Math.PI;
-  const globalTiltZ = (rng.next() - 0.5) * Math.PI * 2;
   
   // New parameters for more variety
   const starburstIntensity = rng.next(); // Starburst regions

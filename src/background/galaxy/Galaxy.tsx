@@ -57,9 +57,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
   };
 
   // Simple random target generation (like Minecraft)
-  const generateRandomTarget = () => {
-    const types: GalaxyType[] = ['spiral', 'elliptical', 'irregular'];
-    
+  const generateRandomTarget = () => {    
     // Use mouse to influence type selection but keep it simple
     const mouseInfluence = Math.abs(mousePosition.x) + Math.abs(mousePosition.y);
     const velocityInfluence = Math.min(mouseVelocity * 0.01, 1.0);

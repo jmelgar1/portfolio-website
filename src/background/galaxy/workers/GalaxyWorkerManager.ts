@@ -183,7 +183,7 @@ export class GalaxyWorkerManager {
     }
     
     // Reject all pending requests
-    for (const [id, pending] of this.pendingRequests.entries()) {
+    for (const [, pending] of this.pendingRequests.entries()) {
       pending.reject(new Error('Worker terminated'));
     }
     this.pendingRequests.clear();

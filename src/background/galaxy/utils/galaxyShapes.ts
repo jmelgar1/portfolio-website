@@ -2,7 +2,6 @@ import * as THREE from "three";
 import {
   GalaxyType,
   SPIRAL,
-  ELLIPTICAL,
   IRREGULAR,
   NUM_STARS,
 } from "../config/galaxyConfig";
@@ -186,13 +185,13 @@ export function generateEllipticalGalaxy(params: DynamicEllipticalParams = ELLIP
     return seedState / 233280;
   };
 
-  // Generate dramatically varied elliptical parameters
-  const eccentricity = seededRandom() * 0.8 + 0.2; // 0.2 to 1.0 eccentricity
-  const majorAxisRatio = seededRandom() * 2 + 1; // 1x to 3x size variation
-  const minorAxisRatio = seededRandom() * 1.5 + 0.5; // 0.5x to 2x variation
+  // Use parameter values with some variation for uniqueness
+  const eccentricity = params.ECCENTRICITY + (seededRandom() - 0.5) * 0.2; // Vary around param value
+  const semiMajorAxis = params.SEMI_MAJOR_AXIS / 30; // Scale to appropriate size
+  const semiMinorAxis = params.SEMI_MINOR_AXIS / 30; // Scale to appropriate size
   const coreFlattening = seededRandom() * 0.6 + 0.7; // 0.7 to 1.3
-  const coreDensity = seededRandom() * 4 + 1; // 1 to 5 core concentration
-  const outerSparseness = seededRandom() * 0.4 + 0.1; // 0.1 to 0.5 outer randomness
+  const coreDensity = params.CORE_DENSITY + (seededRandom() - 0.5) * 1; // Vary around param value
+  const outerSparseness = params.RANDOMNESS + (seededRandom() - 0.5) * 0.2; // Vary around param value
   
   // 3D orientation variations using seeded random
   const verticalStretch = seededRandom() * 0.8 + 1; // 1.0-1.8x vertical stretch
@@ -207,10 +206,9 @@ export function generateEllipticalGalaxy(params: DynamicEllipticalParams = ELLIP
   const densityLumpiness = seededRandom() * 0.4; // 0-0.4 density variations
   const shellStructure = seededRandom() * 0.3; // 0-0.3 shell/ring structure
 
-  // Scale with dynamic sizing
-  const maxRadius = 8 + seededRandom() * 2; // 8-10 units radius variation
-  const semiMajor = maxRadius * majorAxisRatio;
-  const semiMinor = maxRadius * minorAxisRatio * eccentricity; // True elliptical variation
+  // Use the parameter-based axes
+  const semiMajor = semiMajorAxis;
+  const semiMinor = semiMinorAxis * eccentricity; // True elliptical variation
 
   for (let i = 0; i < NUM_STARS; i++) {
     const i3 = i * 3;
@@ -321,7 +319,6 @@ export function generateIrregularGalaxy(params: DynamicIrregularParams = IRREGUL
   const verticalChaos = seededRandom() * 1.2 + 1; // 1.0-2.2x vertical spread
   const globalTiltX = (seededRandom() - 0.5) * 0.8; // -0.4 to 0.4 radians
   const globalTiltY = (seededRandom() - 0.5) * 0.6; // -0.3 to 0.3 radians  
-  const globalTiltZ = (seededRandom() - 0.5) * Math.PI; // Additional Z rotation
   const clusterVerticalOffset = (seededRandom() - 0.5) * 2; // Cluster height offset
 
   // Scale with dynamic sizing based on chaos level

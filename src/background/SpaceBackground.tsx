@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect } from "react";
+import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Starfield from "./stars/star-field/Starfield";
 import ShootingStars from "./stars/shooting-star/ShootingStars";
@@ -6,9 +6,9 @@ import Galaxy from "./galaxy/Galaxy";
 import MouseCameraController from "../camera-controller/MouseCameraController";
 import { useHorizontalScroll } from "../hooks/useHorizontalScroll";
 import { MouseProvider } from "../context/MouseContext";
-import GalaxyDebugOverlay from "../components/ui/GalaxyDebugOverlay";
-import GithubIcon from "../assets/icons/github.svg?react";
-import LinkedinIcon from "../assets/icons/linkedin.svg?react";
+import Navigation from "../components/ui/Navigation";
+import SocialButtons from "../components/ui/SocialButtons";
+import DebugControls, { DebugInfo } from "../components/ui/DebugControls";
 import "./SpaceBackground.css";
 
 interface SpaceBackgroundProps {
@@ -24,42 +24,8 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
     getCurrentSection
   } = useHorizontalScroll(200);
 
-  const [showDebug, setShowDebug] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<{
-    type: string;
-    seed: number;
-    width: number;
-    height: number;
-    depth: number;
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-    minZ: number;
-    maxZ: number;
-    totalParticles: number;
-    transformationProgress: number;
-    mouseVelocity: number;
-    isTransforming: boolean;
-  } | null>(null);
-
-  // Add keyboard shortcut for debug toggle (Ctrl+D or Cmd+D)
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'd') {
-        event.preventDefault();
-        setShowDebug(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const handleDebugUpdate = (newDebugInfo: typeof debugInfo) => {
-    if (showDebug) {
-      setDebugInfo(newDebugInfo);
-    }
+  const handleDebugUpdate = (newDebugInfo: DebugInfo | null) => {
+    // Debug update is now handled by DebugControls component
   };
 
   return (
@@ -88,62 +54,12 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           </Suspense>
         </Canvas>
 
-        {/* Debug overlay */}
-        <GalaxyDebugOverlay debugInfo={debugInfo} visible={showDebug} />
-
-        {/* Debug indicator */}
-        {showDebug && (
-          <div style={{
-            position: 'fixed',
-            bottom: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'rgba(0, 0, 0, 0.8)',
-            color: '#4da6ff',
-            padding: '8px 16px',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontFamily: 'monospace',
-            zIndex: 999
-          }}>
-            Debug Mode Active - Press Ctrl+D to toggle
-          </div>
-        )}
-
-        {/* Bottom Left Buttons */}
-        <div className="bottom-left-buttons">
-          <button className="resume-button">
-            MY RESUME
-          </button>
-          <button className="icon-button github-button">
-            <GithubIcon />
-          </button>
-          <button className="icon-button linkedin-button">
-            <LinkedinIcon />
-          </button>
-        </div>
-
-        {/* Simple Navigation */}
-        <nav className="simple-nav">
-          <button 
-            className={`nav-item ${getCurrentSection() === 0 ? 'active' : ''}`}
-            onClick={() => scrollToSection(0)}
-          >
-            ABOUT ME
-          </button>
-          <button 
-            className={`nav-item ${getCurrentSection() === 1 ? 'active' : ''}`}
-            onClick={() => scrollToSection(1)}
-          >
-            PROJECTS
-          </button>
-          <button 
-            className={`nav-item ${getCurrentSection() === 2 ? 'active' : ''}`}
-            onClick={() => scrollToSection(2)}
-          >
-            EXPERIENCE
-          </button>
-        </nav>
+        <DebugControls onDebugUpdate={handleDebugUpdate} />
+        <SocialButtons />
+        <Navigation 
+          getCurrentSection={getCurrentSection}
+          scrollToSection={scrollToSection}
+        />
 
         <div
           className="content-sections"

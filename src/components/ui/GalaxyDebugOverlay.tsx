@@ -1,5 +1,6 @@
 import React from 'react';
 import './GalaxyDebugOverlay.css';
+import { useFPS } from '../../hooks/useFPS';
 
 interface GalaxyDebugInfo {
   type: string;
@@ -25,6 +26,8 @@ interface GalaxyDebugOverlayProps {
 }
 
 const GalaxyDebugOverlay: React.FC<GalaxyDebugOverlayProps> = ({ debugInfo, visible }) => {
+  const fpsData = useFPS(500); // Update every 500ms
+  
   if (!visible || !debugInfo) return null;
 
   return (
@@ -36,6 +39,26 @@ const GalaxyDebugOverlay: React.FC<GalaxyDebugOverlayProps> = ({ debugInfo, visi
         </div>
       </div>
       
+      <div className="debug-section">
+        <h4>Performance</h4>
+        <div className="debug-row">
+          <span className="label">FPS:</span>
+          <span className="value">{fpsData.fps}</span>
+        </div>
+        <div className="debug-row">
+          <span className="label">Avg FPS:</span>
+          <span className="value">{fpsData.averageFps}</span>
+        </div>
+        <div className="debug-row">
+          <span className="label">Min/Max:</span>
+          <span className="value">{fpsData.minFps}/{fpsData.maxFps}</span>
+        </div>
+        <div className="debug-row">
+          <span className="label">Frames:</span>
+          <span className="value">{fpsData.frameCount.toLocaleString()}</span>
+        </div>
+      </div>
+
       <div className="debug-section">
         <h4>Galaxy Properties</h4>
         <div className="debug-row">

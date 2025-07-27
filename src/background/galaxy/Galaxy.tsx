@@ -9,7 +9,7 @@ import {
   interpolatePositions,
   interpolateColors
 } from "./utils/galaxyShapes";
-import { generateOptimizedGalaxyShape } from "./utils/OptimizedGalaxyShapes";
+import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
 import { useMousePosition } from "../../context/MouseContext";
 
 interface GalaxyProps {
@@ -106,19 +106,10 @@ const Galaxy: React.FC<GalaxyProps> = ({
 
   // Simple random target generation (like Minecraft)
   const generateRandomTarget = () => {    
-    // Use mouse to influence type selection but keep it simple
-    const mouseInfluence = Math.abs(mousePosition.x) + Math.abs(mousePosition.y);
-    const velocityInfluence = Math.min(mouseVelocity * 0.01, 1.0);
-    const combinedInfluence = mouseInfluence * 0.4 + velocityInfluence * 0.6;
-    
-    let selectedType: GalaxyType;
-    if (combinedInfluence < 0.33) {
-      selectedType = 'spiral';
-    } else if (combinedInfluence < 0.66) {
-      selectedType = 'elliptical';  
-    } else {
-      selectedType = 'irregular';
-    }
+    // Truly random galaxy type selection
+    const galaxyTypes: GalaxyType[] = ['spiral', 'elliptical', 'irregular'];
+    const randomIndex = Math.floor(Math.random() * galaxyTypes.length);
+    const selectedType = galaxyTypes[randomIndex];
     
     // Just generate a random seed - no uniqueness tracking needed
     const randomSeed = Math.floor(Math.random() * 100000);

@@ -198,9 +198,6 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
   const ringCount = hasRings ? Math.floor(rng.next() * 3) + 1 : 0; // 1-3 rings
   const ringRadii = hasRings ? Array.from({length: ringCount}, () => rng.next() * 4 + 2) : [];
   
-  // Enhanced dust lanes for spiral galaxies - increased visibility
-  const dustLaneStrength = rng.next() * 0.8 + 0.4; // 0.4-1.2 opacity reduction (much stronger)
-  const dustLaneWidth = rng.next() * 0.8 + 0.3; // 0.3-1.1 width variation (much wider)
   
   // Color scheme selection
   const colorScheme = getRandomColorScheme(rng);
@@ -309,19 +306,6 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
       normalizedRadius = radius / 8;
     }
     
-    // Apply enhanced dust lane effects
-    const dustLaneDistance = Math.abs(y);
-    const inDustLane = dustLaneDistance < dustLaneWidth;
-    let dustFactor = 1.0;
-    if (inDustLane) {
-      const falloffFactor = 1.0 - dustLaneDistance / dustLaneWidth;
-      dustFactor = 1.0 - dustLaneStrength * falloffFactor;
-      
-      // For visual debugging: make dust lanes very obvious
-      if (falloffFactor > 0.8) {
-        dustFactor = Math.min(dustFactor, 0.05); // Extremely dark in dust lane centers
-      }
-    }
 
     // Apply 3D rotations with roll
     const cosX = Math.cos(tiltX);
@@ -384,8 +368,6 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
       }
     }
     
-    // Apply dust lane dimming
-    brightness *= dustFactor;
     
     // Apply brightness variation for realism
     brightness *= (0.8 + rng.next() * 0.4);
@@ -406,11 +388,11 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   
   const rng = new FastSeededRandom(seed);
   
-  // Basic shape parameters
+  // Basic shape parameters - constrained to prevent oversized dimensions
   const eccentricity = rng.next() * 0.9 + 0.1; // 0.1-1.0 (0.1 = nearly circular, 1.0 = very elongated)
-  const majorAxisRatio = rng.next() * 3 + 0.8; // 0.8-3.8x
-  const minorAxisRatio = rng.next() * 2 + 0.3; // 0.3-2.3x
-  const verticalRatio = rng.next() * 1.5 + 0.2; // 0.2-1.7x (how thick/flat it is)
+  const majorAxisRatio = rng.next() * 2 + 0.8; // 0.8-2.8x (reduced from 3.8x)
+  const minorAxisRatio = rng.next() * 1.5 + 0.3; // 0.3-1.8x (reduced from 2.3x)
+  const verticalRatio = rng.next() * 1.2 + 0.2; // 0.2-1.4x (reduced from 1.7x)
   
   // Core characteristics
   const coreFlattening = rng.next() * 0.8 + 0.4; // 0.4-1.2
@@ -439,29 +421,28 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   const stellarAge = rng.next(); // 0 = young, 1 = old
   const metallicity = rng.next(); // affects color
   
-  // Randomness and chaos
-  const outerSparseness = rng.next() * 0.6 + 0.05; // 0.05-0.65
-  const innerRandomness = rng.next() * 0.2 + 0.02; // Very organized core
-  const chaosLevel = rng.next() * 0.4; // Generally less chaotic than spirals
+  // Enhanced randomness and chaos for more asymmetry
+  const outerSparseness = rng.next() * 0.8 + 0.05; // 0.05-0.85 (increased)
+  const innerRandomness = rng.next() * 0.4 + 0.02; // 0.02-0.42 (increased from 0.2)
+  const chaosLevel = rng.next() * 0.6 + 0.1; // 0.1-0.7 (increased from 0.4)
   
   // 3D orientation (full 3D rotation capability)
   const rollRotation = (rng.next() - 0.5) * Math.PI * 2; // Full roll
   const pitchRotation = (rng.next() - 0.5) * Math.PI; // Full pitch  
   const yawRotation = (rng.next() - 0.5) * Math.PI * 2; // Full yaw
   
-  // Asymmetric imperfections (real ellipticals aren't perfect)
-  const asymmetryX = rng.next() * 0.8 + 0.6; // 0.6-1.4x X-axis variation
-  const asymmetryY = rng.next() * 0.6 + 0.7; // 0.7-1.3x Y-axis variation  
-  const asymmetryZ = rng.next() * 0.8 + 0.6; // 0.6-1.4x Z-axis variation
+  // Enhanced asymmetric imperfections (real ellipticals aren't perfect)
+  const asymmetryX = rng.next() * 1.2 + 0.4; // 0.4-1.6x X-axis variation (increased range)
+  const asymmetryY = rng.next() * 1.0 + 0.5; // 0.5-1.5x Y-axis variation (increased range)
+  const asymmetryZ = rng.next() * 1.2 + 0.4; // 0.4-1.6x Z-axis variation (increased range)
   
-  // Enhanced dust features for elliptical galaxies - increased visibility
-  const hasDustLanes = rng.next() < 0.8; // 80% chance of prominent dust lanes
-  const dustLaneStrength = hasDustLanes ? rng.next() * 0.9 + 0.6 : rng.next() * 0.4; // 0.6-1.5 or 0-0.4
-  const dustLaneCount = hasDustLanes ? Math.floor(rng.next() * 5) + 3 : Math.floor(rng.next() * 2); // 3-7 or 0-1 lanes
-  const dustLaneWidth = rng.next() * 1.2 + 0.3; // 0.3-1.5 width variation (much wider)
-  const dustLaneAngles = Array.from({length: dustLaneCount}, () => rng.next() * Math.PI);
-  const dustLaneVariation = rng.next() * 0.3 + 0.1; // 0.1-0.4 thickness variation per lane
-  const dustLaneCurvature = rng.next() * 0.4; // 0-0.4 curvature for realistic lanes
+  // Additional asymmetric distortions for more natural appearance
+  const asymmetricTwist = (rng.next() - 0.5) * 0.6; // -0.3 to 0.3 twist factor
+  const asymmetricBulge = rng.next() * 0.8 + 0.6; // 0.6-1.4x bulge asymmetry
+  const offsetCenterX = (rng.next() - 0.5) * 2.0; // -1.0 to 1.0 center offset
+  const offsetCenterY = (rng.next() - 0.5) * 1.5; // -0.75 to 0.75 center offset
+  const offsetCenterZ = (rng.next() - 0.5) * 2.0; // -1.0 to 1.0 center offset
+  
   
   // Density variations and substructure
   const densityLumpiness = rng.next() * 0.5; // 0-0.5 density variations
@@ -474,11 +455,18 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   let haloExtent = hasHalo ? rng.next() * 6 + 4 : 0; // 4-10 units
   const haloFlattening = hasHalo ? rng.next() * 0.4 + 0.3 : 0; // 0.3-0.7
   
-  // Size and scale
-  const maxRadius = 6 + rng.next() * 4; // 6-10 units
+  // Size and scale - reduced to prevent initial oversizing before constraints
+  const maxRadius = 5 + rng.next() * 3; // 5-8 units (reduced from 6-10)
   let semiMajor = maxRadius * majorAxisRatio;
   let semiMinor = maxRadius * minorAxisRatio * eccentricity;
   let semiVertical = maxRadius * verticalRatio;
+
+  // Early validation: ensure no dimension exceeds reasonable pre-asymmetry limits
+  // With max asymmetry of 1.4x, we need to keep initial values under 18 to ensure final < 25
+  const maxInitialDimension = 18;
+  if (semiMajor > maxInitialDimension) semiMajor = maxInitialDimension;
+  if (semiMinor > maxInitialDimension) semiMinor = maxInitialDimension;
+  if (semiVertical > maxInitialDimension) semiVertical = maxInitialDimension;
 
   // Apply improved balance constraints for elliptical galaxy dimensions:
   // 1. No axis can exceed 1.5x the second-largest axis (tighter than previous 2x)
@@ -518,26 +506,44 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   }
 
   // Constraint 3: All dimensions cannot exceed 25 units
-  if (semiMajor > 25) {
-    semiMajor = 25;
+  // Account for asymmetry scaling that will be applied later (max asymmetry is 1.6x for X/Z, 1.5x for Y)
+  const maxAsymmetryX = 1.6;
+  const maxAsymmetryY = 1.5 * 1.4; // Include asymmetricBulge factor (max 1.4)
+  const maxAsymmetryZ = 1.6;
+  
+  const maxAllowedSemiMajor = 25 / maxAsymmetryX;  // ~15.63 to ensure final X ≤ 25
+  const maxAllowedSemiMinor = 25 / maxAsymmetryZ;   // ~15.63 to ensure final Z ≤ 25
+  const maxAllowedSemiVertical = 25 / maxAsymmetryY; // ~11.90 to ensure final Y ≤ 25
+  
+  if (semiMajor > maxAllowedSemiMajor) {
+    semiMajor = maxAllowedSemiMajor;
   }
-  if (semiMinor > 25) {
-    semiMinor = 25;
+  if (semiMinor > maxAllowedSemiMinor) {
+    semiMinor = maxAllowedSemiMinor;
   }
-  if (semiVertical > 25) {
-    semiVertical = 25;
+  if (semiVertical > maxAllowedSemiVertical) {
+    semiVertical = maxAllowedSemiVertical;
   }
 
   // Additional constraint: prevent all three dimensions from exceeding 20 simultaneously
   // This ensures elliptical galaxies don't become overall too large
-  if (semiMajor > 20 && semiMinor > 20 && semiVertical > 20) {
-    // Scale all dimensions proportionally to keep the largest at 20
-    const maxDimension = Math.max(semiMajor, semiMinor, semiVertical);
-    const scaleFactor = 20 / maxDimension;
+  // Account for asymmetry scaling when checking the 20-unit threshold
+  const maxAllowed20SemiMajor = 20 / maxAsymmetryX;   // ~12.50
+  const maxAllowed20SemiMinor = 20 / maxAsymmetryZ;    // ~12.50
+  const maxAllowed20SemiVertical = 20 / maxAsymmetryY; // ~9.52
+  
+  if (semiMajor > maxAllowed20SemiMajor && semiMinor > maxAllowed20SemiMinor && semiVertical > maxAllowed20SemiVertical) {
+    // Scale all dimensions proportionally to keep the largest within the asymmetry-adjusted 20-unit limit
+    const maxDimension = Math.max(
+      semiMajor / maxAllowed20SemiMajor, 
+      semiMinor / maxAllowed20SemiMinor, 
+      semiVertical / maxAllowed20SemiVertical
+    );
     
-    semiMajor *= scaleFactor;
-    semiMinor *= scaleFactor;
-    semiVertical *= scaleFactor;
+    // FIX: Scale down by dividing by maxDimension, not multiplying by inverse
+    semiMajor = semiMajor / maxDimension;
+    semiMinor = semiMinor / maxDimension;
+    semiVertical = semiVertical / maxDimension;
   }
 
   // Also constrain halo extent to respect the same balance
@@ -626,44 +632,34 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
         baseZ += offset.z * (1 - r);
       }
       
-      // Apply asymmetric scaling for imperfect ellipse
+      // Apply enhanced asymmetric scaling and distortions for imperfect ellipse
       x = baseX * asymmetryX;
-      y = baseY * asymmetryY;
+      y = baseY * asymmetryY * asymmetricBulge;
       z = baseZ * asymmetryZ;
+      
+      // Apply asymmetric twist (rotation around Y-axis based on distance from center)
+      const twistAngle = asymmetricTwist * r * 2; // Stronger twist further from center
+      const cosT = Math.cos(twistAngle);
+      const sinT = Math.sin(twistAngle);
+      const twistedX = x * cosT - z * sinT;
+      const twistedZ = x * sinT + z * cosT;
+      x = twistedX;
+      z = twistedZ;
+      
+      // Apply center offset for asymmetric galaxy center
+      x += offsetCenterX * (1 - r * 0.5); // Less offset for outer particles
+      y += offsetCenterY * (1 - r * 0.5);
+      z += offsetCenterZ * (1 - r * 0.5);
       
       normalizedRadius = Math.sqrt(x*x + y*y + z*z) / maxRadius;
     }
     
-    // Apply enhanced dust lane effects (multiple curved lanes possible)
-    let dustFactor = 1.0;
-    for (let dustIndex = 0; dustIndex < dustLaneCount; dustIndex++) {
-      const dustAngle = dustLaneAngles[dustIndex];
-      const laneVariation = dustLaneVariation * (dustIndex + 1) / dustLaneCount; // Vary thickness per lane
-      const currentLaneWidth = dustLaneWidth * (1 + laneVariation);
-      
-      // Create curved dust lanes with realistic shape
-      const dustDir = Math.cos(dustAngle) * x + Math.sin(dustAngle) * z;
-      const curvatureOffset = Math.sin(dustDir * 0.3) * dustLaneCurvature * Math.max(semiMajor, semiMinor) * 0.1;
-      const distanceFromDustLane = Math.abs(y - dustDir * 0.1 - curvatureOffset);
-      
-      if (distanceFromDustLane < currentLaneWidth) {
-        // Smooth falloff for realistic dust absorption
-        const falloffFactor = 1.0 - (distanceFromDustLane / currentLaneWidth);
-        const laneFactor = 1.0 - dustLaneStrength * Math.pow(falloffFactor, 1.5);
-        dustFactor = Math.min(dustFactor, laneFactor);
-        
-        // For visual debugging: make dust lanes very obvious by darkening heavily
-        if (falloffFactor > 0.7) {
-          dustFactor = Math.min(dustFactor, 0.1); // Very dark in dust lane centers
-        }
-      }
-    }
     
     // Add density lumpiness for realistic irregularities
     const lumpinessEffect = 1 + Math.sin(x * 2 + seed) * Math.cos(y * 3 + seed) * Math.sin(z * 2.5 + seed) * densityLumpiness;
     
     // Skip some particles in very low density regions
-    if (rng.next() > lumpinessEffect * dustFactor) {
+    if (rng.next() > lumpinessEffect) {
       const skipFactor = 0.2;
       x *= skipFactor;
       y *= skipFactor; 
@@ -770,8 +766,6 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
       }
     }
     
-    // Apply dust lane dimming
-    brightness *= dustFactor;
     
     // Apply lumpiness effect to brightness
     brightness *= lumpinessEffect;
@@ -810,13 +804,6 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
   const gasCloudDensity = rng.next() * 0.6; // Gas cloud regions
   const formationActivity = rng.next(); // Star formation activity
   
-  // Enhanced dust lane system for irregular galaxies - increased visibility
-  const hasDustLanes = rng.next() < 0.9; // 90% chance of dust features
-  const dustLaneStrength = hasDustLanes ? rng.next() * 0.8 + 0.7 : rng.next() * 0.3; // 0.7-1.5 or 0-0.3
-  const dustLaneCount = hasDustLanes ? Math.floor(rng.next() * 6) + 4 : Math.floor(rng.next() * 2); // 4-9 or 0-1 lanes
-  const dustLaneWidth = rng.next() * 1.5 + 0.4; // 0.4-1.9 width variation (much wider)
-  const dustCloudiness = rng.next() * 0.5; // 0-0.5 patchy dust cloud density
-  const dustAsymmetry = rng.next() * 0.6 + 0.4; // 0.4-1.0 asymmetric dust distribution
   
   const maxRadius = 2.5 + rng.next() * 3; // 2.5-5.5 units
   const clusterSpread = maxRadius * (0.5 + clusterScatter * 0.6);
@@ -828,8 +815,18 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
   const useRandomColors = rng.next() < 0.3; // 30% chance for random colors
   const hasActiveFormation = rng.next() < 0.7; // 70% have active star formation
 
-  // Pre-generate cluster centers
-  const clusterCenters: THREE.Vector3[] = [];
+  // Pre-generate cluster centers with individual properties
+  interface ClusterProperties {
+    center: THREE.Vector3;
+    radius: number;
+    ellipticityX: number;  // X-axis scaling
+    ellipticityY: number;  // Y-axis scaling  
+    ellipticityZ: number;  // Z-axis scaling
+    density: number;       // Core density factor
+    brightness: number;    // Brightness multiplier
+  }
+  
+  const clusters: ClusterProperties[] = [];
   for (let i = 0; i < clusterCount; i++) {
     const clusterSeed = seed + i * 17.3;
     
@@ -841,59 +838,32 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
     const chaosY = (rng.next() - 0.5) * clusterSpread * chaosLevel * 0.2;
     const chaosZ = (rng.next() - 0.5) * clusterSpread * chaosLevel * 0.3;
     
-    clusterCenters.push(new THREE.Vector3(
-      clusterX + chaosX,
-      clusterY + chaosY,
-      clusterZ + chaosZ
-    ));
+    // Generate variable cluster properties
+    const baseRadius = clusterRadius * (0.5 + rng.next() * 1.0); // 50%-150% size variation
+    const ellipticityX = 0.7 + rng.next() * 0.6; // 0.7-1.3x X scaling
+    const ellipticityY = 0.6 + rng.next() * 0.8; // 0.6-1.4x Y scaling (more vertical variation)
+    const ellipticityZ = 0.7 + rng.next() * 0.6; // 0.7-1.3x Z scaling
+    const density = 0.5 + rng.next() * 1.0; // 0.5-1.5x density variation
+    const brightness = 0.7 + rng.next() * 0.6; // 0.7-1.3x brightness variation
+    
+    clusters.push({
+      center: new THREE.Vector3(
+        clusterX + chaosX,
+        clusterY + chaosY,
+        clusterZ + chaosZ
+      ),
+      radius: baseRadius,
+      ellipticityX,
+      ellipticityY, 
+      ellipticityZ,
+      density,
+      brightness
+    });
   }
-
-  // Generate dust lane structures for irregular galaxies
-  const dustLanes: Array<{
-    start: THREE.Vector3;
-    end: THREE.Vector3;
-    width: number;
-    strength: number;
-  }> = [];
   
-  if (hasDustLanes) {
-    for (let i = 0; i < dustLaneCount; i++) {
-      // Create dust lanes between clusters or as independent structures
-      const useClusterConnection = rng.next() < 0.7 && clusterCenters.length >= 2;
-      
-      if (useClusterConnection) {
-        // Connect two random clusters with dust lane
-        const clusterA = clusterCenters[Math.floor(rng.next() * clusterCenters.length)];
-        const clusterB = clusterCenters[Math.floor(rng.next() * clusterCenters.length)];
-        
-        dustLanes.push({
-          start: clusterA.clone(),
-          end: clusterB.clone(),
-          width: dustLaneWidth * (0.5 + rng.next() * 0.8),
-          strength: dustLaneStrength * (0.7 + rng.next() * 0.6)
-        });
-      } else {
-        // Create independent dust lane structure
-        const laneLength = clusterSpread * (0.8 + rng.next() * 0.6);
-        const laneAngle = rng.next() * Math.PI * 2;
-        const laneHeight = (rng.next() - 0.5) * clusterSpread * verticalChaos * 0.4;
-        
-        const startX = (rng.next() - 0.5) * clusterSpread * asymmetryBoost;
-        const startZ = (rng.next() - 0.5) * clusterSpread * clusterScatter;
-        
-        dustLanes.push({
-          start: new THREE.Vector3(startX, laneHeight, startZ),
-          end: new THREE.Vector3(
-            startX + Math.cos(laneAngle) * laneLength,
-            laneHeight + (rng.next() - 0.5) * laneLength * 0.2,
-            startZ + Math.sin(laneAngle) * laneLength
-          ),
-          width: dustLaneWidth * (0.6 + rng.next() * 0.7),
-          strength: dustLaneStrength * (0.8 + rng.next() * 0.4)
-        });
-      }
-    }
-  }
+  // Create legacy clusterCenters array for compatibility
+  const clusterCenters = clusters.map(cluster => cluster.center);
+
 
   // Pre-compute rotation matrices
   const cosX = Math.cos(globalTiltX);
@@ -908,23 +878,37 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
     const distributionRand = rng.next();
 
     let x: number, y: number, z: number;
+    let currentClusterIndex = -1; // Track which cluster this particle belongs to
 
     if (distributionRand < clusterProbability) {
-      // Cluster distribution
-      const clusterIndex = Math.floor(rng.next() * clusterCount);
-      const cluster = clusterCenters[clusterIndex];
+      // Cluster distribution with variable cluster properties
+      currentClusterIndex = Math.floor(rng.next() * clusterCount);
+      const cluster = clusters[currentClusterIndex];
+      const clusterCenter = cluster.center;
 
       const angle = rng.next() * Math.PI * 2;
-      const radius = Math.pow(rng.next(), 0.7) * clusterRadius * (0.5 + rng.next() * 0.4);
-      const height = (rng.next() - 0.5) * clusterRadius * verticalChaos * (0.6 + rng.next() * 0.3);
+      // Use cluster-specific radius and density
+      const baseRadius = Math.pow(rng.next(), 0.7 * cluster.density) * cluster.radius * (0.5 + rng.next() * 0.4);
+      
+      // Apply elliptical shape to cluster
+      const radiusX = baseRadius * cluster.ellipticityX;
+      const radiusY = baseRadius * cluster.ellipticityY;
+      const radiusZ = baseRadius * cluster.ellipticityZ;
+      
+      // Generate elliptical distribution
+      const cosAngle = Math.cos(angle);
+      const sinAngle = Math.sin(angle);
+      const height = (rng.next() - 0.5) * radiusY * verticalChaos * (0.6 + rng.next() * 0.3);
 
-      x = cluster.x + Math.cos(angle) * radius + (rng.next() - 0.5) * clusterRadius * chaosLevel * 0.15;
-      y = cluster.y + height + (rng.next() - 0.5) * clusterRadius * chaosLevel * 0.1;
-      z = cluster.z + Math.sin(angle) * radius + (rng.next() - 0.5) * clusterRadius * chaosLevel * 0.15;
+      x = clusterCenter.x + cosAngle * radiusX + (rng.next() - 0.5) * cluster.radius * chaosLevel * 0.15;
+      y = clusterCenter.y + height + (rng.next() - 0.5) * cluster.radius * chaosLevel * 0.1;
+      z = clusterCenter.z + sinAngle * radiusZ + (rng.next() - 0.5) * cluster.radius * chaosLevel * 0.15;
     } else {
       // Bridge or sparse distribution with improved thickness
-      const clusterA = clusterCenters[Math.floor(rng.next() * clusterCount)];
-      const clusterB = clusterCenters[Math.floor(rng.next() * clusterCount)];
+      const clusterAIndex = Math.floor(rng.next() * clusterCount);
+      const clusterBIndex = Math.floor(rng.next() * clusterCount);
+      const clusterA = clusterCenters[clusterAIndex];
+      const clusterB = clusterCenters[clusterBIndex];
 
       const bridgeProgress = rng.next();
       
@@ -940,12 +924,20 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
         (clusterB.z - clusterA.z) ** 2
       );
       
-      // Thickness varies based on position along bridge (thicker in middle, tapered at ends)
-      const distanceFromCenter = Math.abs(bridgeProgress - 0.5) * 2; // 0 at center, 1 at ends
-      const bridgeThickness = clusterRadius * 0.5 * (1 - distanceFromCenter * 0.4); // 50% of cluster radius, less tapering
+      // Create much thicker, blob-like connections using cluster-specific radii
+      // Use average radius of the two connected clusters
+      const avgClusterRadius = (clusters[clusterAIndex].radius + clusters[clusterBIndex].radius) * 0.5;
       
-      // Prevent extremely thin bridges for long connections with more generous minimums
-      const minThickness = Math.min(bridgeDistance * 0.15, clusterRadius * 0.4); // At least 15% of distance or 40% of cluster radius
+      // Reduce tapering significantly and increase base thickness
+      const distanceFromCenter = Math.abs(bridgeProgress - 0.5) * 2; // 0 at center, 1 at ends
+      const baseThickness = avgClusterRadius * 0.8; // Use cluster-specific radius
+      const bridgeThickness = baseThickness * (1 - distanceFromCenter * 0.15); // Reduced tapering from 0.4 to 0.15
+      
+      // Much more generous minimum thickness to prevent thin lines
+      const minThickness = Math.max(
+        avgClusterRadius * 0.6, // Always at least 60% of average cluster radius
+        Math.min(bridgeDistance * 0.25, avgClusterRadius * 0.9) // Up to 90% of average cluster radius for reasonable distances
+      );
       const finalThickness = Math.max(bridgeThickness, minThickness);
       
       // Add perpendicular spread to create thick, natural bridge
@@ -969,15 +961,21 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
       
       // Apply thickness using both perpendicular directions
       const thicknessAngle = rng.next() * Math.PI * 2;
-      const thicknessRadius = Math.pow(rng.next(), 0.5) * finalThickness; // Gaussian-like distribution
+      // Change from Gaussian to more uniform distribution for thicker, blob-like appearance
+      const thicknessRadius = Math.pow(rng.next(), 0.3) * finalThickness; // Less concentrated toward center
       
       const thicknessOffsetX = (Math.cos(thicknessAngle) * perpendicular1.x + Math.sin(thicknessAngle) * perpendicular2.x) * thicknessRadius;
       const thicknessOffsetY = (Math.cos(thicknessAngle) * perpendicular1.y + Math.sin(thicknessAngle) * perpendicular2.y) * thicknessRadius;
       const thicknessOffsetZ = (Math.cos(thicknessAngle) * perpendicular1.z + Math.sin(thicknessAngle) * perpendicular2.z) * thicknessRadius;
       
-      x = baseX + thicknessOffsetX;
-      y = baseY + thicknessOffsetY;
-      z = baseZ + thicknessOffsetZ;
+      // Add random bulges along the bridge for more organic, blob-like appearance
+      const bulgeFactor = 1 + Math.sin(bridgeProgress * Math.PI * 4 + seed) * 0.3; // Sinusoidal bulges
+      const randomBulge = 1 + (rng.next() - 0.5) * 0.4; // Random thickness variation
+      const combinedBulge = bulgeFactor * randomBulge;
+      
+      x = baseX + thicknessOffsetX * combinedBulge;
+      y = baseY + thicknessOffsetY * combinedBulge;
+      z = baseZ + thicknessOffsetZ * combinedBulge;
     }
 
     // Apply global rotations (optimized)
@@ -1034,16 +1032,22 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
     let brightness;
     
     if (distributionRand < clusterProbability) {
-      // Cluster particles - brighter with starburst effects
+      // Cluster particles - use cluster-specific brightness with starburst effects
+      const cluster = clusters[currentClusterIndex];
+      let baseBrightness;
+      
       if (normalizedDistance < 0.2) {
-        brightness = 2.5 + starburstIntensity * 2.0; // Very bright starburst cores
+        baseBrightness = 2.5 + starburstIntensity * 2.0; // Very bright starburst cores
       } else if (normalizedDistance < 0.5) {
-        brightness = 1.2 + formationActivity * 1.0; // Active formation regions
+        baseBrightness = 1.2 + formationActivity * 1.0; // Active formation regions
       } else if (normalizedDistance < 0.8) {
-        brightness = 0.4 + gasCloudDensity * 0.8; // Gas cloud regions
+        baseBrightness = 0.4 + gasCloudDensity * 0.8; // Gas cloud regions
       } else {
-        brightness = 0.2 + rng.next() * 0.3;
+        baseBrightness = 0.2 + rng.next() * 0.3;
       }
+      
+      // Apply cluster-specific brightness multiplier
+      brightness = baseBrightness * cluster.brightness;
     } else {
       // Bridge particles
       const bridgeDistanceFromEnds = Math.abs(0.5 - (distributionRand - clusterProbability) / bridgeDensity) * 2;
@@ -1051,43 +1055,6 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
       brightness += gasCloudDensity * 0.5; // Gas bridges can be brighter
     }
     
-    // Apply enhanced dust lane effects for irregular galaxies
-    let dustFactor = 1.0;
-    if (hasDustLanes && dustLanes.length > 0) {
-      for (const dustLane of dustLanes) {
-        // Calculate distance from point to dust lane (line segment)
-        const laneVector = new THREE.Vector3().subVectors(dustLane.end, dustLane.start);
-        const pointVector = new THREE.Vector3(x, y, z).sub(dustLane.start);
-        
-        // Project point onto lane line
-        const laneLength = laneVector.length();
-        if (laneLength > 0) {
-          const projection = pointVector.dot(laneVector) / (laneLength * laneLength);
-          const clampedProjection = Math.max(0, Math.min(1, projection));
-          
-          // Find closest point on lane
-          const closestPoint = dustLane.start.clone().add(laneVector.clone().multiplyScalar(clampedProjection));
-          const distanceToLane = new THREE.Vector3(x, y, z).distanceTo(closestPoint);
-          
-          // Apply dust effect with asymmetric falloff
-          const effectiveWidth = dustLane.width * (dustAsymmetry + (1 - dustAsymmetry) * rng.next());
-          if (distanceToLane < effectiveWidth) {
-            const falloffFactor = 1.0 - (distanceToLane / effectiveWidth);
-            const cloudiness = 1.0 - dustCloudiness * rng.next(); // Add patchiness
-            const laneFactor = 1.0 - dustLane.strength * Math.pow(falloffFactor, 1.2) * cloudiness;
-            dustFactor = Math.min(dustFactor, laneFactor);
-            
-            // For visual debugging: make dust lanes very obvious
-            if (falloffFactor > 0.6) {
-              dustFactor = Math.min(dustFactor, 0.05); // Extremely dark in dust lane centers
-            }
-          }
-        }
-      }
-    }
-    
-    // Apply dust dimming to brightness
-    brightness *= dustFactor;
     
     currentColor.multiplyScalar(brightness);
 

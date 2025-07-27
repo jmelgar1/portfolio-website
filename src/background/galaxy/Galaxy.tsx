@@ -16,12 +16,30 @@ interface GalaxyProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: number;
+  onDebugUpdate?: (debugInfo: {
+    type: string;
+    seed: number;
+    width: number;
+    height: number;
+    depth: number;
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+    minZ: number;
+    maxZ: number;
+    totalParticles: number;
+    transformationProgress: number;
+    mouseVelocity: number;
+    isTransforming: boolean;
+  }) => void;
 }
 
 const Galaxy: React.FC<GalaxyProps> = ({
   position = [0, 0, -10],
   rotation = [0, 0, 0],
   scale = 1,
+  onDebugUpdate,
 }) => {
   const { mouseVelocity, isMouseMoving, mousePosition } = useMousePosition();
   const galaxyRef = useRef<THREE.Points>(null);
@@ -51,9 +69,39 @@ const Galaxy: React.FC<GalaxyProps> = ({
   const [currentGalaxy, setCurrentGalaxy] = useState<GalaxyPositions | null>(null);
   const [targetGalaxy, setTargetGalaxy] = useState<GalaxyPositions | null>(null);
 
+
   // Simple galaxy generation without complex caching
   const getGalaxy = (type: GalaxyType, seed: number): GalaxyPositions => {
     return generateRandomGalaxy(type, seed);
+  };
+
+  // Calculate galaxy bounds and dimensions
+  const calculateGalaxyBounds = (positions: Float32Array) => {
+    if (positions.length === 0) return null;
+
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const y = positions[i + 1];
+      const z = positions[i + 2];
+
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      if (z < minZ) minZ = z;
+      if (z > maxZ) maxZ = z;
+    }
+
+    return {
+      minX, maxX, minY, maxY, minZ, maxZ,
+      width: maxX - minX,
+      height: maxY - minY,
+      depth: maxZ - minZ
+    };
   };
 
   // Simple random target generation (like Minecraft)
@@ -195,6 +243,53 @@ const Galaxy: React.FC<GalaxyProps> = ({
       positionAttributeRef.current.needsUpdate = true;
       colorAttributeRef.current.array.set(interpolatedColors);
       colorAttributeRef.current.needsUpdate = true;
+
+      // Update debug info if callback provided
+      if (onDebugUpdate) {
+        const bounds = calculateGalaxyBounds(interpolatedPositions);
+        if (bounds) {
+          onDebugUpdate({
+            type: currentGalaxyState.type,
+            seed: currentGalaxyState.seed,
+            width: bounds.width,
+            height: bounds.height,
+            depth: bounds.depth,
+            minX: bounds.minX,
+            maxX: bounds.maxX,
+            minY: bounds.minY,
+            maxY: bounds.maxY,
+            minZ: bounds.minZ,
+            maxZ: bounds.maxZ,
+            totalParticles: NUM_STARS,
+            transformationProgress: currentTransformationProgress,
+            mouseVelocity: mouseVelocity,
+            isTransforming: isMouseMoving && currentTransformationProgress > 0
+          });
+        }
+      }
+    } else if (onDebugUpdate && positionAttributeRef.current) {
+      // Update debug info for current stable galaxy
+      const positions = positionAttributeRef.current.array as Float32Array;
+      const bounds = calculateGalaxyBounds(positions);
+      if (bounds) {
+        onDebugUpdate({
+          type: currentGalaxyState.type,
+          seed: currentGalaxyState.seed,
+          width: bounds.width,
+          height: bounds.height,
+          depth: bounds.depth,
+          minX: bounds.minX,
+          maxX: bounds.maxX,
+          minY: bounds.minY,
+          maxY: bounds.maxY,
+          minZ: bounds.minZ,
+          maxZ: bounds.maxZ,
+          totalParticles: NUM_STARS,
+          transformationProgress: currentTransformationProgress,
+          mouseVelocity: mouseVelocity,
+          isTransforming: false
+        });
+      }
     }
   });
 

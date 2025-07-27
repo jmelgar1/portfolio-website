@@ -198,9 +198,9 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
   const ringCount = hasRings ? Math.floor(rng.next() * 3) + 1 : 0; // 1-3 rings
   const ringRadii = hasRings ? Array.from({length: ringCount}, () => rng.next() * 4 + 2) : [];
   
-  // Dust lanes
-  const dustLaneStrength = rng.next() * 0.4; // 0-0.4 opacity reduction
-  const dustLaneWidth = rng.next() * 0.3 + 0.1; // 0.1-0.4
+  // Enhanced dust lanes for spiral galaxies - increased visibility
+  const dustLaneStrength = rng.next() * 0.8 + 0.4; // 0.4-1.2 opacity reduction (much stronger)
+  const dustLaneWidth = rng.next() * 0.8 + 0.3; // 0.3-1.1 width variation (much wider)
   
   // Color scheme selection
   const colorScheme = getRandomColorScheme(rng);
@@ -309,12 +309,18 @@ export function generateOptimizedSpiralGalaxy(seed: number): GalaxyPositions {
       normalizedRadius = radius / 8;
     }
     
-    // Apply dust lane effects
+    // Apply enhanced dust lane effects
     const dustLaneDistance = Math.abs(y);
     const inDustLane = dustLaneDistance < dustLaneWidth;
     let dustFactor = 1.0;
     if (inDustLane) {
-      dustFactor = 1.0 - dustLaneStrength * (1.0 - dustLaneDistance / dustLaneWidth);
+      const falloffFactor = 1.0 - dustLaneDistance / dustLaneWidth;
+      dustFactor = 1.0 - dustLaneStrength * falloffFactor;
+      
+      // For visual debugging: make dust lanes very obvious
+      if (falloffFactor > 0.8) {
+        dustFactor = Math.min(dustFactor, 0.05); // Extremely dark in dust lane centers
+      }
     }
 
     // Apply 3D rotations with roll
@@ -448,11 +454,14 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   const asymmetryY = rng.next() * 0.6 + 0.7; // 0.7-1.3x Y-axis variation  
   const asymmetryZ = rng.next() * 0.8 + 0.6; // 0.6-1.4x Z-axis variation
   
-  // Dust features (less common but can exist)
-  const dustLaneStrength = rng.next() * 0.6; // 0-0.6 opacity reduction
-  const dustLaneCount = Math.floor(rng.next() * 4); // 0-3 dust lanes
-  const dustLaneWidth = rng.next() * 0.4 + 0.1; // 0.1-0.5
+  // Enhanced dust features for elliptical galaxies - increased visibility
+  const hasDustLanes = rng.next() < 0.8; // 80% chance of prominent dust lanes
+  const dustLaneStrength = hasDustLanes ? rng.next() * 0.9 + 0.6 : rng.next() * 0.4; // 0.6-1.5 or 0-0.4
+  const dustLaneCount = hasDustLanes ? Math.floor(rng.next() * 5) + 3 : Math.floor(rng.next() * 2); // 3-7 or 0-1 lanes
+  const dustLaneWidth = rng.next() * 1.2 + 0.3; // 0.3-1.5 width variation (much wider)
   const dustLaneAngles = Array.from({length: dustLaneCount}, () => rng.next() * Math.PI);
+  const dustLaneVariation = rng.next() * 0.3 + 0.1; // 0.1-0.4 thickness variation per lane
+  const dustLaneCurvature = rng.next() * 0.4; // 0-0.4 curvature for realistic lanes
   
   // Density variations and substructure
   const densityLumpiness = rng.next() * 0.5; // 0-0.5 density variations
@@ -462,14 +471,80 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
   
   // Halo structure (outer envelope)
   const hasHalo = rng.next() < 0.7; // 70% chance
-  const haloExtent = hasHalo ? rng.next() * 6 + 4 : 0; // 4-10 units
+  let haloExtent = hasHalo ? rng.next() * 6 + 4 : 0; // 4-10 units
   const haloFlattening = hasHalo ? rng.next() * 0.4 + 0.3 : 0; // 0.3-0.7
   
   // Size and scale
   const maxRadius = 6 + rng.next() * 4; // 6-10 units
-  const semiMajor = maxRadius * majorAxisRatio;
-  const semiMinor = maxRadius * minorAxisRatio * eccentricity;
-  const semiVertical = maxRadius * verticalRatio;
+  let semiMajor = maxRadius * majorAxisRatio;
+  let semiMinor = maxRadius * minorAxisRatio * eccentricity;
+  let semiVertical = maxRadius * verticalRatio;
+
+  // Apply improved balance constraints for elliptical galaxy dimensions:
+  // 1. No axis can exceed 1.5x the second-largest axis (tighter than previous 2x)
+  // 2. Smallest axis must be at least 0.4x the largest axis (prevents extreme flattening)
+  // This ensures more balanced elliptical galaxies while still allowing natural variation
+  const axes = [
+    { value: semiMajor, name: 'semiMajor' },
+    { value: semiMinor, name: 'semiMinor' }, 
+    { value: semiVertical, name: 'semiVertical' }
+  ].sort((a, b) => b.value - a.value);
+
+  const largest = axes[0].value;
+  const secondLargest = axes[1].value;
+
+  // Constraint 1: Largest axis cannot exceed 1.5x the second-largest
+  if (largest > secondLargest * 1.5) {
+    const constrainedLargest = secondLargest * 1.5;
+    
+    // Apply constraint to the largest axis
+    if (axes[0].name === 'semiMajor') {
+      semiMajor = constrainedLargest;
+    } else if (axes[0].name === 'semiMinor') {
+      semiMinor = constrainedLargest;
+    } else {
+      semiVertical = constrainedLargest;
+    }
+  }
+
+  // Constraint 2: Smallest axis must be at least 0.4x the largest axis
+  const minAllowedSmallest = Math.max(semiMajor, semiMinor, semiVertical) * 0.4;
+  if (axes[2].name === 'semiMajor' && semiMajor < minAllowedSmallest) {
+    semiMajor = minAllowedSmallest;
+  } else if (axes[2].name === 'semiMinor' && semiMinor < minAllowedSmallest) {
+    semiMinor = minAllowedSmallest;
+  } else if (axes[2].name === 'semiVertical' && semiVertical < minAllowedSmallest) {
+    semiVertical = minAllowedSmallest;
+  }
+
+  // Constraint 3: All dimensions cannot exceed 25 units
+  if (semiMajor > 25) {
+    semiMajor = 25;
+  }
+  if (semiMinor > 25) {
+    semiMinor = 25;
+  }
+  if (semiVertical > 25) {
+    semiVertical = 25;
+  }
+
+  // Additional constraint: prevent all three dimensions from exceeding 20 simultaneously
+  // This ensures elliptical galaxies don't become overall too large
+  if (semiMajor > 20 && semiMinor > 20 && semiVertical > 20) {
+    // Scale all dimensions proportionally to keep the largest at 20
+    const maxDimension = Math.max(semiMajor, semiMinor, semiVertical);
+    const scaleFactor = 20 / maxDimension;
+    
+    semiMajor *= scaleFactor;
+    semiMinor *= scaleFactor;
+    semiVertical *= scaleFactor;
+  }
+
+  // Also constrain halo extent to respect the same balance
+  if (hasHalo) {
+    const maxAllowedHalo = Math.max(semiMajor, semiMinor, semiVertical) * 1.5; // Halo can be 1.5x the largest main axis
+    haloExtent = Math.min(haloExtent, maxAllowedHalo);
+  }
   
   // Color scheme selection
   const colorScheme = getRandomColorScheme(rng);
@@ -559,16 +634,28 @@ export function generateOptimizedEllipticalGalaxy(seed: number): GalaxyPositions
       normalizedRadius = Math.sqrt(x*x + y*y + z*z) / maxRadius;
     }
     
-    // Apply dust lane effects (multiple lanes possible)
+    // Apply enhanced dust lane effects (multiple curved lanes possible)
     let dustFactor = 1.0;
     for (let dustIndex = 0; dustIndex < dustLaneCount; dustIndex++) {
       const dustAngle = dustLaneAngles[dustIndex];
-      const dustDir = Math.cos(dustAngle) * x + Math.sin(dustAngle) * z;
-      const distanceFromDustLane = Math.abs(y - dustDir * 0.1);
+      const laneVariation = dustLaneVariation * (dustIndex + 1) / dustLaneCount; // Vary thickness per lane
+      const currentLaneWidth = dustLaneWidth * (1 + laneVariation);
       
-      if (distanceFromDustLane < dustLaneWidth) {
-        const laneFactor = 1.0 - dustLaneStrength * (1.0 - distanceFromDustLane / dustLaneWidth);
+      // Create curved dust lanes with realistic shape
+      const dustDir = Math.cos(dustAngle) * x + Math.sin(dustAngle) * z;
+      const curvatureOffset = Math.sin(dustDir * 0.3) * dustLaneCurvature * Math.max(semiMajor, semiMinor) * 0.1;
+      const distanceFromDustLane = Math.abs(y - dustDir * 0.1 - curvatureOffset);
+      
+      if (distanceFromDustLane < currentLaneWidth) {
+        // Smooth falloff for realistic dust absorption
+        const falloffFactor = 1.0 - (distanceFromDustLane / currentLaneWidth);
+        const laneFactor = 1.0 - dustLaneStrength * Math.pow(falloffFactor, 1.5);
         dustFactor = Math.min(dustFactor, laneFactor);
+        
+        // For visual debugging: make dust lanes very obvious by darkening heavily
+        if (falloffFactor > 0.7) {
+          dustFactor = Math.min(dustFactor, 0.1); // Very dark in dust lane centers
+        }
       }
     }
     
@@ -721,8 +808,15 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
   // New parameters for more variety
   const starburstIntensity = rng.next(); // Starburst regions
   const gasCloudDensity = rng.next() * 0.6; // Gas cloud regions
-  const dustLaneStrength = rng.next() * 0.4; // Dust lanes
   const formationActivity = rng.next(); // Star formation activity
+  
+  // Enhanced dust lane system for irregular galaxies - increased visibility
+  const hasDustLanes = rng.next() < 0.9; // 90% chance of dust features
+  const dustLaneStrength = hasDustLanes ? rng.next() * 0.8 + 0.7 : rng.next() * 0.3; // 0.7-1.5 or 0-0.3
+  const dustLaneCount = hasDustLanes ? Math.floor(rng.next() * 6) + 4 : Math.floor(rng.next() * 2); // 4-9 or 0-1 lanes
+  const dustLaneWidth = rng.next() * 1.5 + 0.4; // 0.4-1.9 width variation (much wider)
+  const dustCloudiness = rng.next() * 0.5; // 0-0.5 patchy dust cloud density
+  const dustAsymmetry = rng.next() * 0.6 + 0.4; // 0.4-1.0 asymmetric dust distribution
   
   const maxRadius = 2.5 + rng.next() * 3; // 2.5-5.5 units
   const clusterSpread = maxRadius * (0.5 + clusterScatter * 0.6);
@@ -754,6 +848,53 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
     ));
   }
 
+  // Generate dust lane structures for irregular galaxies
+  const dustLanes: Array<{
+    start: THREE.Vector3;
+    end: THREE.Vector3;
+    width: number;
+    strength: number;
+  }> = [];
+  
+  if (hasDustLanes) {
+    for (let i = 0; i < dustLaneCount; i++) {
+      // Create dust lanes between clusters or as independent structures
+      const useClusterConnection = rng.next() < 0.7 && clusterCenters.length >= 2;
+      
+      if (useClusterConnection) {
+        // Connect two random clusters with dust lane
+        const clusterA = clusterCenters[Math.floor(rng.next() * clusterCenters.length)];
+        const clusterB = clusterCenters[Math.floor(rng.next() * clusterCenters.length)];
+        
+        dustLanes.push({
+          start: clusterA.clone(),
+          end: clusterB.clone(),
+          width: dustLaneWidth * (0.5 + rng.next() * 0.8),
+          strength: dustLaneStrength * (0.7 + rng.next() * 0.6)
+        });
+      } else {
+        // Create independent dust lane structure
+        const laneLength = clusterSpread * (0.8 + rng.next() * 0.6);
+        const laneAngle = rng.next() * Math.PI * 2;
+        const laneHeight = (rng.next() - 0.5) * clusterSpread * verticalChaos * 0.4;
+        
+        const startX = (rng.next() - 0.5) * clusterSpread * asymmetryBoost;
+        const startZ = (rng.next() - 0.5) * clusterSpread * clusterScatter;
+        
+        dustLanes.push({
+          start: new THREE.Vector3(startX, laneHeight, startZ),
+          end: new THREE.Vector3(
+            startX + Math.cos(laneAngle) * laneLength,
+            laneHeight + (rng.next() - 0.5) * laneLength * 0.2,
+            startZ + Math.sin(laneAngle) * laneLength
+          ),
+          width: dustLaneWidth * (0.6 + rng.next() * 0.7),
+          strength: dustLaneStrength * (0.8 + rng.next() * 0.4)
+        });
+      }
+    }
+  }
+
   // Pre-compute rotation matrices
   const cosX = Math.cos(globalTiltX);
   const sinX = Math.sin(globalTiltX);
@@ -781,14 +922,62 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
       y = cluster.y + height + (rng.next() - 0.5) * clusterRadius * chaosLevel * 0.1;
       z = cluster.z + Math.sin(angle) * radius + (rng.next() - 0.5) * clusterRadius * chaosLevel * 0.15;
     } else {
-      // Bridge or sparse distribution
+      // Bridge or sparse distribution with improved thickness
       const clusterA = clusterCenters[Math.floor(rng.next() * clusterCount)];
       const clusterB = clusterCenters[Math.floor(rng.next() * clusterCount)];
 
       const bridgeProgress = rng.next();
-      x = clusterA.x + (clusterB.x - clusterA.x) * bridgeProgress;
-      y = clusterA.y + (clusterB.y - clusterA.y) * bridgeProgress;
-      z = clusterA.z + (clusterB.z - clusterA.z) * bridgeProgress;
+      
+      // Base bridge position
+      const baseX = clusterA.x + (clusterB.x - clusterA.x) * bridgeProgress;
+      const baseY = clusterA.y + (clusterB.y - clusterA.y) * bridgeProgress;
+      const baseZ = clusterA.z + (clusterB.z - clusterA.z) * bridgeProgress;
+      
+      // Calculate bridge thickness based on distance and position along bridge
+      const bridgeDistance = Math.sqrt(
+        (clusterB.x - clusterA.x) ** 2 + 
+        (clusterB.y - clusterA.y) ** 2 + 
+        (clusterB.z - clusterA.z) ** 2
+      );
+      
+      // Thickness varies based on position along bridge (thicker in middle, tapered at ends)
+      const distanceFromCenter = Math.abs(bridgeProgress - 0.5) * 2; // 0 at center, 1 at ends
+      const bridgeThickness = clusterRadius * 0.5 * (1 - distanceFromCenter * 0.4); // 50% of cluster radius, less tapering
+      
+      // Prevent extremely thin bridges for long connections with more generous minimums
+      const minThickness = Math.min(bridgeDistance * 0.15, clusterRadius * 0.4); // At least 15% of distance or 40% of cluster radius
+      const finalThickness = Math.max(bridgeThickness, minThickness);
+      
+      // Add perpendicular spread to create thick, natural bridge
+      const bridgeDirection = new THREE.Vector3(
+        clusterB.x - clusterA.x,
+        clusterB.y - clusterA.y,
+        clusterB.z - clusterA.z
+      ).normalize();
+      
+      // Create perpendicular vectors for bridge thickness
+      const perpendicular1 = new THREE.Vector3();
+      const perpendicular2 = new THREE.Vector3();
+      
+      // Find two perpendicular vectors to the bridge direction
+      if (Math.abs(bridgeDirection.x) < 0.9) {
+        perpendicular1.crossVectors(bridgeDirection, new THREE.Vector3(1, 0, 0)).normalize();
+      } else {
+        perpendicular1.crossVectors(bridgeDirection, new THREE.Vector3(0, 1, 0)).normalize();
+      }
+      perpendicular2.crossVectors(bridgeDirection, perpendicular1).normalize();
+      
+      // Apply thickness using both perpendicular directions
+      const thicknessAngle = rng.next() * Math.PI * 2;
+      const thicknessRadius = Math.pow(rng.next(), 0.5) * finalThickness; // Gaussian-like distribution
+      
+      const thicknessOffsetX = (Math.cos(thicknessAngle) * perpendicular1.x + Math.sin(thicknessAngle) * perpendicular2.x) * thicknessRadius;
+      const thicknessOffsetY = (Math.cos(thicknessAngle) * perpendicular1.y + Math.sin(thicknessAngle) * perpendicular2.y) * thicknessRadius;
+      const thicknessOffsetZ = (Math.cos(thicknessAngle) * perpendicular1.z + Math.sin(thicknessAngle) * perpendicular2.z) * thicknessRadius;
+      
+      x = baseX + thicknessOffsetX;
+      y = baseY + thicknessOffsetY;
+      z = baseZ + thicknessOffsetZ;
     }
 
     // Apply global rotations (optimized)
@@ -862,10 +1051,43 @@ export function generateOptimizedIrregularGalaxy(seed: number): GalaxyPositions 
       brightness += gasCloudDensity * 0.5; // Gas bridges can be brighter
     }
     
-    // Apply dust lane dimming
-    if (dustLaneStrength > 0 && Math.abs(y) < 0.5) {
-      brightness *= (1 - dustLaneStrength * 0.7);
+    // Apply enhanced dust lane effects for irregular galaxies
+    let dustFactor = 1.0;
+    if (hasDustLanes && dustLanes.length > 0) {
+      for (const dustLane of dustLanes) {
+        // Calculate distance from point to dust lane (line segment)
+        const laneVector = new THREE.Vector3().subVectors(dustLane.end, dustLane.start);
+        const pointVector = new THREE.Vector3(x, y, z).sub(dustLane.start);
+        
+        // Project point onto lane line
+        const laneLength = laneVector.length();
+        if (laneLength > 0) {
+          const projection = pointVector.dot(laneVector) / (laneLength * laneLength);
+          const clampedProjection = Math.max(0, Math.min(1, projection));
+          
+          // Find closest point on lane
+          const closestPoint = dustLane.start.clone().add(laneVector.clone().multiplyScalar(clampedProjection));
+          const distanceToLane = new THREE.Vector3(x, y, z).distanceTo(closestPoint);
+          
+          // Apply dust effect with asymmetric falloff
+          const effectiveWidth = dustLane.width * (dustAsymmetry + (1 - dustAsymmetry) * rng.next());
+          if (distanceToLane < effectiveWidth) {
+            const falloffFactor = 1.0 - (distanceToLane / effectiveWidth);
+            const cloudiness = 1.0 - dustCloudiness * rng.next(); // Add patchiness
+            const laneFactor = 1.0 - dustLane.strength * Math.pow(falloffFactor, 1.2) * cloudiness;
+            dustFactor = Math.min(dustFactor, laneFactor);
+            
+            // For visual debugging: make dust lanes very obvious
+            if (falloffFactor > 0.6) {
+              dustFactor = Math.min(dustFactor, 0.05); // Extremely dark in dust lane centers
+            }
+          }
+        }
+      }
     }
+    
+    // Apply dust dimming to brightness
+    brightness *= dustFactor;
     
     currentColor.multiplyScalar(brightness);
 

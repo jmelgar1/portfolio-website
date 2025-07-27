@@ -10,7 +10,7 @@ const ExperiencePage = () => {
         </h1>
         <div style={{ fontSize: '1.2rem', lineHeight: '1.8' }}>
           <p style={{ marginBottom: '2rem' }}>
-            My professional journey in software development and the technologies I've mastered along the way.
+            My professional journey in software development and the technologies I&apos;ve mastered along the way.
           </p>
           
           <div style={{ marginBottom: '2rem' }}>

@@ -10,7 +10,7 @@ const AboutPage = () => {
         </h1>
         <div style={{ fontSize: '1.2rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <p style={{ marginBottom: '1.5rem' }}>
-            Welcome! I'm a passionate software developer with expertise in modern web technologies 
+            Welcome! I&apos;m a passionate software developer with expertise in modern web technologies 
             and a love for creating innovative digital experiences.
           </p>
           <p style={{ marginBottom: '1.5rem' }}>
@@ -18,7 +18,7 @@ const AboutPage = () => {
             in React, TypeScript, and Three.js for creating immersive web experiences.
           </p>
           <p>
-            When I'm not coding, you can find me exploring new technologies, contributing to open-source 
+            When I&apos;m not coding, you can find me exploring new technologies, contributing to open-source 
             projects, and continuously learning about the ever-evolving world of software development.
           </p>
         </div>

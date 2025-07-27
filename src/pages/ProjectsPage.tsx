@@ -10,7 +10,7 @@ const ProjectsPage = () => {
         </h1>
         <div style={{ fontSize: '1.2rem', lineHeight: '1.8' }}>
           <p style={{ marginBottom: '2rem' }}>
-            Here are some of the projects I've worked on, showcasing my skills in various technologies 
+            Here are some of the projects I&apos;ve worked on, showcasing my skills in various technologies 
             and problem-solving approaches.
           </p>
           

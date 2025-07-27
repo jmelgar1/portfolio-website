@@ -19,9 +19,7 @@ interface SpaceBackgroundProps {
 
 const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
   const {
-    scrollPosition,
-    scrollToSection,
-    getCurrentSection
+    scrollPosition
   } = useHorizontalScroll(200);
 
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);

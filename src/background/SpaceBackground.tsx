@@ -59,10 +59,7 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
 
         <DebugControls debugInfo={debugInfo} />
         <SocialButtons />
-        <Navigation 
-          getCurrentSection={getCurrentSection}
-          scrollToSection={scrollToSection}
-        />
+        <Navigation />
 
         <div
           className="content-sections"

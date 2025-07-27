@@ -136,8 +136,12 @@ export const useHorizontalScroll = (
       keyScrollInterval.current = null;
     }
 
-    // Update current scroll position directly for section navigation
-    scrollData.current.current = Math.max(0, Math.min(index * 100, maxScroll));
+    // Update both current and previous for instant navigation (no easing)
+    const targetPosition = Math.max(0, Math.min(index * 100, maxScroll));
+    scrollData.current.current = targetPosition;
+    scrollData.current.previous = targetPosition;
+    scrollData.current.rounded = targetPosition;
+    setScrollPosition(targetPosition);
   };
 
   const getCurrentSection = () => Math.floor(scrollPosition / 100);

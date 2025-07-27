@@ -6,125 +6,166 @@ import {
   NUM_STARS
 } from "./config/galaxyConfig";
 import {
-  generateGalaxyShape,
   interpolatePositions,
   interpolateColors
 } from "./utils/galaxyShapes";
+import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
 import { useMousePosition } from "../../context/MouseContext";
 
 interface GalaxyProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: number;
+  onDebugUpdate?: (debugInfo: {
+    type: string;
+    seed: number;
+    width: number;
+    height: number;
+    depth: number;
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+    minZ: number;
+    maxZ: number;
+    totalParticles: number;
+    transformationProgress: number;
+    mouseVelocity: number;
+    isTransforming: boolean;
+  }) => void;
 }
 
 const Galaxy: React.FC<GalaxyProps> = ({
   position = [0, 0, -10],
   rotation = [0, 0, 0],
   scale = 1,
+  onDebugUpdate,
 }) => {
   const { mouseVelocity, isMouseMoving, mousePosition } = useMousePosition();
   const galaxyRef = useRef<THREE.Points>(null);
   const positionAttributeRef = useRef<THREE.BufferAttribute>(null);
   const colorAttributeRef = useRef<THREE.BufferAttribute>(null);
 
-  // Real-time transformation state with randomized targets
+  // Simple transformation state
   const [currentTransformationProgress, setCurrentTransformationProgress] = useState(0);
   const [transformationTarget, setTransformationTarget] = useState<{
     type: GalaxyType;
-    subtype: number;
-  }>({ type: 'spiral', subtype: 0 });
+    seed: number;
+  }>({ type: 'spiral', seed: Math.random() * 100000 });
   const [currentGalaxyState, setCurrentGalaxyState] = useState<{
     type: GalaxyType;
-    subtype: number;
-  }>({ type: 'spiral', subtype: 0 });
+    seed: number;
+  }>({ type: 'spiral', seed: 12345 });
 
-  // Generate multiple subtypes of each galaxy for variety
-  const galaxySubtypes = useMemo(() => {
-    console.log("Generating galaxy subtypes for variety");
-    return {
-      spiral: [
-        generateGalaxyShape("spiral", undefined, 42),   // Tight spiral
-        generateGalaxyShape("spiral", undefined, 157),  // Loose spiral
-        generateGalaxyShape("spiral", undefined, 289),  // Dense core spiral
-        generateGalaxyShape("spiral", undefined, 394),  // Wide arm spiral
-        generateGalaxyShape("spiral", undefined, 512),  // Asymmetric spiral
-      ],
-      elliptical: [
-        generateGalaxyShape("elliptical", undefined, 84),   // Classic elliptical
-        generateGalaxyShape("elliptical", undefined, 217),  // Flattened elliptical
-        generateGalaxyShape("elliptical", undefined, 358),  // Compact elliptical
-        generateGalaxyShape("elliptical", undefined, 463),  // Extended elliptical
-      ],
-      irregular: [
-        generateGalaxyShape("irregular", undefined, 126),  // Multi-cluster
-        generateGalaxyShape("irregular", undefined, 271),  // Sparse irregular
-        generateGalaxyShape("irregular", undefined, 398),  // Dense irregular
-        generateGalaxyShape("irregular", undefined, 543),  // Chaotic irregular
-        generateGalaxyShape("irregular", undefined, 667),  // Asymmetric irregular
-      ],
+  // Simple random galaxy generation (like Minecraft worlds)
+  const generateRandomGalaxy = useMemo(() => {
+    return (type: GalaxyType, seed?: number) => {
+      const galaxySeed = seed || Math.random() * 100000;
+      return generateOptimizedGalaxyShape(type, galaxySeed);
     };
   }, []);
 
-  // Helper to get specific subtype of a galaxy shape
-  const getGalaxySubtype = (type: GalaxyType, subtypeIndex: number) => {
-    const subtypes = galaxySubtypes[type];
-    const cached = subtypes[subtypeIndex];
+  // Simple galaxy cache - just current and target
+  const [currentGalaxy, setCurrentGalaxy] = useState<GalaxyPositions | null>(null);
+  const [targetGalaxy, setTargetGalaxy] = useState<GalaxyPositions | null>(null);
+
+
+  // Simple galaxy generation without complex caching
+  const getGalaxy = (type: GalaxyType, seed: number): GalaxyPositions => {
+    return generateRandomGalaxy(type, seed);
+  };
+
+  // Calculate galaxy bounds and dimensions
+  const calculateGalaxyBounds = (positions: Float32Array) => {
+    if (positions.length === 0) return null;
+
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const y = positions[i + 1];
+      const z = positions[i + 2];
+
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      if (z < minZ) minZ = z;
+      if (z > maxZ) maxZ = z;
+    }
+
     return {
-      positions: new Float32Array(cached.positions),
-      colors: new Float32Array(cached.colors),
+      minX, maxX, minY, maxY, minZ, maxZ,
+      width: maxX - minX,
+      height: maxY - minY,
+      depth: maxZ - minZ
     };
   };
 
-  // Generate random transformation target
-  const generateRandomTarget = () => {
-    const types: GalaxyType[] = ['spiral', 'elliptical', 'irregular'];
-    const randomType = types[Math.floor(Math.random() * types.length)];
-    const subtypeCount = galaxySubtypes[randomType].length;
-    const randomSubtype = Math.floor(Math.random() * subtypeCount);
+  // Simple random target generation (like Minecraft)
+  const generateRandomTarget = () => {    
+    // Truly random galaxy type selection
+    const galaxyTypes: GalaxyType[] = ['spiral', 'elliptical', 'irregular'];
+    const randomIndex = Math.floor(Math.random() * galaxyTypes.length);
+    const selectedType = galaxyTypes[randomIndex];
     
-    return { type: randomType, subtype: randomSubtype };
+    // Just generate a random seed - no uniqueness tracking needed
+    const randomSeed = Math.floor(Math.random() * 100000);
+    
+    return { type: selectedType, seed: randomSeed };
   };
 
-  // Dynamic transformation system with random targets
+  // Simple transformation system
   useEffect(() => {
     if (isMouseMoving) {
       // Generate new random target when starting transformation
       if (currentTransformationProgress === 0) {
-        setTransformationTarget(generateRandomTarget());
+        const newTarget = generateRandomTarget();
+        setTransformationTarget(newTarget);
+        
+        // Pre-generate target galaxy
+        const targetGalaxyData = getGalaxy(newTarget.type, newTarget.seed);
+        setTargetGalaxy(targetGalaxyData);
       }
       
-      // Progress towards random target
+      // Progress towards target
       const progressSpeed = Math.min(mouseVelocity * 0.001, 0.008);
       setCurrentTransformationProgress(prev => {
         const newProgress = prev + progressSpeed;
         
-        // When transformation completes, set new current state and generate new target
+        // When transformation completes
         if (newProgress >= 1.0) {
           setCurrentGalaxyState(transformationTarget);
-          setTransformationTarget(generateRandomTarget());
-          return 0; // Reset progress for next transformation
+          setCurrentGalaxy(targetGalaxy);
+          
+          const nextTarget = generateRandomTarget();
+          setTransformationTarget(nextTarget);
+          
+          return 0; // Reset for next transformation
         }
         
         return newProgress;
       });
     } else {
-      // Mouse stopped - bias toward returning to spiral variants
+      // Mouse stopped - return to spiral
       if (currentGalaxyState.type !== 'spiral') {
         setCurrentTransformationProgress(prev => {
           if (prev > 0) {
             return Math.max(0, prev - 0.003); // Slow return
           } else {
-            // Set target to random spiral subtype when returning to spiral
-            const spiralSubtype = Math.floor(Math.random() * galaxySubtypes.spiral.length);
-            setTransformationTarget({ type: 'spiral', subtype: spiralSubtype });
-            setCurrentTransformationProgress(0.001); // Start very slow return
+            // Generate random spiral when returning
+            const spiralTarget = { type: 'spiral' as GalaxyType, seed: Math.floor(Math.random() * 100000) };
+            setTransformationTarget(spiralTarget);
+            setCurrentTransformationProgress(0.001);
           }
           return prev;
         });
       }
     }
-  }, [isMouseMoving, mouseVelocity, currentGalaxyState, transformationTarget, galaxySubtypes]);
+  }, [isMouseMoving, mouseVelocity, currentGalaxyState, transformationTarget, mousePosition]);
+
 
 
   // Animation frame for real-time transformation
@@ -151,13 +192,13 @@ const Galaxy: React.FC<GalaxyProps> = ({
     }
 
 
-    // Handle random transformation between galaxy subtypes
+    // Handle simple transformation between galaxies
     if (currentTransformationProgress > 0 && 
-        positionAttributeRef.current && colorAttributeRef.current) {
+        positionAttributeRef.current && colorAttributeRef.current &&
+        currentGalaxy && targetGalaxy) {
       
-      // Get current and target galaxy shapes
-      const fromShape = getGalaxySubtype(currentGalaxyState.type, currentGalaxyState.subtype);
-      const toShape = getGalaxySubtype(transformationTarget.type, transformationTarget.subtype);
+      const fromShape = currentGalaxy;
+      const toShape = targetGalaxy;
       
       // Apply gentle easing for smooth transitions
       const progress = currentTransformationProgress;
@@ -193,13 +234,61 @@ const Galaxy: React.FC<GalaxyProps> = ({
       positionAttributeRef.current.needsUpdate = true;
       colorAttributeRef.current.array.set(interpolatedColors);
       colorAttributeRef.current.needsUpdate = true;
+
+      // Update debug info if callback provided
+      if (onDebugUpdate) {
+        const bounds = calculateGalaxyBounds(interpolatedPositions);
+        if (bounds) {
+          onDebugUpdate({
+            type: currentGalaxyState.type,
+            seed: currentGalaxyState.seed,
+            width: bounds.width,
+            height: bounds.height,
+            depth: bounds.depth,
+            minX: bounds.minX,
+            maxX: bounds.maxX,
+            minY: bounds.minY,
+            maxY: bounds.maxY,
+            minZ: bounds.minZ,
+            maxZ: bounds.maxZ,
+            totalParticles: NUM_STARS,
+            transformationProgress: currentTransformationProgress,
+            mouseVelocity: mouseVelocity,
+            isTransforming: isMouseMoving && currentTransformationProgress > 0
+          });
+        }
+      }
+    } else if (onDebugUpdate && positionAttributeRef.current) {
+      // Update debug info for current stable galaxy
+      const positions = positionAttributeRef.current.array as Float32Array;
+      const bounds = calculateGalaxyBounds(positions);
+      if (bounds) {
+        onDebugUpdate({
+          type: currentGalaxyState.type,
+          seed: currentGalaxyState.seed,
+          width: bounds.width,
+          height: bounds.height,
+          depth: bounds.depth,
+          minX: bounds.minX,
+          maxX: bounds.maxX,
+          minY: bounds.minY,
+          maxY: bounds.maxY,
+          minZ: bounds.minZ,
+          maxZ: bounds.maxZ,
+          totalParticles: NUM_STARS,
+          transformationProgress: currentTransformationProgress,
+          mouseVelocity: mouseVelocity,
+          isTransforming: false
+        });
+      }
     }
   });
 
-  const initialShape = useMemo(
-    () => getGalaxySubtype('spiral', 0),
-    [galaxySubtypes],
-  );
+  const initialShape = useMemo(() => {
+    const initialGalaxy = getGalaxy('spiral', 12345);
+    setCurrentGalaxy(initialGalaxy);
+    return initialGalaxy;
+  }, []);
 
   return (
     <group ref={galaxyRef} position={position} rotation={rotation} scale={scale}>
@@ -229,62 +318,115 @@ const Galaxy: React.FC<GalaxyProps> = ({
         />
       </points>
 
-      {/* Create realistic central bulge/cluster */}
+      {/* Create realistic central bulge/cluster with seed-based variation */}
       <points position={[0, 0, 0]}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             args={[(() => {
-              // Generate dense central cluster of stars
-              const coreStars = currentGalaxyState.type === 'elliptical' ? 800 : 
-                               currentGalaxyState.type === 'spiral' ? 600 : 400;
+              // Generate unique central cluster based on galaxy seed
+              const seedVariation = (currentGalaxyState.seed % 100) / 100;
+              const coreStars = currentGalaxyState.type === 'elliptical' ? 
+                               Math.floor(700 + seedVariation * 200) : 
+                               currentGalaxyState.type === 'spiral' ? 
+                               Math.floor(500 + seedVariation * 200) : 
+                               Math.floor(300 + seedVariation * 200);
+              
               const positions = new Float32Array(coreStars * 3);
-              const coreRadius = currentGalaxyState.type === 'elliptical' ? 2.5 : 
-                                currentGalaxyState.type === 'spiral' ? 4.0 : 6.0;
+              const coreRadius = currentGalaxyState.type === 'elliptical' ? 
+                                2.0 + seedVariation * 1.0 : 
+                                currentGalaxyState.type === 'spiral' ? 
+                                3.5 + seedVariation * 1.0 : 
+                                5.5 + seedVariation * 1.0;
+              
+              // Use galaxy seed for consistent but unique core generation
+              const coreRandom = () => {
+                const a = (currentGalaxyState.seed * 9301 + 49297) % 233280;
+                return a / 233280;
+              };
               
               for (let i = 0; i < coreStars; i++) {
                 const i3 = i * 3;
-                // Dense spherical distribution with concentration toward center
-                const phi = Math.random() * Math.PI * 2;
-                const cosTheta = (Math.random() - 0.5) * 2;
+                // Dense spherical distribution with seed-based randomness
+                const phi = coreRandom() * Math.PI * 2;
+                const cosTheta = (coreRandom() - 0.5) * 2;
                 const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
                 
-                // Power distribution for central concentration
-                const r = Math.pow(Math.random(), 2) * coreRadius;
+                // Power distribution with seed variation
+                const r = Math.pow(coreRandom(), 2 + seedVariation * 0.5) * coreRadius;
                 
-                positions[i3] = r * sinTheta * Math.cos(phi) + (Math.random() - 0.5) * 0.1;
-                positions[i3 + 1] = r * cosTheta * 0.3 + (Math.random() - 0.5) * 0.1; // Flattened
-                positions[i3 + 2] = r * sinTheta * Math.sin(phi) + (Math.random() - 0.5) * 0.1;
+                positions[i3] = r * sinTheta * Math.cos(phi) + (coreRandom() - 0.5) * 0.1;
+                positions[i3 + 1] = r * cosTheta * (0.3 + seedVariation * 0.2) + (coreRandom() - 0.5) * 0.1;
+                positions[i3 + 2] = r * sinTheta * Math.sin(phi) + (coreRandom() - 0.5) * 0.1;
               }
               return positions;
             })(), 3]}
-            count={currentGalaxyState.type === 'elliptical' ? 800 : 
-                   currentGalaxyState.type === 'spiral' ? 600 : 400}
+            count={(() => {
+              const seedVariation = (currentGalaxyState.seed % 100) / 100;
+              return currentGalaxyState.type === 'elliptical' ? 
+                     Math.floor(700 + seedVariation * 200) : 
+                     currentGalaxyState.type === 'spiral' ? 
+                     Math.floor(500 + seedVariation * 200) : 
+                     Math.floor(300 + seedVariation * 200);
+            })()}
           />
           <bufferAttribute
             attach="attributes-color"
             args={[(() => {
-              const coreStarCount = currentGalaxyState.type === 'elliptical' ? 800 : 
-                                   currentGalaxyState.type === 'spiral' ? 600 : 400;
+              const seedVariation = (currentGalaxyState.seed % 100) / 100;
+              const coreStarCount = currentGalaxyState.type === 'elliptical' ? 
+                                   Math.floor(700 + seedVariation * 200) : 
+                                   currentGalaxyState.type === 'spiral' ? 
+                                   Math.floor(500 + seedVariation * 200) : 
+                                   Math.floor(300 + seedVariation * 200);
+              
               const colors = new Float32Array(coreStarCount * 3);
-              const coreColor = currentGalaxyState.type === 'spiral' ? 
-                               { r: 1.0, g: 0.84, b: 0.0 } : // Golden
-                               currentGalaxyState.type === 'elliptical' ? 
-                               { r: 1.0, g: 0.65, b: 0.0 } : // Orange
-                               { r: 0.0, g: 1.0, b: 1.0 };   // Cyan
+              
+              // Unique core colors based on galaxy type and seed
+              let coreColor;
+              if (currentGalaxyState.type === 'spiral') {
+                coreColor = { 
+                  r: 1.0 + seedVariation * 0.1, 
+                  g: 0.84 + seedVariation * 0.1, 
+                  b: seedVariation * 0.2 
+                };
+              } else if (currentGalaxyState.type === 'elliptical') {
+                coreColor = { 
+                  r: 1.0 + seedVariation * 0.05, 
+                  g: 0.65 + seedVariation * 0.15, 
+                  b: seedVariation * 0.1 
+                };
+              } else {
+                coreColor = { 
+                  r: seedVariation * 0.3, 
+                  g: 1.0 + seedVariation * 0.1, 
+                  b: 1.0 + seedVariation * 0.1 
+                };
+              }
+              
+              // Use seed-based randomness for consistent colors
+              const coreRandom = () => {
+                const a = (currentGalaxyState.seed * 9301 + 49297) % 233280;
+                return a / 233280;
+              };
               
               for (let i = 0; i < coreStarCount; i++) {
                 const i3 = i * 3;
-                // Add brightness variation
-                const brightness = 0.8 + Math.random() * 0.4;
-                colors[i3] = coreColor.r * brightness;
-                colors[i3 + 1] = coreColor.g * brightness;
-                colors[i3 + 2] = coreColor.b * brightness;
+                const brightness = 0.8 + coreRandom() * 0.4;
+                colors[i3] = Math.min(coreColor.r * brightness, 1.0);
+                colors[i3 + 1] = Math.min(coreColor.g * brightness, 1.0);
+                colors[i3 + 2] = Math.min(coreColor.b * brightness, 1.0);
               }
               return colors;
             })(), 3]}
-            count={currentGalaxyState.type === 'elliptical' ? 800 : 
-                   currentGalaxyState.type === 'spiral' ? 600 : 400}
+            count={(() => {
+              const seedVariation = (currentGalaxyState.seed % 100) / 100;
+              return currentGalaxyState.type === 'elliptical' ? 
+                     Math.floor(700 + seedVariation * 200) : 
+                     currentGalaxyState.type === 'spiral' ? 
+                     Math.floor(500 + seedVariation * 200) : 
+                     Math.floor(300 + seedVariation * 200);
+            })()}
           />
         </bufferGeometry>
         <pointsMaterial

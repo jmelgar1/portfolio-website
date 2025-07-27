@@ -20,12 +20,11 @@ interface DebugInfo {
 }
 
 interface DebugControlsProps {
-  onDebugUpdate: (debugInfo: DebugInfo | null) => void;
+  debugInfo: DebugInfo | null;
 }
 
-const DebugControls = ({ onDebugUpdate }: DebugControlsProps) => {
+const DebugControls = ({ debugInfo }: DebugControlsProps) => {
   const [showDebug, setShowDebug] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
 
   // Add keyboard shortcut for debug toggle (Ctrl+D or Cmd+D)
   useEffect(() => {
@@ -39,13 +38,6 @@ const DebugControls = ({ onDebugUpdate }: DebugControlsProps) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const handleDebugUpdate = (newDebugInfo: DebugInfo | null) => {
-    if (showDebug) {
-      setDebugInfo(newDebugInfo);
-    }
-    onDebugUpdate(newDebugInfo);
-  };
 
   return (
     <>

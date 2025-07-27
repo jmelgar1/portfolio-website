@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import Starfield from "./stars/star-field/Starfield";
 import ShootingStars from "./stars/shooting-star/ShootingStars";
@@ -24,9 +24,12 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
     getCurrentSection
   } = useHorizontalScroll(200);
 
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+
   const handleDebugUpdate = (newDebugInfo: DebugInfo | null) => {
-    // Debug update is now handled by DebugControls component
+    setDebugInfo(newDebugInfo);
   };
+
 
   return (
     <MouseProvider>
@@ -54,7 +57,7 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           </Suspense>
         </Canvas>
 
-        <DebugControls onDebugUpdate={handleDebugUpdate} />
+        <DebugControls debugInfo={debugInfo} />
         <SocialButtons />
         <Navigation 
           getCurrentSection={getCurrentSection}

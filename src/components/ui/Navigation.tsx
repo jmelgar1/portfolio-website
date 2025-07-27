@@ -1,27 +1,34 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useOverlay } from "../../context/OverlayContext";
 import "./Navigation.css";
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const { openOverlay } = useOverlay();
+
+  const handleNavClick = (path: string) => {
+    openOverlay();
+    navigate(path);
+  };
 
   return (
     <nav className="simple-nav">
       <button 
         className="nav-item"
-        onClick={() => navigate('/about')}
+        onClick={() => handleNavClick('/about')}
       >
         ABOUT ME
       </button>
       <button 
         className="nav-item"
-        onClick={() => navigate('/projects')}
+        onClick={() => handleNavClick('/projects')}
       >
         PROJECTS
       </button>
       <button 
         className="nav-item"
-        onClick={() => navigate('/experience')}
+        onClick={() => handleNavClick('/experience')}
       >
         EXPERIENCE
       </button>

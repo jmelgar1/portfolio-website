@@ -11,6 +11,7 @@ import {
 } from "./utils/galaxyShapes";
 import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
 import { useMousePosition } from "../../context/MouseContext";
+import { useOverlay } from "../../context/OverlayContext";
 
 interface GalaxyProps {
   position?: [number, number, number];
@@ -42,6 +43,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
   onDebugUpdate,
 }) => {
   const { mouseVelocity, isMouseMoving, mousePosition } = useMousePosition();
+  const { overlayState, setTransitionPhase } = useOverlay();
   const galaxyRef = useRef<THREE.Points>(null);
   const positionAttributeRef = useRef<THREE.BufferAttribute>(null);
   const colorAttributeRef = useRef<THREE.BufferAttribute>(null);
@@ -68,6 +70,11 @@ const Galaxy: React.FC<GalaxyProps> = ({
   // Simple galaxy cache - just current and target
   const [currentGalaxy, setCurrentGalaxy] = useState<GalaxyPositions | null>(null);
   const [targetGalaxy, setTargetGalaxy] = useState<GalaxyPositions | null>(null);
+
+  // Overlay transition states
+  const [, setExpansionProgress] = useState(0);
+  const [galaxyOpacity, setGalaxyOpacity] = useState(1);
+  const [galaxyScale, setGalaxyScale] = useState(1);
 
 
   // Simple galaxy generation without complex caching
@@ -171,24 +178,52 @@ const Galaxy: React.FC<GalaxyProps> = ({
   // Animation frame for real-time transformation
   useFrame(() => {
     if (galaxyRef.current) {
-      // Base rotation
-      galaxyRef.current.rotation.y += 0.0005;
-      
-      // Spherical rotation based on mouse position
-      // Mouse X controls rotation around Y axis (left-right orbit)
-      // Mouse Y controls rotation around X axis (up-down orbit)
-      const mouseInfluence = 0.6; // Adjust sensitivity
-      
-      // Convert mouse position to rotation angles
-      // mousePosition.x ranges from -1 (left) to 1 (right)
-      // mousePosition.y ranges from -1 (bottom) to 1 (top)
-      const targetRotationY = mousePosition.x * Math.PI * mouseInfluence;
-      const targetRotationX = mousePosition.y * Math.PI * mouseInfluence * 0.5; // Less dramatic vertical movement
-      
-      // Smooth interpolation to target rotation
-      const lerpFactor = 0.02; // Smooth following
-      galaxyRef.current.rotation.y += (targetRotationY - (galaxyRef.current.rotation.y - 0.0005)) * lerpFactor;
-      galaxyRef.current.rotation.x += (targetRotationX - galaxyRef.current.rotation.x) * lerpFactor;
+      // Handle overlay transition animations
+      if (overlayState.transitionPhase === 'expanding') {
+        setExpansionProgress(prev => {
+          const newProgress = Math.min(prev + 0.03, 1);
+          const easeOut = 1 - Math.pow(1 - newProgress, 3); // Cubic ease-out
+          setGalaxyScale(1 + easeOut * 8); // Scale up to 9x size
+          
+          if (newProgress >= 1) {
+            setTransitionPhase('fading');
+          }
+          return newProgress;
+        });
+      } else if (overlayState.transitionPhase === 'fading') {
+        setGalaxyOpacity(prev => {
+          const newOpacity = Math.max(prev - 0.04, 0);
+          if (newOpacity <= 0) {
+            setTransitionPhase('showing');
+          }
+          return newOpacity;
+        });
+      } else if (!overlayState.isOverlayOpen && (galaxyScale > 1 || galaxyOpacity < 1)) {
+        // Reset when overlay is closed - faster animation
+        setGalaxyScale(prev => Math.max(prev - 0.12, 1));
+        setGalaxyOpacity(prev => Math.min(prev + 0.08, 1));
+        setExpansionProgress(0);
+      }
+
+      // Apply scaling to the galaxy group
+      const targetScale = scale * galaxyScale;
+      galaxyRef.current.scale.setScalar(targetScale);
+
+      // Only apply mouse-based rotation when overlay is not open
+      if (!overlayState.isOverlayOpen) {
+        // Base rotation
+        galaxyRef.current.rotation.y += 0.0005;
+        
+        // Spherical rotation based on mouse position
+        const mouseInfluence = 0.6;
+        const targetRotationY = mousePosition.x * Math.PI * mouseInfluence;
+        const targetRotationX = mousePosition.y * Math.PI * mouseInfluence * 0.5;
+        
+        // Smooth interpolation to target rotation
+        const lerpFactor = 0.02;
+        galaxyRef.current.rotation.y += (targetRotationY - (galaxyRef.current.rotation.y - 0.0005)) * lerpFactor;
+        galaxyRef.current.rotation.x += (targetRotationX - galaxyRef.current.rotation.x) * lerpFactor;
+      }
     }
 
 
@@ -313,6 +348,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
           sizeAttenuation={true}
           vertexColors={true}
           transparent={true}
+          opacity={galaxyOpacity}
           alphaTest={0.001}
           depthWrite={false}
         />
@@ -435,8 +471,8 @@ const Galaxy: React.FC<GalaxyProps> = ({
           sizeAttenuation={true}
           vertexColors={true}
           transparent={true}
-          opacity={currentGalaxyState.type === 'elliptical' ? 1.1 : 
-                  currentGalaxyState.type === 'spiral' ? 0.9 : 0.7}
+          opacity={(currentGalaxyState.type === 'elliptical' ? 1.1 : 
+                  currentGalaxyState.type === 'spiral' ? 0.9 : 0.7) * galaxyOpacity}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />

@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import OverlayNavigation from "./OverlayNavigation";
+import { useOverlay } from "../../context/OverlayContext";
 import "./OverlayPage.css";
 
 interface OverlayPageProps {
@@ -9,10 +10,13 @@ interface OverlayPageProps {
 
 const OverlayPage = ({ children }: OverlayPageProps) => {
   const navigate = useNavigate();
+  const { closeOverlay } = useOverlay();
 
   const handleClose = () => {
+    closeOverlay();
     navigate("/");
   };
+
 
   const handleEscapeKey = (e: KeyboardEvent) => {
     if (e.key === "Escape") {

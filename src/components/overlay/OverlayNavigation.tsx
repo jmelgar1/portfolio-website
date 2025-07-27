@@ -12,13 +12,20 @@ const OverlayNavigation = () => {
     { path: "/experience", label: "EXPERIENCE" }
   ];
 
+  const handleNavClick = (path: string) => {
+    if (location.pathname !== path) {
+      // Since overlay is already open, navigate instantly
+      navigate(path);
+    }
+  };
+
   return (
     <nav className="overlay-nav">
       {navItems.map((item) => (
         <button
           key={item.path}
           className={`overlay-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-          onClick={() => navigate(item.path)}
+          onClick={() => handleNavClick(item.path)}
         >
           {item.label}
         </button>

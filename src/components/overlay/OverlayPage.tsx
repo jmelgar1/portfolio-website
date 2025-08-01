@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OverlayNavigation from "./OverlayNavigation";
 import { useOverlay } from "../../context/OverlayContext";
@@ -11,10 +11,20 @@ interface OverlayPageProps {
 const OverlayPage = ({ children }: OverlayPageProps) => {
   const navigate = useNavigate();
   const { closeOverlay } = useOverlay();
+  const [, setCurrentSection] = useState("about");
 
   const handleClose = () => {
     closeOverlay();
     navigate("/");
+  };
+
+  const handleSectionChange = (section: string) => {
+    setCurrentSection(section);
+    // Update the URL to reflect the current section without causing a full navigation
+    const newPath = `/${section}`;
+    if (window.location.pathname !== newPath) {
+      window.history.replaceState(null, '', newPath);
+    }
   };
 
 
@@ -33,7 +43,7 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
     <div className="overlay-page">
       <div className="overlay-background" onClick={handleClose} />
       <div className="overlay-content">
-        <OverlayNavigation />
+        <OverlayNavigation onSectionChange={handleSectionChange} />
         <button className="close-button" onClick={handleClose}>
           ×
         </button>

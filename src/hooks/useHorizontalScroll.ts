@@ -37,6 +37,14 @@ export const useHorizontalScroll = (
     animationFrame.current = requestAnimationFrame(animateScroll);
 
     const handleWheel = (e: WheelEvent) => {
+      // Check if overlay is open by looking for overlay elements
+      const overlayOpen = document.querySelector('.overlay-page') !== null;
+      
+      // If overlay is open, don't prevent default to allow overlay scrolling
+      if (overlayOpen) {
+        return;
+      }
+
       e.preventDefault();
 
       const deltaY = e.deltaY * scrollSensitivity;

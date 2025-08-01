@@ -1,0 +1,47 @@
+.projects-page h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #4da6ff;
+}
+
+.projects-page .content {
+  font-size: 1.2rem;
+  line-height: 1.8;
+}
+
+.projects-page .intro {
+  margin-bottom: 2rem;
+}
+
+.projects-page .project-item {
+  margin-bottom: 2rem;
+}
+
+.projects-page .project-item h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.projects-page .project-item .description {
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.projects-page .tech-tags {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.projects-page .tech-tag {
+  background: rgba(77, 166, 255, 0.2);
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.9rem;
+}
+
+.projects-page .coming-soon {
+  opacity: 0.7;
+  font-style: italic;
+}

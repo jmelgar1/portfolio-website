@@ -1,8 +1,7 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import SpaceBackground from "./background/SpaceBackground";
-import UnifiedOverlayPage from "./pages/UnifiedOverlayPage";
+import UnifiedOverlayPage from "./pages/unified-overlay-page/UnifiedOverlayPage";
 import { OverlayProvider } from "./context/OverlayContext";
 
 function App() {

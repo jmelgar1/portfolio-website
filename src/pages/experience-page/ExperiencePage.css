@@ -1,0 +1,58 @@
+.experience-page h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #4da6ff;
+}
+
+.experience-page .content {
+  font-size: 1.2rem;
+  line-height: 1.8;
+}
+
+.experience-page .intro {
+  margin-bottom: 2rem;
+}
+
+.experience-page .experience-item {
+  margin-bottom: 2rem;
+}
+
+.experience-page .experience-item h3 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.experience-page .experience-item .description {
+  opacity: 0.8;
+  margin-bottom: 1rem;
+}
+
+.experience-page .experience-item ul {
+  margin-left: 1.5rem;
+  opacity: 0.9;
+}
+
+.experience-page .experience-item li {
+  margin-bottom: 0.5rem;
+}
+
+.experience-page .skills-section h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.experience-page .skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.experience-page .skills-grid h4 {
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.experience-page .skills-grid p {
+  opacity: 0.7;
+  font-size: 1rem;
+}

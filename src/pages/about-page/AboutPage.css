@@ -1,0 +1,19 @@
+.about-page h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #4da6ff;
+}
+
+.about-page .content {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  max-width: 800px;
+}
+
+.about-page .content p {
+  margin-bottom: 1.5rem;
+}
+
+.about-page .content p:last-child {
+  margin-bottom: 0;
+}

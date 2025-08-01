@@ -1,0 +1,120 @@
+.unified-overlay-page section {
+  margin-bottom: 2rem;
+  min-height: 100vh;
+}
+
+.unified-overlay-page section:first-child {
+  padding-top: 0.5rem;
+}
+
+.unified-overlay-page section:not(:first-child) {
+  padding-top: 0rem;
+}
+
+.unified-overlay-page section:last-child {
+  margin-bottom: 0;
+}
+
+.unified-overlay-page h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #4da6ff;
+}
+
+.unified-overlay-page .content {
+  font-size: 1.2rem;
+  line-height: 1.8;
+}
+
+.unified-overlay-page .about-content {
+  max-width: 800px;
+}
+
+.unified-overlay-page .content p {
+  margin-bottom: 1.5rem;
+}
+
+.unified-overlay-page .content p:last-child {
+  margin-bottom: 0;
+}
+
+.unified-overlay-page .intro {
+  margin-bottom: 2rem;
+}
+
+.unified-overlay-page .project-item {
+  margin-bottom: 2rem;
+}
+
+.unified-overlay-page .project-item h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.unified-overlay-page .project-item .description {
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.unified-overlay-page .tech-tags {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.unified-overlay-page .tech-tag {
+  background: rgba(77, 166, 255, 0.2);
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.9rem;
+}
+
+.unified-overlay-page .coming-soon {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.unified-overlay-page .experience-item {
+  margin-bottom: 2rem;
+}
+
+.unified-overlay-page .experience-item h3 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.unified-overlay-page .experience-item .description {
+  opacity: 0.8;
+  margin-bottom: 1rem;
+}
+
+.unified-overlay-page .experience-item ul {
+  margin-left: 1.5rem;
+  opacity: 0.9;
+}
+
+.unified-overlay-page .experience-item li {
+  margin-bottom: 0.5rem;
+}
+
+.unified-overlay-page .skills-section h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.unified-overlay-page .skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.unified-overlay-page .skills-grid h4 {
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.unified-overlay-page .skills-grid p {
+  opacity: 0.7;
+  font-size: 1rem;
+}

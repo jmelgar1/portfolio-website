@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OverlayNavigation from "./OverlayNavigation";
-import { useOverlay } from "../../context/OverlayContext";
+import { useOverlay } from "./context/NavigationOverlayContext";
 import "./OverlayPage.css";
 
 interface OverlayPageProps {

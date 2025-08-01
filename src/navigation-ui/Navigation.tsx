@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useOverlay } from "../../context/OverlayContext";
+import { useOverlay } from "../content-ui/context/NavigationOverlayContext";
 import "./Navigation.css";
 
 const Navigation = () => {

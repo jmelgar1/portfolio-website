@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import SpaceBackground from "./background/SpaceBackground";
-import UnifiedOverlayPage from "./pages/unified-overlay-page/UnifiedOverlayPage";
-import { OverlayProvider } from "./context/OverlayContext";
+import PortfolioSections from "./content-ui/portfolio-sections/PortfolioSections";
+import { OverlayProvider } from "./content-ui/context/NavigationOverlayContext";
 
 function App() {
   return (
@@ -11,9 +11,9 @@ function App() {
         <div className="App">
           <SpaceBackground lookAt={[0, 1.4, 0]} />
           <Routes>
-            <Route path="/about" element={<UnifiedOverlayPage />} />
-            <Route path="/projects" element={<UnifiedOverlayPage />} />
-            <Route path="/experience" element={<UnifiedOverlayPage />} />
+            <Route path="/about" element={<PortfolioSections />} />
+            <Route path="/projects" element={<PortfolioSections />} />
+            <Route path="/experience" element={<PortfolioSections />} />
           </Routes>
         </div>
       </Router>

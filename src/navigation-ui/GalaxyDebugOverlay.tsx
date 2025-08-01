@@ -1,6 +1,6 @@
 import React from 'react';
 import './GalaxyDebugOverlay.css';
-import { useFPS } from '../../hooks/useFPS';
+import { useFPS } from '../hooks/useFPS';
 
 interface GalaxyDebugInfo {
   type: string;

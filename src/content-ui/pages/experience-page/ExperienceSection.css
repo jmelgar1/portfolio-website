@@ -1,0 +1,44 @@
+/* Experience Section Styles */
+.experience-item {
+  margin-bottom: 2rem;
+}
+
+.experience-item h3 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.experience-item .description {
+  opacity: 0.8;
+  margin-bottom: 1rem;
+}
+
+.experience-item ul {
+  margin-left: 1.5rem;
+  opacity: 0.9;
+}
+
+.experience-item li {
+  margin-bottom: 0.5rem;
+}
+
+.skills-section h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.skills-grid h4 {
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.skills-grid p {
+  opacity: 0.7;
+  font-size: 1rem;
+}

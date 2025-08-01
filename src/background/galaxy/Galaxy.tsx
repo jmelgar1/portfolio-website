@@ -11,7 +11,7 @@ import {
 } from "./utils/galaxyShapes";
 import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
 import { useMousePosition } from "../../context/MouseContext";
-import { useOverlay } from "../../context/OverlayContext";
+import { useOverlay } from "../../content-ui/context/NavigationOverlayContext";
 
 interface GalaxyProps {
   position?: [number, number, number];

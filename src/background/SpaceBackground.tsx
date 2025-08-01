@@ -3,12 +3,12 @@ import { Canvas } from "@react-three/fiber";
 import Starfield from "./stars/star-field/Starfield";
 import ShootingStars from "./stars/shooting-star/ShootingStars";
 import Galaxy from "./galaxy/Galaxy";
-import MouseCameraController from "../camera-controller/MouseCameraController";
+import MouseCameraController from "./camera-controller/MouseCameraController";
 import { useHorizontalScroll } from "../hooks/useHorizontalScroll";
 import { MouseProvider } from "../context/MouseContext";
-import Navigation from "../components/ui/Navigation";
-import SocialButtons from "../components/ui/SocialButtons";
-import DebugControls, { DebugInfo } from "../components/ui/DebugControls";
+import Navigation from "../navigation-ui/Navigation";
+import SocialButtons from "../navigation-ui/SocialButtons";
+import DebugControls, { DebugInfo } from "../navigation-ui/DebugControls";
 import "./SpaceBackground.css";
 
 interface SpaceBackgroundProps {

@@ -1,6 +1,5 @@
-import React from "react";
-import GithubIcon from "../../assets/icons/github.svg?react";
-import LinkedinIcon from "../../assets/icons/linkedin.svg?react";
+import GithubIcon from "../assets/icons/github.svg?react";
+import LinkedinIcon from "../assets/icons/linkedin.svg?react";
 import "./SocialButtons.css";
 
 const GITHUB_URL = "https://github.com/jmelgar1";

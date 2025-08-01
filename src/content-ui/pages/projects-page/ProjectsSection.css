@@ -1,0 +1,33 @@
+/* Projects Section Styles */
+.project-item {
+  margin-bottom: 2rem;
+}
+
+.project-item h3 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.project-item .description {
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.tech-tags {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tech-tag {
+  background: rgba(77, 166, 255, 0.2);
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.9rem;
+}
+
+.coming-soon {
+  opacity: 0.7;
+  font-style: italic;
+}

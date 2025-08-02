@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OverlayNavigation from "./OverlayNavigation";
 import { useOverlay } from "./context/NavigationOverlayContext";
+import WispBackground3D from "./WispBackground3D";
 import "./OverlayPage.css";
 
 interface OverlayPageProps {
@@ -42,6 +43,7 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   return (
     <div className="overlay-page">
       <div className="overlay-background" onClick={handleClose} />
+      <WispBackground3D />
       <div className="overlay-content">
         <OverlayNavigation onSectionChange={handleSectionChange} />
         <button className="close-button" onClick={handleClose}>

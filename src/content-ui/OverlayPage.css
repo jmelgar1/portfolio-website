@@ -68,8 +68,6 @@
   animation: fadeInOverlay 0.4s ease-out 0.1s forwards;
   /* Ensure smooth scrolling */
   scroll-behavior: smooth;
-  /* Enable momentum scrolling on mobile */
-  -webkit-overflow-scrolling: touch;
 }
 
 

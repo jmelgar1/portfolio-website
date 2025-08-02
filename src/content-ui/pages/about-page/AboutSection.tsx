@@ -9,16 +9,12 @@ const AboutSection = forwardRef<HTMLElement>((props, ref) => {
       </h1>
       <div className="content about-content">
         <p>
-          Welcome! I&apos;m a passionate software developer with expertise in modern web technologies 
-          and a love for creating innovative digital experiences.
+          Hey, I&apos;m Josh! This website is just a cool side project I&apos;m working on to see what can be created 
+          using almost entirely AI (with very minimal coding from me besides fixes and cleanup/organization).
         </p>
         <p>
-          My journey in technology spans across full-stack development, with particular strengths 
-          in React, TypeScript, and Three.js for creating immersive web experiences.
-        </p>
-        <p>
-          When I&apos;m not coding, you can find me exploring new technologies, contributing to open-source 
-          projects, and continuously learning about the ever-evolving world of software development.
+          The site is constantly being worked on and improved, so expect to see new features and 
+          enhancements as I continue experimenting with different AI tools and techniques.
         </p>
       </div>
     </section>

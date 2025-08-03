@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OverlayNavigation from "./OverlayNavigation";
 import { useOverlay } from "./context/NavigationOverlayContext";
-import WispBackground3D from "./WispBackground3D";
 import "./OverlayPage.css";
 
 interface OverlayPageProps {
@@ -11,8 +10,13 @@ interface OverlayPageProps {
 
 const OverlayPage = ({ children }: OverlayPageProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { closeOverlay } = useOverlay();
-  const [, setCurrentSection] = useState("about");
+  // Initialize currentSection based on the current route
+  const [currentSection, setCurrentSection] = useState(() => {
+    const path = location.pathname.slice(1); // Remove leading '/'
+    return ['about', 'projects', 'experience'].includes(path) ? path : 'about';
+  });
 
   const handleClose = () => {
     closeOverlay();
@@ -43,7 +47,6 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   return (
     <div className="overlay-page">
       <div className="overlay-background" onClick={handleClose} />
-      <WispBackground3D />
       <div className="overlay-content">
         <OverlayNavigation onSectionChange={handleSectionChange} />
         <button className="close-button" onClick={handleClose}>

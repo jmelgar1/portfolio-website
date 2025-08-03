@@ -4,7 +4,6 @@ import Starfield from "./stars/star-field/Starfield";
 import ShootingStars from "./stars/shooting-star/ShootingStars";
 import Galaxy from "./galaxy/Galaxy";
 import MouseCameraController from "./camera-controller/MouseCameraController";
-import { useHorizontalScroll } from "../hooks/useHorizontalScroll";
 import { MouseProvider } from "../context/MouseContext";
 import Navigation from "../navigation-ui/Navigation";
 import SocialButtons from "../navigation-ui/SocialButtons";
@@ -18,10 +17,6 @@ interface SpaceBackgroundProps {
 }
 
 const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
-  const {
-    scrollPosition
-  } = useHorizontalScroll(200);
-
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
 
   const handleDebugUpdate = (newDebugInfo: DebugInfo | null) => {
@@ -58,15 +53,6 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
         <DebugControls debugInfo={debugInfo} />
         <SocialButtons />
         <Navigation />
-
-        <div
-          className="content-sections"
-          style={{ transform: `translateX(-${scrollPosition}vw)` }}
-        >
-          {/* <IntroSection />
-          <ProjectsSection />
-          <WorkHistory /> */}
-        </div>
       </div>
     </MouseProvider>
   );

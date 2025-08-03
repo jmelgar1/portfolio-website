@@ -13,7 +13,7 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   const location = useLocation();
   const { closeOverlay } = useOverlay();
   // Initialize currentSection based on the current route
-  const [currentSection, setCurrentSection] = useState(() => {
+  const [, setCurrentSection] = useState(() => {
     const path = location.pathname.slice(1); // Remove leading '/'
     return ['about', 'projects', 'experience'].includes(path) ? path : 'about';
   });

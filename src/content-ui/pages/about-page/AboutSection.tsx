@@ -1,6 +1,7 @@
 import { forwardRef, Suspense } from 'react';
 import { Canvas } from "@react-three/fiber";
 import Starfield from '../../../background/stars/star-field/Starfield';
+import AsteroidBelt from '../../../background/asteroids/AsteroidBelt';
 import './AboutSection.css';
 
 const AboutSection = forwardRef<HTMLElement>((props, ref) => {
@@ -26,6 +27,7 @@ const AboutSection = forwardRef<HTMLElement>((props, ref) => {
               fov={70}
               cameraPosition={{ x: 0, y: 0, z: 0 }}
             />
+            <AsteroidBelt />
             <ambientLight intensity={0.3} />
           </Suspense>
         </Canvas>
@@ -36,12 +38,12 @@ const AboutSection = forwardRef<HTMLElement>((props, ref) => {
         </h1>
         <div className="content about-content">
         <p>
-          Hey, I&apos;m Josh! This website is just a cool side project I&apos;m working on to see what can be created 
-          using almost entirely AI (with very minimal coding from me besides fixes and cleanup/organization).
+          I'm a full-stack software engineer based in Atlanta with over two years of experience developing end-to-end applications in a retail setting. 
+          Recently, I've worked professionally with Angular, Java, C#, Azure, Kubernetes, and PostgreSQL.
         </p>
         <p>
-          The site is constantly being worked on and improved, so expect to see new features and 
-          enhancements as I continue experimenting with different AI tools and techniques.
+          I enjoy the process of building and the satisfaction that comes from connecting the dots in software systems. 
+          Lately, I've been exploring AI, particularly agentic coding, and uncovering new ways to enhance my learning and become a more effective developer.
         </p>
         </div>
       </div>

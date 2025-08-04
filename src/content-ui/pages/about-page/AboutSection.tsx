@@ -15,6 +15,7 @@ const AboutSection = forwardRef<HTMLElement>((props, ref) => {
             alpha: true,
             powerPreference: "high-performance",
           }}
+          style={{ width: '100%', height: '100%' }}
         >
           <Suspense fallback={null}>
             <Starfield 
@@ -22,7 +23,7 @@ const AboutSection = forwardRef<HTMLElement>((props, ref) => {
               starCount={500}
               enableTwinkling={true}
               enableMouseInteraction={false}
-              fov={75}
+              fov={70}
               cameraPosition={{ x: 0, y: 0, z: 0 }}
             />
             <ambientLight intensity={0.3} />

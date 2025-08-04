@@ -46,6 +46,7 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
             <Starfield 
               cameraPosition={{ x: 0, y: 0, z: 0 }} 
               enableMouseInteraction={true}
+              cameraOrientation="y-axis"
             />
             <ShootingStars />
             <ambientLight intensity={0.3} />

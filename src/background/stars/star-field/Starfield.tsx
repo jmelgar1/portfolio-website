@@ -11,6 +11,7 @@ interface StarfieldProps {
   enableMouseInteraction?: boolean;
   fov?: number;
   cameraPosition?: { x: number; y: number; z: number };
+  cameraOrientation?: 'z-axis' | 'y-axis';
 }
 
 const Starfield: React.FC<StarfieldProps> = ({
@@ -20,6 +21,7 @@ const Starfield: React.FC<StarfieldProps> = ({
   enableMouseInteraction = true,
   fov = 40,
   cameraPosition = { x: 0, y: 0, z: 0 },
+  cameraOrientation = 'z-axis',
 }) => {
   // Calculate star counts based on props
   const TOTAL_DEFAULT_STARS = 2875; // 1875 static + 1000 twinkling
@@ -46,7 +48,7 @@ const Starfield: React.FC<StarfieldProps> = ({
     // Create static stars
     const staticPositions = new Float32Array(STATIC_STAR_COUNT * 3);
     for (let i = 0; i < STATIC_STAR_COUNT; i++) {
-      const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition);
+      const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition, cameraOrientation);
       staticPositions[i * 3] = star.x;
       staticPositions[i * 3 + 1] = star.y;
       staticPositions[i * 3 + 2] = star.z;
@@ -62,7 +64,7 @@ const Starfield: React.FC<StarfieldProps> = ({
       for (let g = 0; g < TWINKLE_GROUP_COUNT; g++) {
         const groupPositions = new Float32Array(starsPerGroup * 3);
         for (let i = 0; i < starsPerGroup; i++) {
-          const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition);
+          const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition, cameraOrientation);
           groupPositions[i * 3] = star.x;
           groupPositions[i * 3 + 1] = star.y;
           groupPositions[i * 3 + 2] = star.z;
@@ -77,7 +79,7 @@ const Starfield: React.FC<StarfieldProps> = ({
     }
 
     return { staticPositions, groups };
-  }, [STATIC_STAR_COUNT, TWINKLE_GROUP_COUNT, shouldTwinkle, staticMode, fov]);
+  }, [STATIC_STAR_COUNT, TWINKLE_GROUP_COUNT, shouldTwinkle, staticMode, fov, cameraOrientation]);
 
   // Handle mouse-based movement with parallax effect and twinkling animation
   useFrame(({ clock }) => {
@@ -86,15 +88,29 @@ const Starfield: React.FC<StarfieldProps> = ({
       const sensitivity = 30.0; // Increased parallax sensitivity
 
       // Create parallax effect - move opposite to mouse for depth illusion
-      // Since camera looks down Y-axis: X = left/right, Z = up/down
       const targetX = -mousePosition.x * sensitivity;
-      const targetZ = -mousePosition.y * sensitivity; // Use Z for up/down movement
+      let targetY = 0;
+      let targetZ = 0;
+
+      if (cameraOrientation === 'y-axis') {
+        // Camera looks down Y-axis: X = left/right, Z = up/down
+        targetZ = -mousePosition.y * sensitivity;
+      } else {
+        // Camera looks down Z-axis: X = left/right, Y = up/down
+        targetY = -mousePosition.y * sensitivity;
+      }
 
       // Apply smooth interpolation
       groupRef.current.position.x +=
         (targetX - groupRef.current.position.x) * lerpFactor;
-      groupRef.current.position.z +=
-        (targetZ - groupRef.current.position.z) * lerpFactor;
+      
+      if (cameraOrientation === 'y-axis') {
+        groupRef.current.position.z +=
+          (targetZ - groupRef.current.position.z) * lerpFactor;
+      } else {
+        groupRef.current.position.y +=
+          (targetY - groupRef.current.position.y) * lerpFactor;
+      }
     }
 
     // Update twinkling star opacity for each group

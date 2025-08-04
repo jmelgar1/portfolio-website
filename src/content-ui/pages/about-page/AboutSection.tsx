@@ -28,7 +28,7 @@ const AboutSection = forwardRef<HTMLElement>((props, ref) => {
               cameraPosition={{ x: 0, y: 0, z: 0 }}
             />
             <AsteroidBelt />
-            <ambientLight intensity={0.3} />
+            <ambientLight intensity={0.1} />
           </Suspense>
         </Canvas>
       </div>

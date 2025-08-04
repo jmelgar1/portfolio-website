@@ -298,12 +298,15 @@ const AsteroidBelt: React.FC = () => {
       const size = 0.2 + Math.random() * 0.6; // Random size between 0.2 and 0.8
       const seed = Math.random(); // Unique seed for each asteroid
       
-      // Calculate initial physics position for diagonal path (bottom-left to top-right)
+      // Calculate initial position along diagonal path (bottom-left to top-right)
       const pathProgress = progress;
-      const baseX = -5.5 + (pathProgress * 9.6); // Move from left (-5.5) to right (4.1) - shifted left
-      const xOffset = (Math.random() - 0.5) * 2; // Random X offset between -1 and 1
-      const initialX = baseX + xOffset;
-      const initialY = -pathLength/2 + (progress * pathLength) - 5;
+      const pathStartX = -8; // Far left start
+      const pathEndX = 6;    // Far right end
+      const pathWidth = pathEndX - pathStartX;
+      const xOffset = (Math.random() - 0.5) * 1.5; // Random X offset for path variation
+      
+      const initialX = pathStartX + (pathProgress * pathWidth) + xOffset;
+      const initialY = -pathLength/2 + (progress * pathLength);
       const initialZ = -5;
       
       // Calculate mass based on size (volume-based mass calculation)
@@ -326,10 +329,10 @@ const AsteroidBelt: React.FC = () => {
         moveSpeed: 1.5 + Math.random() * 1.5, // Random move speed between 1.5 and 3.0
         geometry: createAsteroidGeometry(seed, 0.25), // Create unique geometry for each asteroid
         seed,
-        // Physics properties - diagonal movement from bottom-left to top-right
+        // Physics properties - initial movement along diagonal path
         velocity: {
-          x: 1.8 + (Math.random() - 0.5) * 0.3, // Rightward movement with slight variation (reduced for better control)
-          y: 1.2 + Math.random() * 1.0, // Upward movement (reduced for better collision visibility)
+          x: 1.5 + Math.random() * 0.5, // Rightward movement along path
+          y: 1.2 + Math.random() * 0.3, // Upward movement along path
           z: (Math.random() - 0.5) * 0.1, // Slight z movement for depth variation
         },
         position: {
@@ -346,49 +349,34 @@ const AsteroidBelt: React.FC = () => {
 
   useFrame((state, delta) => {
     const pathLength = 30;
-    const pathStart = -pathLength/2;
     const pathEnd = pathLength/2;
-    const boundaryLeft = -8;
-    const boundaryRight = 6;
-    const boundaryFront = -7;
-    const boundaryBack = -3;
     
-    // Update physics for each asteroid
+    // Define diagonal path parameters
+    const pathStartX = -8; // Far left start
+    const pathEndX = 6;    // Far right end
+    
+    // Update each asteroid with straight-line movement
     asteroidData.current.forEach((data) => {
-      // Apply physics-based movement
+      // Apply physics-based movement (straight line unless collision occurs)
       data.position.x += data.velocity.x * delta;
       data.position.y += data.velocity.y * delta;
       data.position.z += data.velocity.z * delta;
       
-      // Apply very light damping only to X and Z to prevent excessive sideways drift
-      // Don't damp Y velocity to maintain upward movement
-      data.velocity.x *= 0.998;
+      // Only apply very light damping to Z to prevent depth drift
       data.velocity.z *= 0.998;
       
-      // Boundary constraints - gentle bounce off walls
-      if (data.position.x < boundaryLeft || data.position.x > boundaryRight) {
-        data.velocity.x *= -0.6; // Gentle bounce
-        data.position.x = Math.max(boundaryLeft, Math.min(boundaryRight, data.position.x));
-      }
-      
-      if (data.position.z < boundaryFront || data.position.z > boundaryBack) {
-        data.velocity.z *= -0.6; // Gentle bounce
-        data.position.z = Math.max(boundaryFront, Math.min(boundaryBack, data.position.z));
-      }
-      
-      // Reset position when asteroid goes above viewport
-      if (data.position.y > pathEnd) {
-        // Reset to bottom-left area maintaining the exact diagonal path
-        data.position.y = pathStart - Math.random() * 2; // Less random stagger
-        // Reset to the original calculated diagonal position for this asteroid using its stored pathProgress
-        const baseX = -5.5 + (data.pathProgress * 9.6); // Use stored pathProgress to maintain diagonal positioning
-        data.position.x = baseX + data.xOffset; // Use original xOffset
-        data.position.z = -5; // Fixed Z position
+      // Reset when asteroid goes off screen (top or right edge) OR if position drifts too far out of bounds
+      if (data.position.y > pathEnd || data.position.x > pathEndX + 2 || 
+          data.position.x < pathStartX - 5 || data.position.y < -30) {
+        // Always spawn in consistent bottom-left area regardless of original path position
+        data.position.x = -8 + Math.random() * 3; // Spawn in left area (-8 to -5)
+        data.position.y = -20 - Math.random() * 5; // Stagger below view (-20 to -25) - FIXED
+        data.position.z = -5;
         
-        // Reset velocity for consistent diagonal movement
-        data.velocity.x = 1.8 + (Math.random() - 0.5) * 0.3; // Restore original rightward movement with variation
-        data.velocity.y = data.moveSpeed; // Use original move speed
-        data.velocity.z = (Math.random() - 0.5) * 0.1; // Slight z movement for depth variation
+        // Reset to straight diagonal velocity
+        data.velocity.x = 1.5 + Math.random() * 0.5; // Consistent rightward
+        data.velocity.y = 1.2 + Math.random() * 0.3; // Consistent upward
+        data.velocity.z = (Math.random() - 0.5) * 0.1;
       }
       
       // Update currentY for backward compatibility

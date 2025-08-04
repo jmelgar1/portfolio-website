@@ -2,6 +2,12 @@ import React from 'react';
 import './GalaxyDebugOverlay.css';
 import { useFPS } from '../hooks/useFPS';
 
+interface CameraInfo {
+  position: [number, number, number];
+  direction: [number, number, number];
+  rotation: [number, number, number];
+}
+
 interface GalaxyDebugInfo {
   type: string;
   seed: number;
@@ -18,6 +24,7 @@ interface GalaxyDebugInfo {
   transformationProgress: number;
   mouseVelocity: number;
   isTransforming: boolean;
+  cameraInfo?: CameraInfo;
 }
 
 interface GalaxyDebugOverlayProps {
@@ -109,6 +116,24 @@ const GalaxyDebugOverlay: React.FC<GalaxyDebugOverlayProps> = ({ debugInfo, visi
         </div>
       </div>
 
+      {debugInfo.cameraInfo && (
+        <div className="debug-section">
+          <h4>Camera</h4>
+          <div className="debug-row">
+            <span className="label">Position:</span>
+            <span className="value">[{debugInfo.cameraInfo.position[0].toFixed(2)}, {debugInfo.cameraInfo.position[1].toFixed(2)}, {debugInfo.cameraInfo.position[2].toFixed(2)}]</span>
+          </div>
+          <div className="debug-row">
+            <span className="label">Direction:</span>
+            <span className="value">[{debugInfo.cameraInfo.direction[0].toFixed(2)}, {debugInfo.cameraInfo.direction[1].toFixed(2)}, {debugInfo.cameraInfo.direction[2].toFixed(2)}]</span>
+          </div>
+          <div className="debug-row">
+            <span className="label">Rotation:</span>
+            <span className="value">[{debugInfo.cameraInfo.rotation[0].toFixed(1)}°, {debugInfo.cameraInfo.rotation[1].toFixed(1)}°, {debugInfo.cameraInfo.rotation[2].toFixed(1)}°]</span>
+          </div>
+        </div>
+      )}
+
       <div className="debug-section">
         <h4>Transformation</h4>
         <div className="debug-row">
@@ -147,3 +172,4 @@ const GalaxyDebugOverlay: React.FC<GalaxyDebugOverlayProps> = ({ debugInfo, visi
 };
 
 export default GalaxyDebugOverlay;
+export type { CameraInfo, GalaxyDebugInfo };

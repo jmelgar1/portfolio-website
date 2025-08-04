@@ -11,7 +11,7 @@ const ShootingStars: React.FC = () => {
   const tempVector = useMemo(() => new Vector3(), []);
 
   const createShootingStar = (): ShootingStar => {
-    const depth = -Math.random() * 150 - 15;
+    const depth = Math.random() * 150 + 15; // Positive Y depth for Y-axis camera
     const bounds = getCanvasBounds(depth);
     const spawnMargin = 2;
 
@@ -63,8 +63,8 @@ const ShootingStars: React.FC = () => {
           return star;
         })
         .filter((star) => {
-          // Remove stars that are out of bounds
-          const bounds = getCanvasBounds(star.position.z);
+          // Remove stars that are out of bounds - use Y position for depth
+          const bounds = getCanvasBounds(star.position.y);
           return !isOutOfBounds(star.position, bounds);
         });
     });

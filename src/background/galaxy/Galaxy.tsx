@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import {
   GalaxyType,
@@ -12,6 +12,7 @@ import {
 import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
 import { useMousePosition } from "../../context/MouseContext";
 import { useOverlay } from "../../content-ui/context/NavigationOverlayContext";
+import type { CameraInfo } from "../../navigation-ui/GalaxyDebugOverlay";
 
 interface GalaxyProps {
   position?: [number, number, number];
@@ -33,6 +34,7 @@ interface GalaxyProps {
     transformationProgress: number;
     mouseVelocity: number;
     isTransforming: boolean;
+    cameraInfo?: CameraInfo;
   }) => void;
 }
 
@@ -44,6 +46,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
 }) => {
   const { mouseVelocity, isMouseMoving, mousePosition } = useMousePosition();
   const { overlayState, setTransitionPhase } = useOverlay();
+  const { camera } = useThree();
   const galaxyRef = useRef<THREE.Points>(null);
   const positionAttributeRef = useRef<THREE.BufferAttribute>(null);
   const colorAttributeRef = useRef<THREE.BufferAttribute>(null);
@@ -80,6 +83,20 @@ const Galaxy: React.FC<GalaxyProps> = ({
   // Simple galaxy generation without complex caching
   const getGalaxy = (type: GalaxyType, seed: number): GalaxyPositions => {
     return generateRandomGalaxy(type, seed);
+  };
+
+  // Helper function to get camera info
+  const getCameraInfo = (): CameraInfo => {
+    const direction = camera.getWorldDirection(new THREE.Vector3());
+    return {
+      position: [camera.position.x, camera.position.y, camera.position.z],
+      direction: [direction.x, direction.y, direction.z],
+      rotation: [
+        camera.rotation.x * 180 / Math.PI,
+        camera.rotation.y * 180 / Math.PI,
+        camera.rotation.z * 180 / Math.PI
+      ]
+    };
   };
 
   // Calculate galaxy bounds and dimensions
@@ -209,18 +226,24 @@ const Galaxy: React.FC<GalaxyProps> = ({
       const targetScale = scale * galaxyScale;
       galaxyRef.current.scale.setScalar(targetScale);
 
-      // Only apply mouse-based rotation when overlay is not open
+      // Only apply rotation when overlay is not open
       if (!overlayState.isOverlayOpen) {
-        // Base rotation
+        // Base rotation - keep the slow Y-axis spin
         galaxyRef.current.rotation.y += 0.0005;
         
         // Spherical rotation based on mouse position
-        const mouseInfluence = 0.6;
-        const targetRotationY = mousePosition.x * Math.PI * mouseInfluence;
-        const targetRotationX = mousePosition.y * Math.PI * mouseInfluence * 0.5;
+        // Mouse X controls rotation around Y axis (left-right orbit)
+        // Mouse Y controls rotation around X axis (up-down orbit)
+        const mouseInfluence = 0.6; // Adjust sensitivity
+        
+        // Convert mouse position to rotation angles (INVERTED)
+        // mousePosition.x ranges from -1 (left) to 1 (right) - now inverted
+        // mousePosition.y ranges from -1 (bottom) to 1 (top) - now inverted
+        const targetRotationY = -mousePosition.x * Math.PI * mouseInfluence;
+        const targetRotationX = -mousePosition.y * Math.PI * mouseInfluence * 0.5; // Less dramatic vertical movement
         
         // Smooth interpolation to target rotation
-        const lerpFactor = 0.02;
+        const lerpFactor = 0.02; // Smooth following
         galaxyRef.current.rotation.y += (targetRotationY - (galaxyRef.current.rotation.y - 0.0005)) * lerpFactor;
         galaxyRef.current.rotation.x += (targetRotationX - galaxyRef.current.rotation.x) * lerpFactor;
       }
@@ -289,7 +312,8 @@ const Galaxy: React.FC<GalaxyProps> = ({
             totalParticles: NUM_STARS,
             transformationProgress: currentTransformationProgress,
             mouseVelocity: mouseVelocity,
-            isTransforming: isMouseMoving && currentTransformationProgress > 0
+            isTransforming: isMouseMoving && currentTransformationProgress > 0,
+            cameraInfo: getCameraInfo()
           });
         }
       }
@@ -313,7 +337,8 @@ const Galaxy: React.FC<GalaxyProps> = ({
           totalParticles: NUM_STARS,
           transformationProgress: currentTransformationProgress,
           mouseVelocity: mouseVelocity,
-          isTransforming: false
+          isTransforming: false,
+          cameraInfo: getCameraInfo()
         });
       }
     }

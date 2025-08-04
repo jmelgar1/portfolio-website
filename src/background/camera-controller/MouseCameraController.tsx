@@ -12,11 +12,14 @@ const MouseCameraController = ({
   useEffect(() => {
     if (lookAt) {
       camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
+    } else {
+      // Set camera to look down the positive Y-axis where stars are positioned
+      camera.lookAt(0, 100, 0);
     }
   }, [camera, lookAt]);
 
   // This component doesn't directly control camera movement anymore
-  // The galaxy itself will rotate based on mouse position
+  // The starfield itself will move based on mouse position
   // Keeping this component for future camera-specific controls
   return null;
 };

@@ -28,7 +28,7 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
     <MouseProvider>
       <div className="space-background">
         <Canvas
-          camera={{ position: [0, 1.5, 1], fov: 40 }}
+          camera={{ position: [0, 0, 0], fov: 40, rotation: [0, 0, 0] }}
           gl={{
             antialias: true,
             alpha: true,
@@ -38,12 +38,15 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
           <Suspense fallback={null}>
             <MouseCameraController lookAt={lookAt} />
             <Galaxy
-              position={[0, -3.5, -40]}
+              position={[0, 50, 0]}
               rotation={[0, 0, 2]}
               scale={1.5}
               onDebugUpdate={handleDebugUpdate}
             />
-            <Starfield />
+            <Starfield 
+              cameraPosition={{ x: 0, y: 0, z: 0 }} 
+              enableMouseInteraction={true}
+            />
             <ShootingStars />
             <ambientLight intensity={0.3} />
             <directionalLight position={[10, 10, 5]} intensity={0.8} />

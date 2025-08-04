@@ -9,7 +9,7 @@ function App() {
     <OverlayProvider>
       <Router>
         <div className="App">
-          <SpaceBackground lookAt={[0, 1.4, 0]} />
+          <SpaceBackground />
           <Routes>
             <Route path="/about" element={<PortfolioSections />} />
             <Route path="/projects" element={<PortfolioSections />} />

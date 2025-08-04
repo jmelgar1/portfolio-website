@@ -16,6 +16,9 @@ interface MouseContextType {
 
 const MouseContext = createContext<MouseContextType | undefined>(undefined);
 
+// Export the context for direct use
+export { MouseContext };
+
 export const useMousePosition = () => {
   const context = useContext(MouseContext);
   if (!context) {

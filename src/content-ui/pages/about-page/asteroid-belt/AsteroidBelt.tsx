@@ -298,8 +298,8 @@ const AsteroidBelt: React.FC = () => {
       const seed = Math.random();
       
       // For initial spawn: distribute along the diagonal path for immediate visibility
-      const diagonalPathStartX = -12;
-      const diagonalPathEndX = 8;
+      const diagonalPathStartX = -10;  // Shifted right by 2 units
+      const diagonalPathEndX = 10;     // Shifted right by 2 units
       const diagonalPathStartY = -22;  // Match new spawn area
       const diagonalPathEndY = 18;
       
@@ -309,7 +309,7 @@ const AsteroidBelt: React.FC = () => {
       const initialZ = -5;
       
       // Calculate velocity for diagonal movement (bottom-left to top-right)
-      const targetAreaX = { min: 4, max: 8 };
+      const targetAreaX = { min: 6, max: 10 }; // Shifted right by 2 units
       const targetAreaY = { min: 12, max: 18 };
       
       const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
@@ -361,8 +361,8 @@ const AsteroidBelt: React.FC = () => {
   useFrame((state, delta) => {
     // Define exit boundaries that match our new spawn/target areas
     const exitTop = 20;      // 5 units above visible area (~15)
-    const exitRight = 10;    // Right of target area  
-    const exitLeft = -15;    // Left of spawn area
+    const exitRight = 12;    // Right of target area (shifted right)
+    const exitLeft = -13;    // Left of spawn area (shifted right)
     const exitBottom = -25;  // Below spawn area
     
     // Update each asteroid with straight-line movement
@@ -380,12 +380,12 @@ const AsteroidBelt: React.FC = () => {
           data.position.x < exitLeft || data.position.y < exitBottom) {
         
         // Define larger spawn area in bottom-left to maintain belt coverage
-        const spawnAreaX = { min: -12, max: -2 }; // Wider 10-unit spawn zone
+        const spawnAreaX = { min: -10, max: 0 }; // Shifted right by 2 units
         const spawnAreaY = { min: -22, max: -18 }; // 3-7 units below visible area
         const spawnAreaZ = -5;
         
         // Target area for diagonal movement (top-right)
-        const targetAreaX = { min: 4, max: 8 }; // Top-right X range
+        const targetAreaX = { min: 6, max: 10 }; // Shifted right by 2 units
         const targetAreaY = { min: 12, max: 18 }; // Top-right Y range
         
         // Generate completely new asteroid properties (treat as new asteroid)

@@ -368,15 +368,59 @@ const AsteroidBelt: React.FC = () => {
       // Reset when asteroid goes off screen (top or right edge) OR if position drifts too far out of bounds
       if (data.position.y > pathEnd || data.position.x > pathEndX + 2 || 
           data.position.x < pathStartX - 5 || data.position.y < -30) {
-        // Always spawn in consistent bottom-left area regardless of original path position
-        data.position.x = -8 + Math.random() * 3; // Spawn in left area (-8 to -5)
-        data.position.y = -20 - Math.random() * 5; // Stagger below view (-20 to -25) - FIXED
-        data.position.z = -5;
         
-        // Reset to straight diagonal velocity
-        data.velocity.x = 1.5 + Math.random() * 0.5; // Consistent rightward
-        data.velocity.y = 1.2 + Math.random() * 0.3; // Consistent upward
-        data.velocity.z = (Math.random() - 0.5) * 0.1;
+        // Define larger spawn area in bottom-left to maintain belt coverage
+        const spawnAreaX = { min: -12, max: -2 }; // Wider 10-unit spawn zone
+        const spawnAreaY = { min: -25, max: -18 }; // Taller 7-unit spawn zone
+        const spawnAreaZ = -5;
+        
+        // Target area for diagonal movement (top-right)
+        const targetAreaX = { min: 4, max: 8 }; // Top-right X range
+        const targetAreaY = { min: 12, max: 18 }; // Top-right Y range
+        
+        // Generate completely new asteroid properties (treat as new asteroid)
+        const newSize = 0.2 + Math.random() * 0.6; // New random size
+        const newSeed = Math.random(); // New unique seed
+        
+        // Calculate new mass based on new size
+        const volume = (4/3) * Math.PI * Math.pow(newSize * 0.25, 3);
+        const density = 2.5;
+        const newMass = volume * density;
+        
+        // Spawn in fixed area with separation
+        const spawnX = spawnAreaX.min + Math.random() * (spawnAreaX.max - spawnAreaX.min);
+        const spawnY = spawnAreaY.min + Math.random() * (spawnAreaY.max - spawnAreaY.min);
+        
+        data.position.x = spawnX;
+        data.position.y = spawnY;
+        data.position.z = spawnAreaZ;
+        
+        // Calculate velocity vector from spawn position to random target in top-right
+        const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
+        const targetY = targetAreaY.min + Math.random() * (targetAreaY.max - targetAreaY.min);
+        
+        // Calculate direction vector
+        const directionX = targetX - spawnX;
+        const directionY = targetY - spawnY;
+        const distance = Math.sqrt(directionX * directionX + directionY * directionY);
+        
+        // Normalize and apply consistent speed
+        const speed = 2.0 + Math.random() * 0.8; // Speed between 2.0 and 2.8
+        data.velocity.x = (directionX / distance) * speed;
+        data.velocity.y = (directionY / distance) * speed;
+        data.velocity.z = (Math.random() - 0.5) * 0.1; // Small z variation
+        
+        // Update all properties to make this a "new" asteroid
+        data.size = newSize;
+        data.seed = newSeed;
+        data.mass = newMass;
+        data.geometry = createAsteroidGeometry(newSeed, 0.25); // Generate new geometry
+        data.rotationSpeed = {
+          x: (Math.random() - 0.5) * 2, // New rotation speeds
+          y: (Math.random() - 0.5) * 2,
+          z: (Math.random() - 0.5) * 2,
+        };
+        data.lastCollisionTime = 0; // Reset collision timer
       }
       
       // Update currentY for backward compatibility

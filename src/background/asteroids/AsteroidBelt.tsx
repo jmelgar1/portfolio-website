@@ -281,7 +281,6 @@ const AsteroidBelt: React.FC = () => {
   // Initialize asteroid data with procedural geometries
   useMemo(() => {
     asteroidData.current = [];
-    const pathLength = 30; // Total path length from bottom to top
     
     // Generate 45 irregular positions along the path
     const positions: number[] = [];
@@ -294,46 +293,58 @@ const AsteroidBelt: React.FC = () => {
     positions.sort((a, b) => a - b); // Ensure they're ordered
     
     for (let i = 0; i < 45; i++) {
-      const progress = positions[i]; // Irregular spacing
-      const size = 0.2 + Math.random() * 0.6; // Random size between 0.2 and 0.8
-      const seed = Math.random(); // Unique seed for each asteroid
+      const progress = positions[i]; // Use irregular spacing for initial distribution
+      const size = 0.2 + Math.random() * 0.6;
+      const seed = Math.random();
       
-      // Calculate initial position along diagonal path (bottom-left to top-right)
-      const pathProgress = progress;
-      const pathStartX = -8; // Far left start
-      const pathEndX = 6;    // Far right end
-      const pathWidth = pathEndX - pathStartX;
-      const xOffset = (Math.random() - 0.5) * 1.5; // Random X offset for path variation
+      // For initial spawn: distribute along the diagonal path for immediate visibility
+      const diagonalPathStartX = -12;
+      const diagonalPathEndX = 8;
+      const diagonalPathStartY = -25;
+      const diagonalPathEndY = 18;
       
-      const initialX = pathStartX + (pathProgress * pathWidth) + xOffset;
-      const initialY = -pathLength/2 + (progress * pathLength);
+      // Position along diagonal path based on progress
+      const initialX = diagonalPathStartX + (progress * (diagonalPathEndX - diagonalPathStartX)) + (Math.random() - 0.5) * 2;
+      const initialY = diagonalPathStartY + (progress * (diagonalPathEndY - diagonalPathStartY)) + (Math.random() - 0.5) * 2;
       const initialZ = -5;
       
-      // Calculate mass based on size (volume-based mass calculation)
-      const volume = (4/3) * Math.PI * Math.pow(size * 0.25, 3); // radius = size * 0.5 / 2
-      const density = 2.5; // Typical asteroid density (g/cm³)
+      // Calculate velocity for diagonal movement (bottom-left to top-right)
+      const targetAreaX = { min: 4, max: 8 };
+      const targetAreaY = { min: 12, max: 18 };
+      
+      const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
+      const targetY = targetAreaY.min + Math.random() * (targetAreaY.max - targetAreaY.min);
+      
+      const directionX = targetX - initialX;
+      const directionY = targetY - initialY;
+      const distance = Math.sqrt(directionX * directionX + directionY * directionY);
+      
+      const speed = 2.0 + Math.random() * 0.8;
+      
+      // Calculate mass based on size
+      const volume = (4/3) * Math.PI * Math.pow(size * 0.25, 3);
+      const density = 2.5;
       const mass = volume * density;
       
       asteroidData.current.push({
         id: i,
-        startX: (i - 6) * 0.8,
-        startY: (i - 6) * 1.2,
+        startX: initialX,
+        startY: initialY,
         currentY: initialY,
         size,
-        xOffset,
+        xOffset: 0,
         rotationSpeed: {
-          x: (Math.random() - 0.5) * 2, // Random rotation speed between -1 and 1
+          x: (Math.random() - 0.5) * 2,
           y: (Math.random() - 0.5) * 2,
           z: (Math.random() - 0.5) * 2,
         },
-        moveSpeed: 1.5 + Math.random() * 1.5, // Random move speed between 1.5 and 3.0
-        geometry: createAsteroidGeometry(seed, 0.25), // Create unique geometry for each asteroid
+        moveSpeed: speed,
+        geometry: createAsteroidGeometry(seed, 0.25),
         seed,
-        // Physics properties - initial movement along diagonal path
         velocity: {
-          x: 1.5 + Math.random() * 0.5, // Rightward movement along path
-          y: 1.2 + Math.random() * 0.3, // Upward movement along path
-          z: (Math.random() - 0.5) * 0.1, // Slight z movement for depth variation
+          x: (directionX / distance) * speed,
+          y: (directionY / distance) * speed,
+          z: (Math.random() - 0.5) * 0.1,
         },
         position: {
           x: initialX,
@@ -342,18 +353,17 @@ const AsteroidBelt: React.FC = () => {
         },
         mass: mass,
         lastCollisionTime: 0,
-        pathProgress: progress, // Store this asteroid's position along the diagonal path
+        pathProgress: progress,
       });
     }
   }, []);
 
   useFrame((state, delta) => {
-    const pathLength = 30;
-    const pathEnd = pathLength/2;
-    
-    // Define diagonal path parameters
-    const pathStartX = -8; // Far left start
-    const pathEndX = 6;    // Far right end
+    // Define exit boundaries that match our new spawn/target areas
+    const exitTop = 20;      // Above target area
+    const exitRight = 10;    // Right of target area  
+    const exitLeft = -15;    // Left of spawn area
+    const exitBottom = -30;  // Below spawn area
     
     // Update each asteroid with straight-line movement
     asteroidData.current.forEach((data) => {
@@ -365,9 +375,9 @@ const AsteroidBelt: React.FC = () => {
       // Only apply very light damping to Z to prevent depth drift
       data.velocity.z *= 0.998;
       
-      // Reset when asteroid goes off screen (top or right edge) OR if position drifts too far out of bounds
-      if (data.position.y > pathEnd || data.position.x > pathEndX + 2 || 
-          data.position.x < pathStartX - 5 || data.position.y < -30) {
+      // Reset when asteroid exits the screen boundaries
+      if (data.position.y > exitTop || data.position.x > exitRight || 
+          data.position.x < exitLeft || data.position.y < exitBottom) {
         
         // Define larger spawn area in bottom-left to maintain belt coverage
         const spawnAreaX = { min: -12, max: -2 }; // Wider 10-unit spawn zone

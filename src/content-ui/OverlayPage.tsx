@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Canvas } from "@react-three/fiber";
 import OverlayNavigation from "./OverlayNavigation";
 import { useOverlay } from "./context/NavigationOverlayContext";
+import Starfield from '../background/stars/star-field/Starfield';
+import AsteroidBelt from './pages/about-page/asteroid-belt/AsteroidBelt';
 import "./OverlayPage.css";
 
 interface OverlayPageProps {
@@ -47,6 +50,30 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   return (
     <div className="overlay-page">
       <div className="overlay-background" onClick={handleClose} />
+      <div className="overlay-starfield-background">
+        <Canvas
+          camera={{ position: [0, 0, 0], fov: 75 }}
+          gl={{
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance",
+          }}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <Suspense fallback={null}>
+            <Starfield 
+              staticMode={false}
+              starCount={800}
+              enableTwinkling={true}
+              enableMouseInteraction={false}
+              fov={70}
+              cameraPosition={{ x: 0, y: 0, z: 0 }}
+            />
+            <AsteroidBelt />
+            <ambientLight intensity={0.1} />
+          </Suspense>
+        </Canvas>
+      </div>
       <div className="overlay-content">
         <OverlayNavigation onSectionChange={handleSectionChange} />
         <button className="close-button" onClick={handleClose}>

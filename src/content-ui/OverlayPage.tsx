@@ -50,37 +50,41 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   return (
     <div className="overlay-page">
       <div className="overlay-background" onClick={handleClose} />
-      <div className="overlay-starfield-background">
-        <Canvas
-          camera={{ position: [0, 0, 0], fov: 75 }}
-          gl={{
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance",
-          }}
-          style={{ width: '100%', height: '100%' }}
-        >
-          <Suspense fallback={null}>
-            <Starfield 
-              staticMode={false}
-              starCount={800}
-              enableTwinkling={true}
-              enableMouseInteraction={false}
-              fov={70}
-              cameraPosition={{ x: 0, y: 0, z: 0 }}
-            />
-            <AsteroidBelt />
-            <ambientLight intensity={0.1} />
-          </Suspense>
-        </Canvas>
-      </div>
       <div className="overlay-content">
         <OverlayNavigation onSectionChange={handleSectionChange} />
         <button className="close-button" onClick={handleClose}>
           ×
         </button>
+        {/* Scrollable content */}
         <div className="page-content">
-          {children}
+          {/* Background that scrolls with content */}
+          <div className="overlay-starfield-background">
+            <Canvas
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              gl={{
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance",
+              }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              <Suspense fallback={null}>
+                <Starfield 
+                  staticMode={false}
+                  starCount={800}
+                  enableTwinkling={true}
+                  enableMouseInteraction={false}
+                  fov={70}
+                  cameraPosition={{ x: 0, y: 0, z: 0 }}
+                />
+                <AsteroidBelt />
+                <ambientLight intensity={0.1} />
+              </Suspense>
+            </Canvas>
+          </div>
+          <div className="page-content-wrapper">
+            {children}
+          </div>
         </div>
       </div>
     </div>

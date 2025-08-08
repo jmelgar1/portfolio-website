@@ -20,6 +20,7 @@
   cursor: pointer;
   opacity: 0;
   animation: fadeInBackground 0.3s ease-out 0.4s forwards;
+  z-index: 0;
 }
 
 .overlay-starfield-background {
@@ -27,9 +28,10 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 300vh;
   z-index: 1;
   pointer-events: none;
+  /* Background scrolls with content and covers all sections */
 }
 
 .overlay-content {
@@ -71,14 +73,23 @@
 
 .page-content {
   flex: 1;
-  padding: 1rem 3rem 3rem 3rem;
+  position: relative;
   overflow-y: auto;
   overflow-x: hidden;
-  color: white;
   opacity: 0;
   animation: fadeInOverlay 0.4s ease-out 0.1s forwards;
   /* Ensure smooth scrolling */
   scroll-behavior: smooth;
+  /* Ensure content appears above background */
+  z-index: 2;
+}
+
+.page-content-wrapper {
+  position: relative;
+  padding: 1rem 3rem 3rem 3rem;
+  color: white;
+  z-index: 3;
+  /* Ensure content is above the background */
 }
 
 

@@ -2,7 +2,7 @@ import GithubIcon from "../assets/icons/github.svg?react";
 import LinkedinIcon from "../assets/icons/linkedin.svg?react";
 import "./SocialButtons.css";
 
-const GITHUB_URL = "https://github.com/jmelgar1";
+const GITHUB_URL = "https://github.com/jmelgar1"; 
 const LINKEDIN_URL = "https://www.linkedin.com/in/josh-melgar/";
 
 const SocialButtons = () => {

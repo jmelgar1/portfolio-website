@@ -277,6 +277,8 @@ function handleCollision(a1: AsteroidData, a2: AsteroidData, currentTime: number
 const AsteroidBelt: React.FC = () => {
   const asteroidRefs = useRef<(THREE.Mesh | null)[]>([]);
   const asteroidData = useRef<AsteroidData[]>([]);
+  const fadeOpacity = useRef(0);
+  const fadeStartTime = useRef<number | null>(null);
   
   // Initialize asteroid data with procedural geometries
   useMemo(() => {
@@ -359,6 +361,25 @@ const AsteroidBelt: React.FC = () => {
   }, []);
 
   useFrame((state, delta) => {
+    // Handle fade-in effect to match content animation timing
+    const elapsedTime = state.clock.elapsedTime;
+    
+    // Initialize fade start time on first frame
+    if (fadeStartTime.current === null) {
+      fadeStartTime.current = elapsedTime;
+    }
+    
+    const fadeDelay = 0.6; // Match the content fade-in delay (0.6s)
+    const fadeDuration = 0.4; // Match the content fade-in duration (0.4s)
+    const timeSinceStart = elapsedTime - fadeStartTime.current;
+    
+    if (timeSinceStart >= fadeDelay) {
+      const fadeProgress = Math.min(1, (timeSinceStart - fadeDelay) / fadeDuration);
+      fadeOpacity.current = fadeProgress;
+    } else {
+      fadeOpacity.current = 0;
+    }
+    
     // Define exit boundaries that match our new spawn/target areas
     const exitTop = 20;      // 5 units above visible area (~15)
     const exitRight = 12;    // Right of target area (shifted right)
@@ -469,6 +490,12 @@ const AsteroidBelt: React.FC = () => {
         asteroid.scale.set(size, size, size);
       }
     });
+    
+    // Update material opacity for fade-in effect
+    if (asteroidMaterial.opacity !== fadeOpacity.current) {
+      asteroidMaterial.opacity = fadeOpacity.current;
+      asteroidMaterial.needsUpdate = true;
+    }
   });
 
   // Create realistic asteroid materials
@@ -477,7 +504,8 @@ const AsteroidBelt: React.FC = () => {
       color: new THREE.Color(0.4, 0.35, 0.3), // Rocky brownish-gray color
       roughness: 0.9, // Very rough surface for realistic asteroid appearance
       metalness: 0.1, // Slight metallic properties for mineral content
-      transparent: false,
+      transparent: true, // Enable transparency for fade effect
+      opacity: 0, // Start invisible
     });
   }, []);
 

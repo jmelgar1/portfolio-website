@@ -142,42 +142,61 @@
 
 /* Job Header */
 .job-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+/* Force reset all paragraph margins within timeline content */
+.timeline-content p,
+.timeline-content .company-name,
+.timeline-content .job-duration,
+.timeline-content .job-location {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-block-start: 0 !important;
+  margin-block-end: 0 !important;
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
 }
 
 .job-title {
   color: #4da6ff;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
   line-height: 1.3;
 }
 
 .job-meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.2rem;
   opacity: 0.9;
 }
 
 .company-name {
   color: #fff;
-  font-weight: 500;
-  font-size: 1.1rem;
-  margin: 0;
+  font-size: 1.2rem;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2;
 }
 
 .job-duration {
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.95rem;
-  margin: 0;
-  font-weight: 500;
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2;
 }
 
 .job-location {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  margin: 0;
+  font-size: 0.95rem;
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2;
 }
 
 /* Responsibilities List */

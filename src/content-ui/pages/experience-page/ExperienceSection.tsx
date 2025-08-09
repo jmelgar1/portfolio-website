@@ -4,7 +4,7 @@ import './ExperienceSection.css';
 const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
   const experiences = [
     {
-      title: "Software Engineer 2",
+      title: "Software Engineer II",
       company: "DICK'S Sporting Goods",
       location: "Remote",
       duration: "October 2024 - Present",
@@ -16,7 +16,7 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
       ]
     },
     {
-      title: "Software Engineer 1",
+      title: "Software Engineer I",
       company: "DICK'S Sporting Goods",
       location: "Remote",
       duration: "May 2023 - October 2024",
@@ -47,17 +47,6 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
         "Created responsive websites using HTML5, CSS3, and JavaScript for diverse client portfolio",
         "Optimized website performance achieving average load times under 2 seconds across all projects",
         "Collaborated with design team to implement pixel-perfect designs and cross-browser compatibility"
-      ]
-    },
-    {
-      title: "Pool Manager & Lifeguard",
-      company: "AMS Pools",
-      location: "Suwanee, Georgia",
-      duration: "May 2018 - September 2020",
-      responsibilities: [
-        "Developed interactive UI components using React and CSS3, improving user interface consistency",
-        "Assisted in migrating legacy jQuery codebase to modern React architecture",
-        "Participated in agile development process and daily standups, gaining experience in team collaboration"
       ]
     }
   ];

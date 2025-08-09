@@ -6,6 +6,7 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
     {
       title: "Software Engineer II",
       company: "DICK'S Sporting Goods",
+      logo: "DSG_LOGO.webp",
       location: "Remote",
       duration: "October 2024 - Present",
       responsibilities: [
@@ -18,6 +19,7 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
     {
       title: "Software Engineer I",
       company: "DICK'S Sporting Goods",
+      logo: "DSG_LOGO.webp",
       location: "Remote",
       duration: "May 2023 - October 2024",
       responsibilities: [
@@ -30,6 +32,7 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
     {
       title: "Network Engineer Intern",
       company: "DICK'S Sporting Goods",
+      logo: "DSG_LOGO.webp",
       location: "Pittsburgh, PA",
       duration: "June 2022 - August 2022",
       responsibilities: [
@@ -41,6 +44,7 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
     {
       title: "Computer Technician",
       company: "eBryIT. Inc",
+      logo: "eBryIT_LOGO.webp",
       location: "Kennesaw, Georgia",
       duration: "June 2021 - October 2021",
       responsibilities: [
@@ -67,6 +71,11 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
             <article key={index} className="timeline-item">
               <div className="timeline-dot" aria-hidden="true"></div>
               <div className="timeline-content">
+                <img 
+                  src={`/company-logos/${experience.logo}`} 
+                  alt={`${experience.company} logo`}
+                  className="company-logo"
+                />
                 <div className="job-header">
                   <h3 className="job-title">{experience.title}</h3>
                   <div className="job-meta">

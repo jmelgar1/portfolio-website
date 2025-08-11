@@ -296,23 +296,23 @@ const AsteroidBelt: React.FC = () => {
     
     for (let i = 0; i < 59; i++) {
       const progress = positions[i]; // Use irregular spacing for initial distribution
-      const size = 0.2 + Math.random() * 0.6;
+      const size = 0.15 + Math.random() * 0.4;
       const seed = Math.random();
       
       // For initial spawn: distribute along the horizontal path for immediate visibility
       const horizontalPathStartX = -25;  // Left side off-screen
       const horizontalPathEndX = 25;     // Right side off-screen
-      const horizontalPathY = 4;         // Center Y position between sections
-      const horizontalPathYVariation = 3; // Y variation range (+/- 1.5 units)
+      const horizontalPathY = 8;         // Center Y position between sections
+      const horizontalPathYVariation = 2; // Y variation range (+/- 1 unit)
       
       // Position along horizontal path based on progress
       const initialX = horizontalPathStartX + (progress * (horizontalPathEndX - horizontalPathStartX)) + (Math.random() - 0.5) * 2;
       const initialY = horizontalPathY + (Math.random() - 0.5) * horizontalPathYVariation;
-      const initialZ = -20;
+      const initialZ = -25;
       
       // Calculate velocity for horizontal movement (left to right)
       const targetAreaX = { min: 20, max: 25 }; // Right side off-screen
-      const targetAreaY = { min: 2.5, max: 5.5 };  // Same general area as path (tighter spread)
+      const targetAreaY = { min: 7, max: 9 };  // Same general area as path (tighter spread)
       
       const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
       const targetY = targetAreaY.min + Math.random() * (targetAreaY.max - targetAreaY.min);
@@ -402,15 +402,15 @@ const AsteroidBelt: React.FC = () => {
         
         // Define larger spawn area on left side to maintain belt coverage
         const spawnAreaX = { min: -25, max: -20 }; // Left side off-screen
-        const spawnAreaY = { min: 2.5, max: 5.5 }; // Horizontal belt Y range (tighter spread)
-        const spawnAreaZ = -20;
+        const spawnAreaY = { min: 7, max: 9 }; // Horizontal belt Y range (tighter spread)
+        const spawnAreaZ = -25;
         
         // Target area for horizontal movement (right side)
         const targetAreaX = { min: 20, max: 25 }; // Right side off-screen
-        const targetAreaY = { min: 2.5, max: 5.5 }; // Same horizontal belt Y range (tighter spread)
+        const targetAreaY = { min: 7, max: 9 }; // Same horizontal belt Y range (tighter spread)
         
         // Generate completely new asteroid properties (treat as new asteroid)
-        const newSize = 0.2 + Math.random() * 0.6; // New random size
+        const newSize = 0.15 + Math.random() * 0.4; // New random size
         const newSeed = Math.random(); // New unique seed
         
         // Calculate new mass based on new size
@@ -516,7 +516,7 @@ const AsteroidBelt: React.FC = () => {
         <mesh 
           key={i}
           ref={(el) => (asteroidRefs.current[i] = el)}
-          position={[0, 0, -20]} // Initial position, will be updated in useFrame
+          position={[0, 0, -25]} // Initial position, will be updated in useFrame
           geometry={asteroidData.current[i].geometry}
           material={asteroidMaterial}
         />

@@ -57,6 +57,8 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
         </button>
         {/* Scrollable content */}
         <div className="page-content">
+          {/* Atmospheric gradient background */}
+          <div className="atmospheric-gradient-background"></div>
           {/* Background that scrolls with content */}
           <div className="overlay-starfield-background">
             <Canvas
@@ -74,7 +76,7 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                   starCount={800}
                   enableTwinkling={true}
                   enableMouseInteraction={false}
-                  fov={70}
+                  fov={10}
                   cameraPosition={{ x: 0, y: 0, z: 0 }}
                 />
                 <AsteroidBelt />

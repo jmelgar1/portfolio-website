@@ -15,12 +15,34 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: #000000;
+  height: 200vh;
   cursor: pointer;
   opacity: 0;
   animation: fadeInBackground 0.3s ease-out 0.4s forwards;
+  z-index: 0.5;
+}
+
+.atmospheric-gradient-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 500vh; /* Extended to cover all content fully */
+  /* Space to atmosphere gradient - blue reaches bottom of scroll */
+  background: linear-gradient(
+    to bottom,
+    #000000 0%,           /* Deep space black - About section top */
+    #000000 25%,          /* Stay in deep space through most of About */
+    #1a1a3a 35%,          /* First atmospheric glow */
+    #2a2a5a 45%,          /* Upper atmosphere blue tint */
+    #3a4a7a 55%,          /* Mid atmosphere blue - Projects area */
+    #4a6a9a 65%,          /* Lower atmosphere blue */
+    #5a7aba 75%,          /* Atmospheric blue - Experience area */
+    #6a8ada 85%,          /* Bright sky blue */
+    #87ceeb 100%          /* Maintain blue to very bottom */
+  );
   z-index: 0;
+  pointer-events: none;
 }
 
 .overlay-starfield-background {
@@ -28,7 +50,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 300vh;
+  height: 500vh;
   z-index: 1;
   pointer-events: none;
   /* Background scrolls with content and covers all sections */

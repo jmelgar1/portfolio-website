@@ -45,7 +45,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
   onDebugUpdate,
 }) => {
   const { mouseVelocity, isMouseMoving, mousePosition } = useMousePosition();
-  const { overlayState, setTransitionPhase } = useOverlay();
+  const { overlayState, setTransitionPhase, preserveGalaxyState } = useOverlay();
   const { camera } = useThree();
   const galaxyRef = useRef<THREE.Points>(null);
   const positionAttributeRef = useRef<THREE.BufferAttribute>(null);
@@ -75,9 +75,12 @@ const Galaxy: React.FC<GalaxyProps> = ({
   const [targetGalaxy, setTargetGalaxy] = useState<GalaxyPositions | null>(null);
 
   // Overlay transition states
-  const [, setExpansionProgress] = useState(0);
+  const [expansionProgress, setExpansionProgress] = useState(0);
   const [galaxyOpacity, setGalaxyOpacity] = useState(1);
   const [galaxyScale, setGalaxyScale] = useState(1);
+
+  // Track if component is mounting from preserved state
+  const [isRestoringFromPreserved, setIsRestoringFromPreserved] = useState(false);
 
 
   // Simple galaxy generation without complex caching
@@ -211,13 +214,36 @@ const Galaxy: React.FC<GalaxyProps> = ({
         setGalaxyOpacity(prev => {
           const newOpacity = Math.max(prev - 0.04, 0);
           if (newOpacity <= 0) {
+            // Capture galaxy state before transitioning to 'showing'
+            const stateToPreserve = {
+              scale: galaxyScale,
+              opacity: 0, // Will be at 0 when fully faded
+              position: position as [number, number, number],
+              rotation: galaxyRef.current ? 
+                [galaxyRef.current.rotation.x, galaxyRef.current.rotation.y, galaxyRef.current.rotation.z] as [number, number, number] :
+                rotation as [number, number, number],
+              mousePosition: { ...mousePosition },
+              currentGalaxyState: { ...currentGalaxyState },
+              transformationProgress: currentTransformationProgress,
+              transformationTarget: { ...transformationTarget },
+              expansionProgress: expansionProgress
+            };
+            
+            preserveGalaxyState(stateToPreserve);
             setTransitionPhase('showing');
           }
           return newOpacity;
         });
       } else if (!overlayState.isOverlayOpen && (galaxyScale > 1 || galaxyOpacity < 1)) {
         // Reset when overlay is closed - faster animation
-        setGalaxyScale(prev => Math.max(prev - 0.12, 1));
+        setGalaxyScale(prev => {
+          const newScale = Math.max(prev - 0.12, 1);
+          // Clear restoration flag when scale reaches normal
+          if (newScale === 1 && isRestoringFromPreserved) {
+            setIsRestoringFromPreserved(false);
+          }
+          return newScale;
+        });
         setGalaxyOpacity(prev => Math.min(prev + 0.08, 1));
         setExpansionProgress(0);
       }
@@ -344,11 +370,39 @@ const Galaxy: React.FC<GalaxyProps> = ({
     }
   });
 
+  // Initialize galaxy with preserved state or default
   const initialShape = useMemo(() => {
-    const initialGalaxy = getGalaxy('spiral', 12345);
-    setCurrentGalaxy(initialGalaxy);
-    return initialGalaxy;
-  }, []);
+    // Check if we have preserved state to restore from
+    if (overlayState.preservedGalaxyState) {
+      const preserved = overlayState.preservedGalaxyState;
+      
+      // Restore galaxy state
+      setCurrentGalaxyState(preserved.currentGalaxyState);
+      setTransformationTarget(preserved.transformationTarget);
+      setCurrentTransformationProgress(preserved.transformationProgress);
+      setExpansionProgress(preserved.expansionProgress);
+      setGalaxyScale(preserved.scale);
+      setGalaxyOpacity(preserved.opacity);
+      setIsRestoringFromPreserved(true);
+      
+      // Generate galaxy from preserved state
+      const restoredGalaxy = getGalaxy(preserved.currentGalaxyState.type, preserved.currentGalaxyState.seed);
+      setCurrentGalaxy(restoredGalaxy);
+      
+      // Also generate target galaxy if transformation was in progress
+      if (preserved.transformationProgress > 0) {
+        const restoredTargetGalaxy = getGalaxy(preserved.transformationTarget.type, preserved.transformationTarget.seed);
+        setTargetGalaxy(restoredTargetGalaxy);
+      }
+      
+      return restoredGalaxy;
+    } else {
+      // Default initialization
+      const initialGalaxy = getGalaxy('spiral', 12345);
+      setCurrentGalaxy(initialGalaxy);
+      return initialGalaxy;
+    }
+  }, [overlayState.preservedGalaxyState]);
 
   return (
     <group ref={galaxyRef} position={position} rotation={rotation} scale={scale}>

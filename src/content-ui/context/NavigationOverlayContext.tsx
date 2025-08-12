@@ -1,10 +1,30 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 
+interface PreservedGalaxyState {
+  scale: number;
+  opacity: number;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  mousePosition: { x: number; y: number };
+  // Galaxy-specific state
+  currentGalaxyState: {
+    type: 'spiral' | 'elliptical' | 'irregular';
+    seed: number;
+  };
+  transformationProgress: number;
+  transformationTarget: {
+    type: 'spiral' | 'elliptical' | 'irregular';
+    seed: number;
+  };
+  expansionProgress: number;
+}
+
 interface OverlayState {
   isOverlayOpen: boolean;
   isTransitioning: boolean;
   transitionPhase: 'idle' | 'expanding' | 'fading' | 'showing';
   isInitialOpen: boolean;
+  preservedGalaxyState?: PreservedGalaxyState;
 }
 
 interface OverlayContextType {
@@ -12,6 +32,8 @@ interface OverlayContextType {
   openOverlay: () => void;
   closeOverlay: () => void;
   setTransitionPhase: (phase: OverlayState['transitionPhase']) => void;
+  preserveGalaxyState: (state: PreservedGalaxyState) => void;
+  clearPreservedState: () => void;
 }
 
 const OverlayContext = createContext<OverlayContextType | undefined>(undefined);
@@ -29,7 +51,8 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isOverlayOpen: false,
     isTransitioning: false,
     transitionPhase: 'idle',
-    isInitialOpen: true
+    isInitialOpen: true,
+    preservedGalaxyState: undefined
   });
 
   const openOverlay = useCallback(() => {
@@ -42,12 +65,13 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const closeOverlay = useCallback(() => {
-    setOverlayState({
+    setOverlayState(prev => ({
       isOverlayOpen: false,
-      isTransitioning: false,
+      isTransitioning: prev.transitionPhase !== 'idle', // Only transitioning if not already idle
       transitionPhase: 'idle',
-      isInitialOpen: true
-    });
+      isInitialOpen: true,
+      preservedGalaxyState: prev.preservedGalaxyState // Keep preserved state for potential reopening
+    }));
   }, []);
 
   const setTransitionPhase = useCallback((phase: OverlayState['transitionPhase']) => {
@@ -59,12 +83,28 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }));
   }, []);
 
+  const preserveGalaxyState = useCallback((state: PreservedGalaxyState) => {
+    setOverlayState(prev => ({
+      ...prev,
+      preservedGalaxyState: state
+    }));
+  }, []);
+
+  const clearPreservedState = useCallback(() => {
+    setOverlayState(prev => ({
+      ...prev,
+      preservedGalaxyState: undefined
+    }));
+  }, []);
+
   return (
     <OverlayContext.Provider value={{
       overlayState,
       openOverlay,
       closeOverlay,
-      setTransitionPhase
+      setTransitionPhase,
+      preserveGalaxyState,
+      clearPreservedState
     }}>
       {children}
     </OverlayContext.Provider>

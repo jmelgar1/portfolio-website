@@ -9,13 +9,19 @@ function AppContent() {
   const { overlayState } = useOverlay();
   
   // Conditionally render SpaceBackground based on overlay state
-  // Render when:
-  // 1. Overlay is closed (normal 3D background)
-  // 2. Overlay is transitioning (opening or closing animations)
-  // 3. NOT when overlay is showing (performance optimization)
-  const shouldRenderBackground = !overlayState.isOverlayOpen || 
-                                overlayState.isTransitioning || 
-                                overlayState.transitionPhase !== 'showing';
+  // ONLY render when:
+  // 1. Overlay is closed (transitionPhase === 'idle') 
+  // 2. Overlay is transitioning (expanding/fading phases)
+  // NEVER render when overlay is showing (GPU optimization)
+  const shouldRenderBackground = overlayState.transitionPhase !== 'showing';
+
+  // Debug logging for GPU optimization tracking
+  console.log('🖥️ SpaceBackground render decision:', {
+    shouldRender: shouldRenderBackground,
+    transitionPhase: overlayState.transitionPhase,
+    isTransitioning: overlayState.isTransitioning,
+    isOverlayOpen: overlayState.isOverlayOpen
+  });
   
   return (
     <Router>

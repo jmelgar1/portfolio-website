@@ -10,6 +10,7 @@ import {
   interpolateColors
 } from "./utils/galaxyShapes";
 import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
+import { FastSeededRandom } from "./utils/FastSeededRandom";
 import { useMousePosition } from "../../context/MouseContext";
 import { useOverlay } from "../../content-ui/context/NavigationOverlayContext";
 import type { CameraInfo } from "../../navigation-ui/GalaxyDebugOverlay";
@@ -81,11 +82,92 @@ const Galaxy: React.FC<GalaxyProps> = ({
 
   // Track if component is mounting from preserved state
   const [isRestoringFromPreserved, setIsRestoringFromPreserved] = useState(false);
+  
+  // Store preserved snapshot data
+  const [preservedCentralCoreData, setPreservedCentralCoreData] = useState<{
+    positions: Float32Array;
+    colors: Float32Array;
+    starCount: number;
+  } | null>(null);
 
 
-  // Simple galaxy generation without complex caching
+  // Galaxy generation with optional snapshot restoration
   const getGalaxy = (type: GalaxyType, seed: number): GalaxyPositions => {
     return generateRandomGalaxy(type, seed);
+  };
+
+  // Create galaxy from snapshot data (exact restoration)
+  const createGalaxyFromSnapshot = (snapshotData: { positions: number[]; colors: number[] }): GalaxyPositions => {
+    return {
+      positions: new Float32Array(snapshotData.positions),
+      colors: new Float32Array(snapshotData.colors)
+    };
+  };
+
+  // Generate central core data with proper seeded RNG
+  const generateCentralCoreData = (galaxyType: 'spiral' | 'elliptical' | 'irregular', seed: number) => {
+    const rng = new FastSeededRandom(seed);
+    const seedVariation = (seed % 100) / 100;
+    
+    // Calculate star count based on galaxy type
+    const coreStarCount = galaxyType === 'elliptical' ? 
+                         Math.floor(700 + seedVariation * 200) : 
+                         galaxyType === 'spiral' ? 
+                         Math.floor(500 + seedVariation * 200) : 
+                         Math.floor(300 + seedVariation * 200);
+    
+    // Generate positions
+    const positions = new Float32Array(coreStarCount * 3);
+    const coreRadius = galaxyType === 'elliptical' ? 
+                      2.0 + seedVariation * 1.0 : 
+                      galaxyType === 'spiral' ? 
+                      3.5 + seedVariation * 1.0 : 
+                      5.5 + seedVariation * 1.0;
+    
+    for (let i = 0; i < coreStarCount; i++) {
+      const i3 = i * 3;
+      const phi = rng.next() * Math.PI * 2;
+      const cosTheta = (rng.next() - 0.5) * 2;
+      const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
+      const r = Math.pow(rng.next(), 2 + seedVariation * 0.5) * coreRadius;
+      
+      positions[i3] = r * sinTheta * Math.cos(phi) + (rng.next() - 0.5) * 0.1;
+      positions[i3 + 1] = r * cosTheta * (0.3 + seedVariation * 0.2) + (rng.next() - 0.5) * 0.1;
+      positions[i3 + 2] = r * sinTheta * Math.sin(phi) + (rng.next() - 0.5) * 0.1;
+    }
+    
+    // Generate colors
+    const colors = new Float32Array(coreStarCount * 3);
+    let coreColor;
+    if (galaxyType === 'spiral') {
+      coreColor = { 
+        r: 1.0 + seedVariation * 0.1, 
+        g: 0.84 + seedVariation * 0.1, 
+        b: seedVariation * 0.2 
+      };
+    } else if (galaxyType === 'elliptical') {
+      coreColor = { 
+        r: 1.0 + seedVariation * 0.05, 
+        g: 0.65 + seedVariation * 0.15, 
+        b: seedVariation * 0.1 
+      };
+    } else {
+      coreColor = { 
+        r: seedVariation * 0.3, 
+        g: 1.0 + seedVariation * 0.1, 
+        b: 1.0 + seedVariation * 0.1 
+      };
+    }
+    
+    for (let i = 0; i < coreStarCount; i++) {
+      const i3 = i * 3;
+      const brightness = 0.8 + rng.next() * 0.4;
+      colors[i3] = Math.min(coreColor.r * brightness, 1.0);
+      colors[i3 + 1] = Math.min(coreColor.g * brightness, 1.0);
+      colors[i3 + 2] = Math.min(coreColor.b * brightness, 1.0);
+    }
+    
+    return { positions, colors, starCount: coreStarCount };
   };
 
   // Helper function to get camera info
@@ -214,7 +296,50 @@ const Galaxy: React.FC<GalaxyProps> = ({
         setGalaxyOpacity(prev => {
           const newOpacity = Math.max(prev - 0.04, 0);
           if (newOpacity <= 0) {
-            // Capture galaxy state before transitioning to 'showing'
+            console.log('🎯 Capturing galaxy snapshot immediately (opacity reached 0):', {
+              galaxyType: currentGalaxyState.type,
+              seed: currentGalaxyState.seed,
+              transformationProgress: currentTransformationProgress,
+              mouseMoving: isMouseMoving,
+              bufferSizes: {
+                positions: positionAttributeRef.current?.array.length || 0,
+                colors: colorAttributeRef.current?.array.length || 0
+              }
+            });
+
+            // Capture complete galaxy snapshot before transitioning to 'showing'
+            const captureGalaxySnapshot = () => {
+              // Capture main galaxy data from current buffer attributes
+              const mainPositions = positionAttributeRef.current ? 
+                Array.from(positionAttributeRef.current.array as Float32Array) : [];
+              const mainColors = colorAttributeRef.current ? 
+                Array.from(colorAttributeRef.current.array as Float32Array) : [];
+              
+              // Generate central core data using proper seeded RNG (same as render)
+              const coreData = generateCentralCoreData(currentGalaxyState.type, currentGalaxyState.seed);
+
+              return {
+                mainGalaxy: {
+                  positions: mainPositions,
+                  colors: mainColors
+                },
+                centralCore: {
+                  positions: Array.from(coreData.positions),
+                  colors: Array.from(coreData.colors),
+                  starCount: coreData.starCount
+                },
+                // Capture current and target galaxy data for transformation state
+                currentGalaxyData: currentGalaxy ? {
+                  positions: Array.from(currentGalaxy.positions),
+                  colors: Array.from(currentGalaxy.colors)
+                } : null,
+                targetGalaxyData: targetGalaxy ? {
+                  positions: Array.from(targetGalaxy.positions),
+                  colors: Array.from(targetGalaxy.colors)
+                } : null
+              };
+            };
+
             const stateToPreserve = {
               scale: galaxyScale,
               opacity: 0, // Will be at 0 when fully faded
@@ -226,7 +351,8 @@ const Galaxy: React.FC<GalaxyProps> = ({
               currentGalaxyState: { ...currentGalaxyState },
               transformationProgress: currentTransformationProgress,
               transformationTarget: { ...transformationTarget },
-              expansionProgress: expansionProgress
+              expansionProgress: expansionProgress,
+              galaxySnapshot: captureGalaxySnapshot()
             };
             
             preserveGalaxyState(stateToPreserve);
@@ -238,9 +364,10 @@ const Galaxy: React.FC<GalaxyProps> = ({
         // Reset when overlay is closed - faster animation
         setGalaxyScale(prev => {
           const newScale = Math.max(prev - 0.12, 1);
-          // Clear restoration flag when scale reaches normal
+          // Clear restoration flag and preserved data when scale reaches normal
           if (newScale === 1 && isRestoringFromPreserved) {
             setIsRestoringFromPreserved(false);
+            setPreservedCentralCoreData(null);
           }
           return newScale;
         });
@@ -370,11 +497,25 @@ const Galaxy: React.FC<GalaxyProps> = ({
     }
   });
 
-  // Initialize galaxy with preserved state or default
+  // Initialize galaxy with preserved snapshot or default
   const initialShape = useMemo(() => {
-    // Check if we have preserved state to restore from
-    if (overlayState.preservedGalaxyState) {
+    // Check if we have preserved snapshot to restore from
+    if (overlayState.preservedGalaxyState?.galaxySnapshot) {
       const preserved = overlayState.preservedGalaxyState;
+      const snapshot = preserved.galaxySnapshot;
+      
+      console.log('🔄 Restoring galaxy from snapshot:', {
+        galaxyType: preserved.currentGalaxyState.type,
+        seed: preserved.currentGalaxyState.seed,
+        snapshotSizes: {
+          mainPositions: snapshot.mainGalaxy.positions.length,
+          mainColors: snapshot.mainGalaxy.colors.length,
+          corePositions: snapshot.centralCore.positions.length,
+          coreColors: snapshot.centralCore.colors.length,
+          coreStarCount: snapshot.centralCore.starCount
+        },
+        transformationProgress: preserved.transformationProgress
+      });
       
       // Restore galaxy state
       setCurrentGalaxyState(preserved.currentGalaxyState);
@@ -385,14 +526,23 @@ const Galaxy: React.FC<GalaxyProps> = ({
       setGalaxyOpacity(preserved.opacity);
       setIsRestoringFromPreserved(true);
       
-      // Generate galaxy from preserved state
-      const restoredGalaxy = getGalaxy(preserved.currentGalaxyState.type, preserved.currentGalaxyState.seed);
+      // Restore galaxy from exact snapshot data
+      const restoredGalaxy = createGalaxyFromSnapshot(snapshot.mainGalaxy);
       setCurrentGalaxy(restoredGalaxy);
       
-      // Also generate target galaxy if transformation was in progress
-      if (preserved.transformationProgress > 0) {
-        const restoredTargetGalaxy = getGalaxy(preserved.transformationTarget.type, preserved.transformationTarget.seed);
-        setTargetGalaxy(restoredTargetGalaxy);
+      // Set preserved central core data
+      setPreservedCentralCoreData({
+        positions: new Float32Array(snapshot.centralCore.positions),
+        colors: new Float32Array(snapshot.centralCore.colors),
+        starCount: snapshot.centralCore.starCount
+      });
+      
+      // Restore transformation galaxies if they exist
+      if (snapshot.currentGalaxyData) {
+        setCurrentGalaxy(createGalaxyFromSnapshot(snapshot.currentGalaxyData));
+      }
+      if (snapshot.targetGalaxyData && preserved.transformationProgress > 0) {
+        setTargetGalaxy(createGalaxyFromSnapshot(snapshot.targetGalaxyData));
       }
       
       return restoredGalaxy;
@@ -433,114 +583,41 @@ const Galaxy: React.FC<GalaxyProps> = ({
         />
       </points>
 
-      {/* Create realistic central bulge/cluster with seed-based variation */}
+      {/* Create realistic central bulge/cluster from snapshot or generate new */}
       <points position={[0, 0, 0]}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
             args={[(() => {
-              // Generate unique central cluster based on galaxy seed
-              const seedVariation = (currentGalaxyState.seed % 100) / 100;
-              const coreStars = currentGalaxyState.type === 'elliptical' ? 
-                               Math.floor(700 + seedVariation * 200) : 
-                               currentGalaxyState.type === 'spiral' ? 
-                               Math.floor(500 + seedVariation * 200) : 
-                               Math.floor(300 + seedVariation * 200);
-              
-              const positions = new Float32Array(coreStars * 3);
-              const coreRadius = currentGalaxyState.type === 'elliptical' ? 
-                                2.0 + seedVariation * 1.0 : 
-                                currentGalaxyState.type === 'spiral' ? 
-                                3.5 + seedVariation * 1.0 : 
-                                5.5 + seedVariation * 1.0;
-              
-              // Use galaxy seed for consistent but unique core generation
-              const coreRandom = () => {
-                const a = (currentGalaxyState.seed * 9301 + 49297) % 233280;
-                return a / 233280;
-              };
-              
-              for (let i = 0; i < coreStars; i++) {
-                const i3 = i * 3;
-                // Dense spherical distribution with seed-based randomness
-                const phi = coreRandom() * Math.PI * 2;
-                const cosTheta = (coreRandom() - 0.5) * 2;
-                const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
-                
-                // Power distribution with seed variation
-                const r = Math.pow(coreRandom(), 2 + seedVariation * 0.5) * coreRadius;
-                
-                positions[i3] = r * sinTheta * Math.cos(phi) + (coreRandom() - 0.5) * 0.1;
-                positions[i3 + 1] = r * cosTheta * (0.3 + seedVariation * 0.2) + (coreRandom() - 0.5) * 0.1;
-                positions[i3 + 2] = r * sinTheta * Math.sin(phi) + (coreRandom() - 0.5) * 0.1;
+              // Use preserved positions if available, otherwise generate with proper RNG
+              if (preservedCentralCoreData) {
+                return preservedCentralCoreData.positions;
               }
-              return positions;
+              
+              // Generate central core data with proper seeded RNG
+              const coreData = generateCentralCoreData(currentGalaxyState.type, currentGalaxyState.seed);
+              return coreData.positions;
             })(), 3]}
-            count={(() => {
-              const seedVariation = (currentGalaxyState.seed % 100) / 100;
-              return currentGalaxyState.type === 'elliptical' ? 
-                     Math.floor(700 + seedVariation * 200) : 
-                     currentGalaxyState.type === 'spiral' ? 
-                     Math.floor(500 + seedVariation * 200) : 
-                     Math.floor(300 + seedVariation * 200);
+            count={preservedCentralCoreData ? preservedCentralCoreData.starCount : (() => {
+              const coreData = generateCentralCoreData(currentGalaxyState.type, currentGalaxyState.seed);
+              return coreData.starCount;
             })()}
           />
           <bufferAttribute
             attach="attributes-color"
             args={[(() => {
-              const seedVariation = (currentGalaxyState.seed % 100) / 100;
-              const coreStarCount = currentGalaxyState.type === 'elliptical' ? 
-                                   Math.floor(700 + seedVariation * 200) : 
-                                   currentGalaxyState.type === 'spiral' ? 
-                                   Math.floor(500 + seedVariation * 200) : 
-                                   Math.floor(300 + seedVariation * 200);
-              
-              const colors = new Float32Array(coreStarCount * 3);
-              
-              // Unique core colors based on galaxy type and seed
-              let coreColor;
-              if (currentGalaxyState.type === 'spiral') {
-                coreColor = { 
-                  r: 1.0 + seedVariation * 0.1, 
-                  g: 0.84 + seedVariation * 0.1, 
-                  b: seedVariation * 0.2 
-                };
-              } else if (currentGalaxyState.type === 'elliptical') {
-                coreColor = { 
-                  r: 1.0 + seedVariation * 0.05, 
-                  g: 0.65 + seedVariation * 0.15, 
-                  b: seedVariation * 0.1 
-                };
-              } else {
-                coreColor = { 
-                  r: seedVariation * 0.3, 
-                  g: 1.0 + seedVariation * 0.1, 
-                  b: 1.0 + seedVariation * 0.1 
-                };
+              // Use preserved colors if available, otherwise generate with proper RNG
+              if (preservedCentralCoreData) {
+                return preservedCentralCoreData.colors;
               }
               
-              // Use seed-based randomness for consistent colors
-              const coreRandom = () => {
-                const a = (currentGalaxyState.seed * 9301 + 49297) % 233280;
-                return a / 233280;
-              };
-              
-              for (let i = 0; i < coreStarCount; i++) {
-                const i3 = i * 3;
-                const brightness = 0.8 + coreRandom() * 0.4;
-                colors[i3] = Math.min(coreColor.r * brightness, 1.0);
-                colors[i3 + 1] = Math.min(coreColor.g * brightness, 1.0);
-                colors[i3 + 2] = Math.min(coreColor.b * brightness, 1.0);
-              }
-              return colors;
+              // Generate central core data with proper seeded RNG
+              const coreData = generateCentralCoreData(currentGalaxyState.type, currentGalaxyState.seed);
+              return coreData.colors;
             })(), 3]}
-            count={(() => {
-              const seedVariation = (currentGalaxyState.seed % 100) / 100;
-              return currentGalaxyState.type === 'elliptical' ? 
-                     Math.floor(700 + seedVariation * 200) : 
-                     currentGalaxyState.type === 'spiral' ? 
-                     Math.floor(500 + seedVariation * 200) : 
-                     Math.floor(300 + seedVariation * 200);
+            count={preservedCentralCoreData ? preservedCentralCoreData.starCount : (() => {
+              const coreData = generateCentralCoreData(currentGalaxyState.type, currentGalaxyState.seed);
+              return coreData.starCount;
             })()}
           />
         </bufferGeometry>

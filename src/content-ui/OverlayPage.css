@@ -15,7 +15,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 200vh;
+  height: 180vh;
   cursor: pointer;
   opacity: 0;
   animation: fadeInBackground 0.3s ease-out 0.4s forwards;
@@ -27,7 +27,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 500vh; /* Extended to cover all content fully */
+  height: 420vh; /* Extended to cover all content fully */
   /* Space to atmosphere gradient - blue reaches bottom of scroll */
   background: linear-gradient(
     to bottom,
@@ -50,7 +50,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 500vh;
+  height: 420vh;
   z-index: 1;
   pointer-events: none;
   /* Background scrolls with content and covers all sections */

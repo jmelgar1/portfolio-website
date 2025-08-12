@@ -17,6 +17,29 @@ interface PreservedGalaxyState {
     seed: number;
   };
   expansionProgress: number;
+  // Complete galaxy snapshot - exact positions and colors at moment of preservation
+  galaxySnapshot: {
+    // Main galaxy particles - exact positions and colors from buffer attributes
+    mainGalaxy: {
+      positions: number[]; // Float32Array as regular array for serialization
+      colors: number[];    // Float32Array as regular array for serialization
+    };
+    // Central core particles - exact positions and colors
+    centralCore: {
+      positions: number[];
+      colors: number[];
+      starCount: number;
+    };
+    // Current transformation state for interpolation
+    currentGalaxyData: {
+      positions: number[];
+      colors: number[];
+    } | null;
+    targetGalaxyData: {
+      positions: number[];
+      colors: number[];
+    } | null;
+  };
 }
 
 interface OverlayState {

@@ -94,44 +94,6 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
           ))}
         </div>
 
-        <div className="skills-section">
-          <h3>Core Technologies & Skills</h3>
-          <div className="skills-timeline">
-            <div className="skill-category">
-              <h4>Frontend Development</h4>
-              <div className="skill-tags">
-                <span className="skill-tag">React</span>
-                <span className="skill-tag">TypeScript</span>
-                <span className="skill-tag">Three.js</span>
-                <span className="skill-tag">CSS3</span>
-                <span className="skill-tag">HTML5</span>
-                <span className="skill-tag">D3.js</span>
-              </div>
-            </div>
-            <div className="skill-category">
-              <h4>Backend Development</h4>
-              <div className="skill-tags">
-                <span className="skill-tag">Node.js</span>
-                <span className="skill-tag">Express.js</span>
-                <span className="skill-tag">Python</span>
-                <span className="skill-tag">PostgreSQL</span>
-                <span className="skill-tag">MongoDB</span>
-                <span className="skill-tag">REST APIs</span>
-              </div>
-            </div>
-            <div className="skill-category">
-              <h4>Tools & Practices</h4>
-              <div className="skill-tags">
-                <span className="skill-tag">Git</span>
-                <span className="skill-tag">Docker</span>
-                <span className="skill-tag">Testing</span>
-                <span className="skill-tag">CI/CD</span>
-                <span className="skill-tag">Agile</span>
-                <span className="skill-tag">WebSocket</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Starfield from "./stars/star-field/Starfield";
 import ShootingStars from "./stars/shooting-star/ShootingStars";
@@ -22,6 +22,14 @@ const SpaceBackground = ({ lookAt }: SpaceBackgroundProps) => {
   const handleDebugUpdate = (newDebugInfo: DebugInfo | null) => {
     setDebugInfo(newDebugInfo);
   };
+
+  // Track component lifecycle for GPU optimization monitoring
+  useEffect(() => {
+    console.log('🚀 SpaceBackground MOUNTED - GPU resources allocated');
+    return () => {
+      console.log('💾 SpaceBackground UNMOUNTED - GPU resources freed');
+    };
+  }, []);
 
 
   return (

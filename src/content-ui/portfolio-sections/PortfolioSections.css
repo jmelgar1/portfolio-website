@@ -1,18 +1,9 @@
 .portfolio-sections section {
-  margin-bottom: 2rem;
   min-height: 100vh;
 }
 
 .portfolio-sections section:first-child {
   padding-top: 0.5rem;
-}
-
-.portfolio-sections section:not(:first-child) {
-  padding-top: 0rem;
-}
-
-.portfolio-sections section:last-child {
-  margin-bottom: 0;
 }
 
 .portfolio-sections h1 {
@@ -24,17 +15,4 @@
 .portfolio-sections .content {
   font-size: 1.2rem;
   line-height: 1.8;
-}
-
-/* Common content styles that apply to all sections */
-.portfolio-sections .content p {
-  margin-bottom: 1.5rem;
-}
-
-.portfolio-sections .content p:last-child {
-  margin-bottom: 0;
-}
-
-.portfolio-sections .intro {
-  margin-bottom: 2rem;
 }

@@ -8,6 +8,7 @@ interface MountainTerrainProps {
   length?: number;
   maxHeight?: number;
   segments?: number;
+  seed?: number;
 }
 
 const MountainTerrain = ({
@@ -16,7 +17,8 @@ const MountainTerrain = ({
   width = 450,
   length = 300, // width:length ratio of 1.5
   maxHeight = 300,
-  segments = 92
+  segments = 92,
+  seed = Math.random()
 }: MountainTerrainProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -55,10 +57,10 @@ const MountainTerrain = ({
         const sampleX = vertex.x * frequency;
         const sampleY = vertex.y * frequency;
         
-        // Simple noise function (you can replace with proper Perlin noise)
-        const noiseValue = Math.sin(sampleX) * Math.cos(sampleY) + 
-                          Math.sin(sampleX * 2.1) * Math.cos(sampleY * 2.3) * 0.5 +
-                          Math.sin(sampleX * 4.7) * Math.cos(sampleY * 4.1) * 0.25;
+        // Simple noise function with seed offset
+        const noiseValue = Math.sin(sampleX + seed) * Math.cos(sampleY + seed) + 
+                          Math.sin(sampleX * 2.1 + seed * 1.3) * Math.cos(sampleY * 2.3 + seed * 2.7) * 0.5 +
+                          Math.sin(sampleX * 4.7 + seed * 3.1) * Math.cos(sampleY * 4.1 + seed * 4.9) * 0.25;
         
         height += amplitude * noiseValue;
         amplitude *= persistence;
@@ -113,7 +115,7 @@ const MountainTerrain = ({
     });
 
     return { geometry: geo, material: mat };
-  }, [width, length, maxHeight, segments]);
+  }, [width, length, maxHeight, segments, seed]);
 
   // No rotation animation
 

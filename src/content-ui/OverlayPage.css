@@ -26,7 +26,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 415vh; /* Extended to cover all content fully */
+  height: 440vh; /* Extended to cover all content fully */
   /* Space to atmosphere gradient - blue reaches bottom of scroll */
   background: linear-gradient(
     to bottom,

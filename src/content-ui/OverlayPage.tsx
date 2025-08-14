@@ -22,6 +22,9 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
     const path = location.pathname.slice(1); // Remove leading '/'
     return ['about', 'projects', 'experience'].includes(path) ? path : 'about';
   });
+  
+  // Generate a new random seed each time the overlay loads
+  const [terrainSeed] = useState(() => Math.random() * 1000);
 
   const handleClose = () => {
     closeOverlay();
@@ -95,12 +98,13 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                 {/* Mountain Terrain */}
                 <group name="mountain-terrain-group">
                   <MountainTerrain 
-                    position={[0, -60, -70]}
+                    position={[0, -280, -700]}
                     rotation={[-Math.PI / 2, 0, 0]}
-                    width={120}
+                    width={320}
                     length={300}
                     maxHeight={300}
                     segments={92}
+                    seed={terrainSeed}
                   />
                 </group>
               </Suspense>

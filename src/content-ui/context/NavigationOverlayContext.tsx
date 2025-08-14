@@ -70,12 +70,17 @@ export const useOverlay = () => {
 };
 
 export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [overlayState, setOverlayState] = useState<OverlayState>({
-    isOverlayOpen: false,
-    isTransitioning: false,
-    transitionPhase: 'idle',
-    isInitialOpen: true,
-    preservedGalaxyState: undefined
+  const [overlayState, setOverlayState] = useState<OverlayState>(() => {
+    // Check if we're loading on an overlay route
+    const isOverlayRoute = ['/about', '/projects', '/experience'].includes(window.location.pathname);
+    
+    return {
+      isOverlayOpen: isOverlayRoute,
+      isTransitioning: false,
+      transitionPhase: isOverlayRoute ? 'showing' : 'idle',
+      isInitialOpen: !isOverlayRoute,
+      preservedGalaxyState: undefined
+    };
   });
 
   const openOverlay = useCallback(() => {

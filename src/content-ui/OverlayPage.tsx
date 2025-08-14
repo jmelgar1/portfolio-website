@@ -5,6 +5,7 @@ import OverlayNavigation from "./OverlayNavigation";
 import { useOverlay } from "./context/NavigationOverlayContext";
 import Starfield from '../background/stars/star-field/Starfield';
 import AsteroidBelt from './pages/about-page/asteroid-belt/AsteroidBelt';
+import DynamicAmbientLight from './DynamicAmbientLight';
 import "./OverlayPage.css";
 
 interface OverlayPageProps {
@@ -80,7 +81,22 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                   cameraPosition={{ x: 0, y: 0, z: 0 }}
                 />
                 <AsteroidBelt />
-                <ambientLight intensity={0.1} />
+                {/* Red cube positioned at bottom center, same plane as asteroids */}
+                <mesh position={[0, -10, -25]}>
+                  <boxGeometry args={[2, 2, 2]} />
+                  <meshStandardMaterial color="blue" />
+                </mesh>
+
+                <mesh position={[4, -10, -25]}>
+                  <boxGeometry args={[2, 2, 2]} />
+                  <meshStandardMaterial color="green" />
+                </mesh>
+
+                <mesh position={[-4, -10, -25]}>
+                  <boxGeometry args={[2, 2, 2]} />
+                  <meshStandardMaterial color="red" />
+                </mesh>
+                <DynamicAmbientLight minIntensity={0.1} maxIntensity={0.7} />
               </Suspense>
             </Canvas>
           </div>

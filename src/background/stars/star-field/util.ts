@@ -3,10 +3,11 @@ export const generateStarInFrustum = (
   maxParallaxOffset: number = 30, 
   fov: number = 40,
   cameraPosition: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 },
-  cameraOrientation: 'z-axis' | 'y-axis' = 'z-axis'
+  cameraOrientation: 'z-axis' | 'y-axis' = 'z-axis',
+  customAspectRatio?: number
 ) => {
   const cameraFov = fov;
-  const cameraAspect = window.innerWidth / window.innerHeight;
+  const cameraAspect = customAspectRatio || (window.innerWidth / window.innerHeight);
   const fovRad = (cameraFov * Math.PI) / 180;
   
   const relativeDepth = depth;

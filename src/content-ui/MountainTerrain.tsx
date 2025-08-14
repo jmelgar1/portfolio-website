@@ -28,6 +28,17 @@ const MountainTerrain = ({
     const positions = geo.attributes.position;
     const vertex = new THREE.Vector3();
     
+    // Create color array for vertex colors
+    const colors = new Float32Array(positions.count * 3);
+    const baseColor = new THREE.Color(0x8B7355); // Muted brown
+    const peakColor = new THREE.Color(0x757573); // Peak gray
+    
+    // Track min and max heights for normalization
+    let minHeight = Infinity;
+    let maxHeightValue = -Infinity;
+    const heights: number[] = [];
+    
+    // First pass: calculate heights
     for (let i = 0; i < positions.count; i++) {
       vertex.fromBufferAttribute(positions, i);
       
@@ -56,17 +67,47 @@ const MountainTerrain = ({
       
       // Linear easing (no transformation)
       const finalHeight = height * maxHeight * 0.1;
+      heights[i] = finalHeight;
+      
+      minHeight = Math.min(minHeight, finalHeight);
+      maxHeightValue = Math.max(maxHeightValue, finalHeight);
       
       // Set the Z position (height)
       positions.setZ(i, finalHeight);
     }
+    
+    // Second pass: assign colors based on normalized height
+    for (let i = 0; i < positions.count; i++) {
+      const normalizedHeight = (heights[i] - minHeight) / (maxHeightValue - minHeight);
+      
+      // Use a threshold approach: only peaks (top 20%) get the gray color
+      const peakThreshold = 0.8;
+      let colorMix;
+      
+      if (normalizedHeight > peakThreshold) {
+        // Interpolate between brown and gray for peak areas
+        colorMix = (normalizedHeight - peakThreshold) / (1 - peakThreshold);
+      } else {
+        // Keep as brown for lower areas
+        colorMix = 0;
+      }
+      
+      const color = baseColor.clone().lerp(peakColor, colorMix);
+      
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+    
+    // Add color attribute to geometry
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     
     positions.needsUpdate = true;
     geo.computeVertexNormals();
 
     // Create blended material for mountain look
     const mat = new THREE.MeshLambertMaterial({
-      color: 0x8B7355, // Brown mountain color
+      vertexColors: true, // Enable vertex colors
       flatShading: true, // Low poly look
       side: THREE.DoubleSide,
     });

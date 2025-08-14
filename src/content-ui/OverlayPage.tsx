@@ -73,24 +73,36 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
               style={{ width: '100%', height: '100%' }}
             >
               <Suspense fallback={null}>
-                <Starfield 
-                  staticMode={false}
-                  starCount={800}
-                  enableTwinkling={true}
-                  enableMouseInteraction={false}
-                  fov={10}
-                  cameraPosition={{ x: 0, y: 0, z: 0 }}
-                />
-                <AsteroidBelt />
-                <MountainTerrain 
-                  position={[0, -60, -70]}
-                  rotation={[-Math.PI / 2, 0, 0]}
-                  width={450}
-                  length={300}
-                  maxHeight={300}
-                  segments={92}
-                />
                 <DynamicAmbientLight minIntensity={0.1} maxIntensity={0.7} />
+                
+                {/* Starfield */}
+                <group name="starfield-group">
+                  <Starfield 
+                    staticMode={false}
+                    starCount={800}
+                    enableTwinkling={true}
+                    enableMouseInteraction={false}
+                    fov={6}
+                    cameraPosition={{ x: 0, y: 0, z: 0 }}
+                  />
+                </group>
+                
+                {/* Asteroid Belt */}
+                <group name="asteroid-belt-group">
+                  <AsteroidBelt />
+                </group>
+                
+                {/* Mountain Terrain */}
+                <group name="mountain-terrain-group">
+                  <MountainTerrain 
+                    position={[0, -60, -70]}
+                    rotation={[-Math.PI / 2, 0, 0]}
+                    width={120}
+                    length={300}
+                    maxHeight={300}
+                    segments={92}
+                  />
+                </group>
               </Suspense>
             </Canvas>
           </div>

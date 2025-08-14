@@ -12,6 +12,8 @@ interface StarfieldProps {
   fov?: number;
   cameraPosition?: { x: number; y: number; z: number };
   cameraOrientation?: 'z-axis' | 'y-axis';
+  viewport?: { width: number; height: number };
+  customAspectRatio?: number;
 }
 
 const Starfield: React.FC<StarfieldProps> = ({
@@ -22,6 +24,8 @@ const Starfield: React.FC<StarfieldProps> = ({
   fov = 40,
   cameraPosition = { x: 0, y: 0, z: 0 },
   cameraOrientation = 'z-axis',
+  viewport,
+  customAspectRatio,
 }) => {
   // Calculate star counts based on props
   const TOTAL_DEFAULT_STARS = 2875; // 1875 static + 1000 twinkling
@@ -44,11 +48,14 @@ const Starfield: React.FC<StarfieldProps> = ({
   const starData = useMemo(() => {
     const FIXED_DEPTH = 200; // All stars at the same depth level
     const parallaxOffset = staticMode ? 0 : 30; // No parallax expansion for static mode
+    
+    // Calculate aspect ratio from viewport or custom value
+    const aspectRatio = customAspectRatio || (viewport ? viewport.width / viewport.height : undefined);
 
     // Create static stars
     const staticPositions = new Float32Array(STATIC_STAR_COUNT * 3);
     for (let i = 0; i < STATIC_STAR_COUNT; i++) {
-      const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition, cameraOrientation);
+      const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition, cameraOrientation, aspectRatio);
       staticPositions[i * 3] = star.x;
       staticPositions[i * 3 + 1] = star.y;
       staticPositions[i * 3 + 2] = star.z;
@@ -64,7 +71,7 @@ const Starfield: React.FC<StarfieldProps> = ({
       for (let g = 0; g < TWINKLE_GROUP_COUNT; g++) {
         const groupPositions = new Float32Array(starsPerGroup * 3);
         for (let i = 0; i < starsPerGroup; i++) {
-          const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition, cameraOrientation);
+          const star = generateStarInFrustum(FIXED_DEPTH, parallaxOffset, fov, cameraPosition, cameraOrientation, aspectRatio);
           groupPositions[i * 3] = star.x;
           groupPositions[i * 3 + 1] = star.y;
           groupPositions[i * 3 + 2] = star.z;

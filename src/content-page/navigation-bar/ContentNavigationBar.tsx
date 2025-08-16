@@ -1,11 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import "./ContentNavigationBar.css";
 
 interface OverlayNavigationProps {
   onSectionChange?: (section: string) => void;
 }
 
-const OverlayNavigation = ({ onSectionChange }: OverlayNavigationProps) => {
+export interface ContentNavigationBarRef {
+  scrollToSection: (sectionId: string) => void;
+}
+
+const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationProps>(({ onSectionChange }, ref) => {
   const [activeSection, setActiveSection] = useState("about");
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -16,7 +20,7 @@ const OverlayNavigation = ({ onSectionChange }: OverlayNavigationProps) => {
     { id: "experience", label: "EXPERIENCE" }
   ];
 
-  const handleNavClick = (sectionId: string) => {
+  const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     const scrollContainer = document.querySelector('.page-content');
     
@@ -35,7 +39,7 @@ const OverlayNavigation = ({ onSectionChange }: OverlayNavigationProps) => {
       const elementTop = element.offsetTop;
       
       // Small offset to position header nicely below nav
-      const offset = 20;
+      const offset = 120;
       
       scrollContainer.scrollTo({
         top: elementTop - offset,
@@ -49,6 +53,14 @@ const OverlayNavigation = ({ onSectionChange }: OverlayNavigationProps) => {
       }, 1000); // Smooth scroll typically takes ~500-800ms
     }
   };
+
+  const handleNavClick = (sectionId: string) => {
+    scrollToSection(sectionId);
+  };
+
+  useImperativeHandle(ref, () => ({
+    scrollToSection
+  }));
 
   useEffect(() => {
     const handleScroll = (e: Event) => {
@@ -114,6 +126,8 @@ const OverlayNavigation = ({ onSectionChange }: OverlayNavigationProps) => {
       ))}
     </nav>
   );
-};
+});
+
+OverlayNavigation.displayName = 'OverlayNavigation';
 
 export default OverlayNavigation;

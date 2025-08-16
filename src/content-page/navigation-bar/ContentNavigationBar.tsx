@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import "./OverlayNavigation.css";
+import "./ContentNavigationBar.css";
 
 interface OverlayNavigationProps {
   onSectionChange?: (section: string) => void;

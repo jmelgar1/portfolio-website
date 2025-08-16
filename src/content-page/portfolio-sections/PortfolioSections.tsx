@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import OverlayPage from "../background/OverlayPage";
+import OverlayPage from "../background/ImmersiveBackground";
 import AboutSection from "../modules/about-module/AboutSection";
 import ProjectsSection from "../modules/projects-module/ProjectsSection";
 import ExperienceSection from "../modules/experience-module/ExperienceSection";

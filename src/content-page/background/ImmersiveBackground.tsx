@@ -1,13 +1,13 @@
 import React, { useState, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
-import OverlayNavigation from "../navigation/OverlayNavigation";
+import OverlayNavigation from "../navigation-bar/ContentNavigationBar";
 import { useOverlay } from "../context/NavigationOverlayContext";
 import Starfield from '../../home-page/stars/star-field/Starfield';
 import AsteroidBelt from './asteroid-belt/AsteroidBelt';
 import DynamicAmbientLight from './lighting/DynamicAmbientLight';
 import MountainTerrain from './planet-terrain/MountainTerrain';
-import "./OverlayPage.css";
+import "./ImmersiveBackground.css";
 
 interface OverlayPageProps {
   children: React.ReactNode;

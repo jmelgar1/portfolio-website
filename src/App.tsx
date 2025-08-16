@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import SpaceBackground from "./background/SpaceBackground";
-import PortfolioSections from "./content-ui/portfolio-sections/PortfolioSections";
-import { OverlayProvider, useOverlay } from "./content-ui/context/NavigationOverlayContext";
+import SpaceBackground from "./home-page/SpaceBackground";
+import PortfolioSections from "./content-page/portfolio-sections/PortfolioSections";
+import { OverlayProvider, useOverlay } from "./content-page/context/NavigationOverlayContext";
 
 // Inner component that has access to overlay context
 function AppContent() {

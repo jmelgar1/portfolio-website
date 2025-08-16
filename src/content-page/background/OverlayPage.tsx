@@ -1,12 +1,12 @@
 import React, { useState, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
-import OverlayNavigation from "./OverlayNavigation";
-import { useOverlay } from "./context/NavigationOverlayContext";
-import Starfield from '../background/stars/star-field/Starfield';
-import AsteroidBelt from './pages/about-page/asteroid-belt/AsteroidBelt';
-import DynamicAmbientLight from './DynamicAmbientLight';
-import MountainTerrain from './MountainTerrain';
+import OverlayNavigation from "../navigation/OverlayNavigation";
+import { useOverlay } from "../context/NavigationOverlayContext";
+import Starfield from '../../home-page/stars/star-field/Starfield';
+import AsteroidBelt from './asteroid-belt/AsteroidBelt';
+import DynamicAmbientLight from './lighting/DynamicAmbientLight';
+import MountainTerrain from './planet-terrain/MountainTerrain';
 import "./OverlayPage.css";
 
 interface OverlayPageProps {
@@ -98,10 +98,10 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                 {/* Mountain Terrain */}
                 <group name="mountain-terrain-group">
                   <MountainTerrain 
-                    position={[0, -280, -700]}
+                    position={[0, -310, -1000]}
                     rotation={[-Math.PI / 2, 0, 0]}
-                    width={320}
-                    length={300}
+                    width={520}
+                    length={700}
                     maxHeight={300}
                     segments={92}
                     seed={terrainSeed}

@@ -1,13 +1,13 @@
-import React, { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Starfield from "./stars/star-field/Starfield";
 import ShootingStars from "./stars/shooting-star/ShootingStars";
 import Galaxy from "./galaxy/Galaxy";
 import MouseCameraController from "./camera-controller/MouseCameraController";
-import { MouseProvider } from "../context/MouseContext";
-import Navigation from "../navigation-ui/Navigation";
-import SocialButtons from "../navigation-ui/SocialButtons";
-import DebugControls, { DebugInfo } from "../navigation-ui/DebugControls";
+import { MouseProvider } from "./stars/star-field/context/MouseContext";
+import Navigation from "./ui/Navigation";
+import SocialButtons from "./ui/SocialButtons";
+import DebugControls, { DebugInfo } from "./ui/debug/DebugControls";
 import "./SpaceBackground.css";
 
 interface SpaceBackgroundProps {

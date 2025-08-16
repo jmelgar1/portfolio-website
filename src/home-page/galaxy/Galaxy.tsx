@@ -11,9 +11,9 @@ import {
 } from "./utils/galaxyShapes";
 import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
 import { FastSeededRandom } from "./utils/FastSeededRandom";
-import { useMousePosition } from "../../context/MouseContext";
-import { useOverlay } from "../../content-ui/context/NavigationOverlayContext";
-import type { CameraInfo } from "../../navigation-ui/GalaxyDebugOverlay";
+import { useMousePosition } from "../stars/star-field/context/MouseContext";
+import { useOverlay } from "../../content-page/context/NavigationOverlayContext";
+import type { CameraInfo } from "../ui/debug/GalaxyDebugOverlay";
 
 interface GalaxyProps {
   position?: [number, number, number];

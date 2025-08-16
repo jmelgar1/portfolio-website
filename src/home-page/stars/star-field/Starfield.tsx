@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useContext } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { generateStarInFrustum } from "./util";
-import { MouseContext } from "../../../context/MouseContext";
+import { MouseContext } from "./context/MouseContext";
 
 interface StarfieldProps {
   staticMode?: boolean;

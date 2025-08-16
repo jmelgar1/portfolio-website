@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import OverlayPage from "../OverlayPage";
-import AboutSection from "../pages/about-page/AboutSection";
-import ProjectsSection from "../pages/projects-page/ProjectsSection";
-import ExperienceSection from "../pages/experience-page/ExperienceSection";
+import OverlayPage from "../background/OverlayPage";
+import AboutSection from "../modules/about-module/AboutSection";
+import ProjectsSection from "../modules/projects-module/ProjectsSection";
+import ExperienceSection from "../modules/experience-module/ExperienceSection";
 import './PortfolioSections.css';
 
 const PortfolioSections = () => {

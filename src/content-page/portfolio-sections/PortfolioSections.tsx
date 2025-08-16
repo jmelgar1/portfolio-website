@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import OverlayPage from "../background/ImmersiveBackground";
 import AboutSection from "../modules/about-module/AboutSection";
 import ProjectsSection from "../modules/projects-module/ProjectsSection";
 import ExperienceSection from "../modules/experience-module/ExperienceSection";
+import ContentNavigationBar from "../navigation-bar/ContentNavigationBar";
 import './PortfolioSections.css';
 
 const PortfolioSections = () => {
@@ -11,17 +12,24 @@ const PortfolioSections = () => {
   const aboutRef = useRef<HTMLElement>(null);
   const projectsRef = useRef<HTMLElement>(null);
   const experienceRef = useRef<HTMLElement>(null);
+  
+  const [, setActiveSection] = useState("about");
 
   useEffect(() => {
     // Scroll to the appropriate section based on the route
     const scrollToSection = () => {
       let targetRef = aboutRef;
+      let sectionId = 'about';
       
       if (location.pathname === '/projects') {
         targetRef = projectsRef;
+        sectionId = 'projects';
       } else if (location.pathname === '/experience') {
         targetRef = experienceRef;
+        sectionId = 'experience';
       }
+
+      setActiveSection(sectionId);
 
       if (targetRef.current) {
         const scrollContainer = document.querySelector('.page-content') as HTMLElement;
@@ -45,8 +53,13 @@ const PortfolioSections = () => {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+  };
+
   return (
     <OverlayPage>
+      <ContentNavigationBar onSectionChange={handleSectionChange} />
       <div className="portfolio-sections">
         <AboutSection ref={aboutRef} />
         <ProjectsSection ref={projectsRef} />

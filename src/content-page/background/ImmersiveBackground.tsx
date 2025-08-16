@@ -1,7 +1,6 @@
 import React, { useState, Suspense } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
-import OverlayNavigation from "../navigation-bar/ContentNavigationBar";
 import { useOverlay } from "../context/NavigationOverlayContext";
 import Starfield from '../../home-page/stars/star-field/Starfield';
 import AsteroidBelt from './asteroid-belt/AsteroidBelt';
@@ -15,13 +14,7 @@ interface OverlayPageProps {
 
 const OverlayPage = ({ children }: OverlayPageProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { closeOverlay } = useOverlay();
-  // Initialize currentSection based on the current route
-  const [, setCurrentSection] = useState(() => {
-    const path = location.pathname.slice(1); // Remove leading '/'
-    return ['about', 'projects', 'experience'].includes(path) ? path : 'about';
-  });
   
   // Generate a new random seed each time the overlay loads
   const [terrainSeed] = useState(() => Math.random() * 1000);
@@ -29,15 +22,6 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   const handleClose = () => {
     closeOverlay();
     navigate("/");
-  };
-
-  const handleSectionChange = (section: string) => {
-    setCurrentSection(section);
-    // Update the URL to reflect the current section without causing a full navigation
-    const newPath = `/${section}`;
-    if (window.location.pathname !== newPath) {
-      window.history.replaceState(null, '', newPath);
-    }
   };
 
 
@@ -56,7 +40,6 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
     <div className="overlay-page">
       <div className="overlay-background" onClick={handleClose} />
       <div className="overlay-content">
-        <OverlayNavigation onSectionChange={handleSectionChange} />
         <button className="close-button" onClick={handleClose}>
           ×
         </button>

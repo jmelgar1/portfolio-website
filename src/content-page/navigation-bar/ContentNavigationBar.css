@@ -1,10 +1,17 @@
 .overlay-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
   justify-content: center;
   gap: 3rem;
   padding: 2rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
+  background: #000;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
 }
 
 .overlay-nav-item {

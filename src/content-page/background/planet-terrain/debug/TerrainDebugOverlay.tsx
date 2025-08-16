@@ -1,6 +1,6 @@
 import React from 'react';
 import './TerrainDebugOverlay.css';
-import { useFPS } from '../hooks/useFPS';
+import { useFPS } from '../../../../hooks/useFPS';
 
 interface CameraInfo {
   position: [number, number, number];

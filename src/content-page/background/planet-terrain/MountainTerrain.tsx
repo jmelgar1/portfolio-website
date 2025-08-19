@@ -82,13 +82,17 @@ const MountainTerrain = ({
     for (let i = 0; i < positions.count; i++) {
       const normalizedHeight = (heights[i] - minHeight) / (maxHeightValue - minHeight);
       
-      // Use a threshold approach: only peaks (top 20%) get the gray color
-      const peakThreshold = 0.8;
+      // Use a threshold approach: only peaks (top 60%) get the gray color
+      const peakThreshold = 0.4;
+      const blendThreshold = 0.7; // Start blending at 70%
       let colorMix;
       
-      if (normalizedHeight > peakThreshold) {
+      if (normalizedHeight > blendThreshold) {
         // Interpolate between brown and gray for peak areas
-        colorMix = (normalizedHeight - peakThreshold) / (1 - peakThreshold);
+        colorMix = (normalizedHeight - blendThreshold) / (1 - blendThreshold);
+      } else if (normalizedHeight > peakThreshold) {
+        // Pure gray for middle range
+        colorMix = 1;
       } else {
         // Keep as brown for lower areas
         colorMix = 0;
@@ -110,7 +114,7 @@ const MountainTerrain = ({
     // Create blended material for mountain look
     const mat = new THREE.MeshLambertMaterial({
       vertexColors: true, // Enable vertex colors
-      flatShading: true, // Low poly look
+      flatShading: false, // Smooth shading
       side: THREE.DoubleSide,
     });
 

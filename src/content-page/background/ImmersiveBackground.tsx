@@ -81,12 +81,12 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                 {/* Mountain Terrain */}
                 <group name="mountain-terrain-group">
                   <MountainTerrain 
-                    position={[0, -310, -1000]}
+                    position={[0, -310, -1200]}
                     rotation={[-Math.PI / 2, 0, 0]}
                     width={520}
-                    length={700}
-                    maxHeight={300}
-                    segments={92}
+                    length={1100}
+                    maxHeight={400}
+                    segments={150}
                     seed={terrainSeed}
                   />
                 </group>

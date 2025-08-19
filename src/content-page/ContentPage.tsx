@@ -15,6 +15,7 @@ const ContentPage = () => {
   const navigationRef = useRef<ContentNavigationBarRef>(null);
   
   const [, setActiveSection] = useState("about");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     // Update active section state based on URL 
@@ -29,8 +30,18 @@ const ContentPage = () => {
     }
 
     setActiveSection(sectionId);
-    // Note: No programmatic scrolling - let user control their scroll position
-  }, [location.pathname]);
+    
+    // Only scroll to section on initial load (coming from home page)
+    // After that, let users control their scroll position
+    if (isInitialLoad && navigationRef.current) {
+      setTimeout(() => {
+        if (navigationRef.current) {
+          navigationRef.current.scrollToSection(sectionId);
+        }
+      }, 100);
+      setIsInitialLoad(false);
+    }
+  }, [location.pathname, isInitialLoad]);
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);

@@ -7,7 +7,7 @@ import ExperienceSection from "./modules/experience-module/ExperienceSection";
 import ContentNavigationBar, { ContentNavigationBarRef } from "./navigation-bar/ContentNavigationBar";
 import './ContentPage.css';
 
-const PortfolioSections = () => {
+const ContentPage = () => {
   const location = useLocation();
   const aboutRef = useRef<HTMLElement>(null);
   const projectsRef = useRef<HTMLElement>(null);
@@ -17,29 +17,29 @@ const PortfolioSections = () => {
   const [, setActiveSection] = useState("about");
 
   useEffect(() => {
-    // Scroll to the appropriate section based on the route
-    const scrollToSection = () => {
-      let sectionId = 'about';
-      
-      if (location.pathname === '/projects') {
-        sectionId = 'projects';
-      } else if (location.pathname === '/experience') {
-        sectionId = 'experience';
-      } else if (location.pathname === '/about') {
-        sectionId = 'about';
-      }
+    // Update active section state based on URL and sync with navigation bar
+    let sectionId = 'about';
+    
+    if (location.pathname === '/projects') {
+      sectionId = 'projects';
+    } else if (location.pathname === '/experience') {
+      sectionId = 'experience';
+    } else if (location.pathname === '/about') {
+      sectionId = 'about';
+    }
 
-      setActiveSection(sectionId);
-
-      // Use the navigation component's scroll method
-      if (navigationRef.current) {
-        navigationRef.current.scrollToSection(sectionId);
-      }
-    };
-
-    // Small delay to ensure the overlay is fully rendered
-    const timer = setTimeout(scrollToSection, 100);
-    return () => clearTimeout(timer);
+    setActiveSection(sectionId);
+    
+    // Ensure navigation bar is in sync when URL changes from external sources
+    // (like browser back/forward buttons or direct URL access)
+    if (navigationRef.current) {
+      // Use a small delay to ensure the navigation bar has mounted
+      setTimeout(() => {
+        if (navigationRef.current) {
+          navigationRef.current.scrollToSection(sectionId);
+        }
+      }, 100);
+    }
   }, [location.pathname]);
 
   const handleSectionChange = (section: string) => {
@@ -58,4 +58,4 @@ const PortfolioSections = () => {
   );
 };
 
-export default PortfolioSections;
+export default ContentPage;

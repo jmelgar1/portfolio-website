@@ -52,7 +52,7 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
       scrollTimeoutRef.current = setTimeout(() => {
         setIsScrolling(false);
         scrollTimeoutRef.current = null;
-      }, 1000); // Smooth scroll typically takes ~500-800ms
+      }, 800); // Reduce timeout to allow manual scrolling sooner
     }
   };
 
@@ -64,7 +64,14 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
       experience: "/experience"
     };
     
+    // First navigate to update the URL
     navigate(urlMap[sectionId] || "/about");
+    
+    // Use a small delay to ensure DOM is ready after navigation
+    // This prevents race conditions between URL change and scrolling
+    setTimeout(() => {
+      scrollToSection(sectionId);
+    }, 50);
   };
 
   useImperativeHandle(ref, () => ({
@@ -83,22 +90,41 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
       }));
 
       const scrollTop = scrollContainer.scrollTop;
+      const containerHeight = scrollContainer.clientHeight;
       
-      // Use a simple offset for detecting which section is visible
-      const scrollPosition = scrollTop + 100; // 100px buffer for better UX
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sections[i];
+      // Find which section takes up the majority of the viewport
+      let maxVisibleArea = 0;
+      let mostVisibleSection = 'about';
+      
+      sections.forEach(section => {
         if (section.element) {
           const sectionTop = section.element.offsetTop;
-          if (sectionTop <= scrollPosition) {
-            if (activeSection !== section.id) {
-              setActiveSection(section.id);
-              onSectionChange?.(section.id);
-            }
-            break;
+          const sectionHeight = section.element.offsetHeight;
+          const sectionBottom = sectionTop + sectionHeight;
+          
+          // Calculate visible area of this section
+          const visibleTop = Math.max(scrollTop, sectionTop);
+          const visibleBottom = Math.min(scrollTop + containerHeight, sectionBottom);
+          const visibleArea = Math.max(0, visibleBottom - visibleTop);
+          
+          if (visibleArea > maxVisibleArea) {
+            maxVisibleArea = visibleArea;
+            mostVisibleSection = section.id;
           }
         }
+      });
+      
+      if (activeSection !== mostVisibleSection) {
+        setActiveSection(mostVisibleSection);
+        onSectionChange?.(mostVisibleSection);
+        
+        // Update URL when scrolling to different section
+        const urlMap: Record<string, string> = {
+          about: "/about",
+          projects: "/projects", 
+          experience: "/experience"
+        };
+        navigate(urlMap[mostVisibleSection] || "/about", { replace: true });
       }
     };
 

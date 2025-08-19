@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ContentNavigationBar.css";
 
 interface OverlayNavigationProps {
@@ -10,6 +11,7 @@ export interface ContentNavigationBarRef {
 }
 
 const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationProps>(({ onSectionChange }, ref) => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("about");
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -55,7 +57,14 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
   };
 
   const handleNavClick = (sectionId: string) => {
-    scrollToSection(sectionId);
+    // Navigate to the appropriate URL based on section
+    const urlMap: Record<string, string> = {
+      about: "/about",
+      projects: "/projects", 
+      experience: "/experience"
+    };
+    
+    navigate(urlMap[sectionId] || "/about");
   };
 
   useImperativeHandle(ref, () => ({

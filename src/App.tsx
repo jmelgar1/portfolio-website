@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import SpaceBackground from "./home-page/SpaceBackground";
-import PortfolioSections from "./content-page/portfolio-sections/PortfolioSections";
+import ContentPage from "./content-page/ContentPage";
 import { OverlayProvider, useOverlay } from "./content-page/context/NavigationOverlayContext";
 
 // Inner component that has access to overlay context
@@ -28,9 +28,9 @@ function AppContent() {
       <div className="App">
         {shouldRenderBackground && <SpaceBackground />}
         <Routes>
-          <Route path="/about" element={<PortfolioSections />} />
-          <Route path="/projects" element={<PortfolioSections />} />
-          <Route path="/experience" element={<PortfolioSections />} />
+          <Route path="/about" element={<ContentPage />} />
+          <Route path="/projects" element={<ContentPage />} />
+          <Route path="/experience" element={<ContentPage />} />
         </Routes>
       </div>
     </Router>

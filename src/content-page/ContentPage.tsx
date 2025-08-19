@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import OverlayPage from "../background/ImmersiveBackground";
-import AboutSection from "../modules/about-module/AboutSection";
-import ProjectsSection from "../modules/projects-module/ProjectsSection";
-import ExperienceSection from "../modules/experience-module/ExperienceSection";
-import ContentNavigationBar, { ContentNavigationBarRef } from "../navigation-bar/ContentNavigationBar";
-import './PortfolioSections.css';
+import OverlayPage from "./background/ImmersiveBackground";
+import AboutSection from "./modules/about-module/AboutSection";
+import ProjectsSection from "./modules/projects-module/ProjectsSection";
+import ExperienceSection from "./modules/experience-module/ExperienceSection";
+import ContentNavigationBar, { ContentNavigationBarRef } from "./navigation-bar/ContentNavigationBar";
+import './ContentPage.css';
 
 const PortfolioSections = () => {
   const location = useLocation();
@@ -25,6 +25,8 @@ const PortfolioSections = () => {
         sectionId = 'projects';
       } else if (location.pathname === '/experience') {
         sectionId = 'experience';
+      } else if (location.pathname === '/about') {
+        sectionId = 'about';
       }
 
       setActiveSection(sectionId);

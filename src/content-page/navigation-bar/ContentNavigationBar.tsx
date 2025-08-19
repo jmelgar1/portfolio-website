@@ -13,8 +13,8 @@ export interface ContentNavigationBarRef {
 const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationProps>(({ onSectionChange }, ref) => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("about");
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const navItems = [
     { id: "about", label: "ABOUT ME" },
@@ -28,12 +28,12 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
     
     if (element && scrollContainer) {
       // Clear any existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
       }
       
-      // Set scrolling flag to prevent flicker during animation
-      setIsScrolling(true);
+      // Set navigation flag to prevent scroll detection interference
+      setIsNavigating(true);
       setActiveSection(sectionId);
       onSectionChange?.(sectionId);
       
@@ -48,11 +48,11 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
         behavior: 'smooth'
       });
       
-      // Reset scrolling flag after animation completes
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-        scrollTimeoutRef.current = null;
-      }, 800); // Reduce timeout to allow manual scrolling sooner
+      // Reset navigation flag after animation completes
+      navigationTimeoutRef.current = setTimeout(() => {
+        setIsNavigating(false);
+        navigationTimeoutRef.current = null;
+      }, 800);
     }
   };
 
@@ -64,11 +64,10 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
       experience: "/experience"
     };
     
-    // First navigate to update the URL
+    // Update URL first
     navigate(urlMap[sectionId] || "/about");
     
-    // Use a small delay to ensure DOM is ready after navigation
-    // This prevents race conditions between URL change and scrolling
+    // Then scroll to the section with a small delay to ensure DOM is ready
     setTimeout(() => {
       scrollToSection(sectionId);
     }, 50);
@@ -80,8 +79,8 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
 
   useEffect(() => {
     const handleScroll = (e: Event) => {
-      // Skip scroll detection during programmatic scrolling
-      if (isScrolling) return;
+      // Skip scroll detection during programmatic navigation
+      if (isNavigating) return;
       
       const scrollContainer = e.target as HTMLElement;
       const sections = navItems.map(item => ({
@@ -92,7 +91,12 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
       const scrollTop = scrollContainer.scrollTop;
       const containerHeight = scrollContainer.clientHeight;
       
-      // Find which section takes up the majority of the viewport
+      // Account for navigation bar offset
+      const navOffset = 120;
+      const viewportTop = scrollTop + navOffset;
+      const viewportBottom = scrollTop + containerHeight;
+      
+      // Find which section takes up the majority of the visible viewport
       let maxVisibleArea = 0;
       let mostVisibleSection = 'about';
       
@@ -102,12 +106,17 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
           const sectionHeight = section.element.offsetHeight;
           const sectionBottom = sectionTop + sectionHeight;
           
-          // Calculate visible area of this section
-          const visibleTop = Math.max(scrollTop, sectionTop);
-          const visibleBottom = Math.min(scrollTop + containerHeight, sectionBottom);
+          // Calculate visible area within the actual viewport (below nav)
+          const visibleTop = Math.max(viewportTop, sectionTop);
+          const visibleBottom = Math.min(viewportBottom, sectionBottom);
           const visibleArea = Math.max(0, visibleBottom - visibleTop);
           
-          if (visibleArea > maxVisibleArea) {
+          // Calculate percentage of viewport this section occupies
+          const viewportHeight = viewportBottom - viewportTop;
+          const visibilityPercentage = visibleArea / viewportHeight;
+          
+          // Section must occupy at least 50% of viewport to be considered active
+          if (visibilityPercentage > 0.5 && visibleArea > maxVisibleArea) {
             maxVisibleArea = visibleArea;
             mostVisibleSection = section.id;
           }
@@ -133,20 +142,16 @@ const OverlayNavigation = forwardRef<ContentNavigationBarRef, OverlayNavigationP
       scrollContainer.addEventListener('scroll', handleScroll);
       return () => {
         scrollContainer.removeEventListener('scroll', handleScroll);
-        // Clean up timeout on unmount
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
       };
     }
     
     return () => {
-      // Clean up timeout on unmount
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      // Clean up navigation timeout on unmount
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
       }
     };
-  }, [activeSection, onSectionChange, navItems, isScrolling]);
+  }, [activeSection, onSectionChange, navigate, isNavigating]);
 
   return (
     <nav className="overlay-nav">

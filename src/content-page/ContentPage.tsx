@@ -17,7 +17,7 @@ const ContentPage = () => {
   const [, setActiveSection] = useState("about");
 
   useEffect(() => {
-    // Update active section state based on URL and sync with navigation bar
+    // Update active section state based on URL 
     let sectionId = 'about';
     
     if (location.pathname === '/projects') {
@@ -29,17 +29,7 @@ const ContentPage = () => {
     }
 
     setActiveSection(sectionId);
-    
-    // Ensure navigation bar is in sync when URL changes from external sources
-    // (like browser back/forward buttons or direct URL access)
-    if (navigationRef.current) {
-      // Use a small delay to ensure the navigation bar has mounted
-      setTimeout(() => {
-        if (navigationRef.current) {
-          navigationRef.current.scrollToSection(sectionId);
-        }
-      }, 100);
-    }
+    // Note: No programmatic scrolling - let user control their scroll position
   }, [location.pathname]);
 
   const handleSectionChange = (section: string) => {

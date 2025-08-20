@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { useTerrainWorker } from '../../../workers/useTerrainWorker';
+import { useTerrainWorker } from '../../workers/useTerrainWorker';
 
 interface MountainTerrainProps {
   position?: [number, number, number];

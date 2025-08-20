@@ -13,4 +13,7 @@ export default defineConfig({
     outDir: "build",
   },
   assetsInclude: ["**/*.glb"],
+  worker: {
+    format: 'es'
+  }
 });

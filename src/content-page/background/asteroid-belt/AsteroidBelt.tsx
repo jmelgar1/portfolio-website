@@ -302,7 +302,7 @@ const AsteroidBelt: React.FC = () => {
       // For initial spawn: distribute along the horizontal path for immediate visibility
       const horizontalPathStartX = -25;  // Left side off-screen
       const horizontalPathEndX = 25;     // Right side off-screen
-      const horizontalPathY = 8;         // Center Y position between sections
+      const horizontalPathY = 7;         // Center Y position between sections
       const horizontalPathYVariation = 2; // Y variation range (+/- 1 unit)
       
       // Position along horizontal path based on progress
@@ -312,7 +312,7 @@ const AsteroidBelt: React.FC = () => {
       
       // Calculate velocity for horizontal movement (left to right)
       const targetAreaX = { min: 20, max: 25 }; // Right side off-screen
-      const targetAreaY = { min: 7, max: 9 };  // Same general area as path (tighter spread)
+      const targetAreaY = { min: 6, max: 8 };  // Same general area as path (tighter spread)
       
       const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
       const targetY = targetAreaY.min + Math.random() * (targetAreaY.max - targetAreaY.min);
@@ -402,12 +402,12 @@ const AsteroidBelt: React.FC = () => {
         
         // Define larger spawn area on left side to maintain belt coverage
         const spawnAreaX = { min: -25, max: -20 }; // Left side off-screen
-        const spawnAreaY = { min: 7, max: 9 }; // Horizontal belt Y range (tighter spread)
+        const spawnAreaY = { min: 6, max: 8 }; // Horizontal belt Y range (tighter spread)
         const spawnAreaZ = -25;
         
         // Target area for horizontal movement (right side)
         const targetAreaX = { min: 20, max: 25 }; // Right side off-screen
-        const targetAreaY = { min: 7, max: 9 }; // Same horizontal belt Y range (tighter spread)
+        const targetAreaY = { min: 6, max: 8 }; // Same horizontal belt Y range (tighter spread)
         
         // Generate completely new asteroid properties (treat as new asteroid)
         const newSize = 0.15 + Math.random() * 0.4; // New random size

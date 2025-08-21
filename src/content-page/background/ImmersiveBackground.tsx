@@ -6,6 +6,7 @@ import Starfield from '../../home-page/stars/star-field/Starfield';
 import AsteroidBelt from './asteroid-belt/AsteroidBelt';
 import DynamicAmbientLight from './lighting/DynamicAmbientLight';
 import MountainTerrain from './planet-terrain/MountainTerrain';
+import Clouds from './clouds/Clouds';
 import "./ImmersiveBackground.css";
 
 interface OverlayPageProps {
@@ -76,6 +77,11 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                 {/* Asteroid Belt */}
                 <group name="asteroid-belt-group">
                   <AsteroidBelt />
+                </group>
+                
+                {/* Clouds */}
+                <group name="red-cubes-group">
+                  <Clouds />
                 </group>
                 
                 {/* Mountain Terrain */}

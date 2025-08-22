@@ -183,54 +183,47 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
 };
 
 const Clouds: React.FC = () => {
-  // Create multiple clouds with varied properties, all elongated type - tripled amount
-  const cloudInstances = useMemo(() => [
-    { position: [-120, 0, 0] as [number, number, number], scale: 6.5, speed: 0.3, seed: 12345, cloudType: 'elongated' as const },
-    { position: [-80, 8, -10] as [number, number, number], scale: 4.0, speed: 0.5, seed: 67890, cloudType: 'elongated' as const },
-    { position: [-30, -5, 5] as [number, number, number], scale: 6.0, speed: 0.4, seed: 24680, cloudType: 'elongated' as const },
-    { position: [20, 12, -5] as [number, number, number], scale: 4.8, speed: 0.2, seed: 13579, cloudType: 'elongated' as const },
-    { position: [70, 3, 8] as [number, number, number], scale: 7.5, speed: 0.6, seed: 97531, cloudType: 'elongated' as const },
-    { position: [120, -8, -8] as [number, number, number], scale: 3.8, speed: 0.35, seed: 86420, cloudType: 'elongated' as const },
-    { position: [170, 10, 3] as [number, number, number], scale: 5.2, speed: 0.7, seed: 75319, cloudType: 'elongated' as const },
-    { position: [-160, 15, -15] as [number, number, number], scale: 9.0, speed: 0.25, seed: 11111, cloudType: 'elongated' as const },
-    { position: [200, -12, 12] as [number, number, number], scale: 3.2, speed: 0.8, seed: 22222, cloudType: 'elongated' as const },
-    { position: [-50, 18, -20] as [number, number, number], scale: 7.2, speed: 0.45, seed: 33333, cloudType: 'elongated' as const },
-    { position: [40, -10, 15] as [number, number, number], scale: 5.5, speed: 0.55, seed: 44444, cloudType: 'elongated' as const },
-    { position: [-100, 20, 8] as [number, number, number], scale: 4.5, speed: 0.4, seed: 55555, cloudType: 'elongated' as const },
-    { position: [150, 5, -12] as [number, number, number], scale: 6.8, speed: 0.3, seed: 66666, cloudType: 'elongated' as const },
-    { position: [-180, -5, 18] as [number, number, number], scale: 8.2, speed: 0.28, seed: 77777, cloudType: 'elongated' as const },
-    { position: [10, 25, -8] as [number, number, number], scale: 3.5, speed: 0.65, seed: 88888, cloudType: 'elongated' as const },
-    { position: [-200, 12, -5] as [number, number, number], scale: 5.8, speed: 0.32, seed: 99999, cloudType: 'elongated' as const },
-    { position: [-140, -8, 12] as [number, number, number], scale: 4.2, speed: 0.48, seed: 11122, cloudType: 'elongated' as const },
-    { position: [-60, 16, -18] as [number, number, number], scale: 7.0, speed: 0.38, seed: 22233, cloudType: 'elongated' as const },
-    { position: [0, 2, 20] as [number, number, number], scale: 5.0, speed: 0.58, seed: 33344, cloudType: 'elongated' as const },
-    { position: [50, -15, 6] as [number, number, number], scale: 6.5, speed: 0.42, seed: 44455, cloudType: 'elongated' as const },
-    { position: [90, 22, -14] as [number, number, number], scale: 4.8, speed: 0.62, seed: 55566, cloudType: 'elongated' as const },
-    { position: [140, -3, 16] as [number, number, number], scale: 7.8, speed: 0.28, seed: 66677, cloudType: 'elongated' as const },
-    { position: [180, 18, -22] as [number, number, number], scale: 3.8, speed: 0.72, seed: 77788, cloudType: 'elongated' as const },
-    { position: [220, 8, 4] as [number, number, number], scale: 6.2, speed: 0.35, seed: 88899, cloudType: 'elongated' as const },
-    { position: [-220, -12, 25] as [number, number, number], scale: 8.5, speed: 0.22, seed: 99900, cloudType: 'elongated' as const },
-    { position: [-170, 28, -10] as [number, number, number], scale: 4.5, speed: 0.68, seed: 11000, cloudType: 'elongated' as const },
-    { position: [-90, -18, 14] as [number, number, number], scale: 5.5, speed: 0.45, seed: 22000, cloudType: 'elongated' as const },
-    { position: [-10, 35, -25] as [number, number, number], scale: 7.2, speed: 0.38, seed: 33000, cloudType: 'elongated' as const },
-    { position: [30, -25, 18] as [number, number, number], scale: 3.2, speed: 0.78, seed: 44000, cloudType: 'elongated' as const },
-    { position: [80, 6, -2] as [number, number, number], scale: 6.8, speed: 0.52, seed: 55000, cloudType: 'elongated' as const },
-    { position: [110, -14, 22] as [number, number, number], scale: 4.0, speed: 0.65, seed: 66000, cloudType: 'elongated' as const },
-    { position: [160, 30, -18] as [number, number, number], scale: 8.0, speed: 0.25, seed: 77000, cloudType: 'elongated' as const },
-    { position: [190, -6, 8] as [number, number, number], scale: 5.2, speed: 0.58, seed: 88000, cloudType: 'elongated' as const },
-    { position: [240, 14, -12] as [number, number, number], scale: 7.5, speed: 0.32, seed: 99000, cloudType: 'elongated' as const },
-    { position: [-240, 4, 20] as [number, number, number], scale: 4.8, speed: 0.48, seed: 10101, cloudType: 'elongated' as const },
-    { position: [-190, -20, -8] as [number, number, number], scale: 6.0, speed: 0.42, seed: 20202, cloudType: 'elongated' as const },
-    { position: [-130, 24, 15] as [number, number, number], scale: 3.5, speed: 0.75, seed: 30303, cloudType: 'elongated' as const },
-    { position: [-70, -12, -24] as [number, number, number], scale: 7.8, speed: 0.35, seed: 40404, cloudType: 'elongated' as const },
-    { position: [-20, 40, 10] as [number, number, number], scale: 5.8, speed: 0.55, seed: 50505, cloudType: 'elongated' as const },
-    { position: [25, 8, -15] as [number, number, number], scale: 4.2, speed: 0.62, seed: 60606, cloudType: 'elongated' as const },
-    { position: [65, -22, 25] as [number, number, number], scale: 8.2, speed: 0.28, seed: 70707, cloudType: 'elongated' as const },
-    { position: [105, 16, -6] as [number, number, number], scale: 6.5, speed: 0.45, seed: 80808, cloudType: 'elongated' as const },
-    { position: [135, -8, 12] as [number, number, number], scale: 3.8, speed: 0.68, seed: 90909, cloudType: 'elongated' as const },
-    { position: [175, 26, -20] as [number, number, number], scale: 7.0, speed: 0.38, seed: 10111, cloudType: 'elongated' as const },
-    { position: [210, -16, 16] as [number, number, number], scale: 5.5, speed: 0.58, seed: 20222, cloudType: 'elongated' as const },
-  ], []);
+  // Generate clouds using algorithm instead of hardcoded values
+  const cloudInstances = useMemo(() => {
+    const clouds = [];
+    const numClouds = 44; // Same number as before
+    const seededRandom = (seed: number) => {
+      let value = seed;
+      return () => {
+        value = (value * 9301 + 49297) % 233280;
+        return value / 233280;
+      };
+    };
+    
+    const masterRandom = seededRandom(12345); // Master seed for consistent generation
+    
+    for (let i = 0; i < numClouds; i++) {
+      // Generate deterministic but varied positions
+      const xRange = 480; // Total range from -240 to 240
+      const x = -240 + (i / (numClouds - 1)) * xRange + (masterRandom() - 0.5) * 80; // Distributed with some randomness
+      const y = -25 + masterRandom() * 65; // Range from -25 to 40
+      const z = -25 + masterRandom() * 50; // Range from -25 to 25
+      
+      // Generate varied scales (3.2 to 9.0 range from original)
+      const scale = 3.2 + masterRandom() * 5.8;
+      
+      // Generate varied speeds (0.2 to 0.8 range from original)
+      const speed = 0.2 + masterRandom() * 0.6;
+      
+      // Generate unique seed for each cloud
+      const seed = Math.floor(masterRandom() * 100000) + 10000;
+      
+      clouds.push({
+        position: [x, y, z] as [number, number, number],
+        scale: Math.round(scale * 10) / 10, // Round to 1 decimal
+        speed: Math.round(speed * 100) / 100, // Round to 2 decimals
+        seed,
+        cloudType: 'elongated' as const
+      });
+    }
+    
+    return clouds;
+  }, []);
   
   return (
     <group position={[0, -20, -600]}>

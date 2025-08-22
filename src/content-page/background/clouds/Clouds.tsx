@@ -143,8 +143,8 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
     const random = seededRandom(seed + 1000); // Different seed for color
     const baseHue = 200; // Blue base
     const hueVariation = (random() - 0.5) * 20; // ±10 hue variation
-    const saturation = 20 + random() * 15; // 20-35% saturation
-    const lightness = 95 + random() * 4; // 95-99% lightness
+    const saturation = 5 + random() * 10; // 5-15% saturation
+    const lightness = 97 + random() * 3; // 97-100% lightness
     
     return `hsl(${baseHue + hueVariation}, ${saturation}%, ${lightness}%)`;
   }, [seed]);

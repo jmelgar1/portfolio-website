@@ -27,7 +27,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 450%;
+  height: 410%;
   /* Space to atmosphere gradient - blue reaches bottom of scroll */
   background: linear-gradient(
     to bottom,
@@ -50,7 +50,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 450%;
+  height: 410%;
   z-index: 1;
   pointer-events: none;
   /* Background scrolls with content and covers all sections */
@@ -108,7 +108,7 @@
 
 .page-content-wrapper {
   position: relative;
-  padding: 0rem 0rem 3rem 3rem;
+  padding: 0rem 0rem 0rem 3rem;
   color: white;
   z-index: 3;
 }

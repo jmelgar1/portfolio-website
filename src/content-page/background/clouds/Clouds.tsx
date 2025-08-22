@@ -204,8 +204,8 @@ const Clouds: React.FC = () => {
       const y = -25 + masterRandom() * 65; // Range from -25 to 40
       const z = -25 + masterRandom() * 50; // Range from -25 to 25
       
-      // Generate varied scales (3.2 to 9.0 range from original)
-      const scale = 3.2 + masterRandom() * 5.8;
+      // Generate varied scales (4.16 to 9.0 range - increased minimum by 30%)
+      const scale = 4.16 + masterRandom() * 4.84;
       
       // Generate varied speeds (0.2 to 0.8 range from original)
       const speed = 0.2 + masterRandom() * 0.6;

@@ -40,18 +40,6 @@ const ExperienceSection = forwardRef<HTMLElement>((props, ref) => {
         "Developed an AI-powered troubleshooting assistant using OpenAI's GPT-3 API to help users diagnose common network/VPN issues",
         "Implemented and automated new network configuration tasks by developing Python scripts that interfaced with network devices via APIs and SSH"
       ]
-    },
-    {
-      title: "Computer Technician",
-      company: "eBryIT. Inc",
-      logo: "eBryIT_LOGO.webp",
-      location: "Kennesaw, Georgia",
-      duration: "June 2021 - October 2021",
-      responsibilities: [
-        "Created responsive websites using HTML5, CSS3, and JavaScript for diverse client portfolio",
-        "Optimized website performance achieving average load times under 2 seconds across all projects",
-        "Collaborated with design team to implement pixel-perfect designs and cross-browser compatibility"
-      ]
     }
   ];
 

@@ -38,10 +38,10 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
     
     for (let i = 0; i < numSpheres; i++) {
       const radius = (1.5 + random() * 2.5) * scale; // Random radius 1.5-4.0
-      const x = (random() - 0.5) * 12 * scale; // Extended X position (doubled)
-      const y = (random() - 0.5) * 4 * scale; // Extended Y position (33% increase)
-      const z = (random() - 0.5) * 2 * scale; // Random Z position
-      const segments = Math.floor(random() * 3) + 6; // 6-8 segments
+      const x = (random() - 0.5) * 8 * scale; // Reduced X spread for more overlap
+      const y = (random() - 0.5) * 3 * scale; // Reduced Y spread for more overlap
+      const z = (random() - 0.5) * 1.5 * scale; // Reduced Z spread for more overlap
+      const segments = Math.floor(random() * 2) + 6; // 6-7 segments (lower poly for better merging)
       
       sphereConfigs.push({
         radius,
@@ -131,10 +131,13 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
       <meshStandardMaterial
         color={cloudColor}
         transparent
-        opacity={0.8}
-        side={THREE.DoubleSide}
+        opacity={0.9}
+        side={THREE.FrontSide}
         roughness={1.0}
         metalness={0.0}
+        depthWrite={false}
+        depthTest={true}
+        alphaTest={0.1}
       />
     </mesh>
   );

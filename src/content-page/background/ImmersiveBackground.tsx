@@ -1,0 +1,111 @@
+import React, { useState, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
+import { Canvas } from "@react-three/fiber";
+import { useOverlay } from "../context/NavigationOverlayContext";
+import Starfield from '../../home-page/stars/star-field/Starfield';
+import AsteroidBelt from './asteroid-belt/AsteroidBelt';
+import DynamicAmbientLight from './lighting/DynamicAmbientLight';
+import MountainTerrain from './planet-terrain/MountainTerrain';
+import Clouds from './clouds/Clouds';
+import "./ImmersiveBackground.css";
+
+interface OverlayPageProps {
+  children: React.ReactNode;
+}
+
+const OverlayPage = ({ children }: OverlayPageProps) => {
+  const navigate = useNavigate();
+  const { closeOverlay } = useOverlay();
+  
+  // Generate a new random seed each time the overlay loads
+  const [terrainSeed] = useState(() => Math.random() * 1000);
+
+  const handleClose = () => {
+    closeOverlay();
+    navigate("/");
+  };
+
+
+  const handleEscapeKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      handleClose();
+    }
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, []);
+
+  return (
+    <div className="overlay-page">
+      <div className="overlay-background" onClick={handleClose} />
+      <div className="overlay-content">
+        <button className="close-button" onClick={handleClose}>
+          ×
+        </button>
+        {/* Scrollable content */}
+        <div className="page-content">
+          {/* Atmospheric gradient background */}
+          <div className="atmospheric-gradient-background"></div>
+          {/* Background that scrolls with content */}
+          <div className="overlay-starfield-background">
+            <Canvas
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              gl={{
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance",
+              }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              <Suspense fallback={null}>
+                <DynamicAmbientLight minIntensity={0.1} maxIntensity={0.7} />
+                
+                {/* Starfield */}
+                <group name="starfield-group">
+                  <Starfield 
+                    staticMode={false}
+                    starCount={800}
+                    enableTwinkling={true}
+                    enableMouseInteraction={false}
+                    fov={6}
+                    cameraPosition={{ x: 0, y: 0, z: 0 }}
+                  />
+                </group>
+                
+                {/* Asteroid Belt */}
+                <group name="asteroid-belt-group">
+                  <AsteroidBelt />
+                </group>
+                
+                {/* Clouds */}
+                <group name="red-cubes-group">
+                  <Clouds />
+                </group>
+                
+                {/* Mountain Terrain */}
+                <group name="mountain-terrain-group">
+                  <MountainTerrain 
+                    position={[0, -310, -1200]}
+                    rotation={[-Math.PI / 2, 0, 0]}
+                    width={420}
+                    length={1150}
+                    maxHeight={400}
+                    segments={500}
+                    seed={terrainSeed}
+                  />
+                </group>
+              </Suspense>
+            </Canvas>
+          </div>
+          <div className="page-content-wrapper">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default OverlayPage;

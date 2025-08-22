@@ -37,6 +37,14 @@ export const useHorizontalScroll = (
     animationFrame.current = requestAnimationFrame(animateScroll);
 
     const handleWheel = (e: WheelEvent) => {
+      // Check if overlay is open by looking for overlay elements
+      const overlayOpen = document.querySelector('.overlay-page') !== null;
+      
+      // If overlay is open, don't prevent default to allow overlay scrolling
+      if (overlayOpen) {
+        return;
+      }
+
       e.preventDefault();
 
       const deltaY = e.deltaY * scrollSensitivity;
@@ -136,8 +144,12 @@ export const useHorizontalScroll = (
       keyScrollInterval.current = null;
     }
 
-    // Update current scroll position directly for section navigation
-    scrollData.current.current = Math.max(0, Math.min(index * 100, maxScroll));
+    // Update both current and previous for instant navigation (no easing)
+    const targetPosition = Math.max(0, Math.min(index * 100, maxScroll));
+    scrollData.current.current = targetPosition;
+    scrollData.current.previous = targetPosition;
+    scrollData.current.rounded = targetPosition;
+    setScrollPosition(targetPosition);
   };
 
   const getCurrentSection = () => Math.floor(scrollPosition / 100);

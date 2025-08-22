@@ -23,10 +23,10 @@ yarn-debug.log*
 yarn-error.log*
 
 .idea
-public/
 /logs/
 CLAUDE.md
 .claude/
 .vscode/
 .claude/settings.local.json
 .claude/settings.local.json
+newbackgroundplans.txt

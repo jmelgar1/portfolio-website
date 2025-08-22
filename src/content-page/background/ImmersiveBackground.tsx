@@ -89,8 +89,8 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
                   <MountainTerrain 
                     position={[0, -310, -1200]}
                     rotation={[-Math.PI / 2, 0, 0]}
-                    width={400}
-                    length={1100}
+                    width={420}
+                    length={1150}
                     maxHeight={400}
                     segments={500}
                     seed={terrainSeed}

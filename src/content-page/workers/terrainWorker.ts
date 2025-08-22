@@ -27,9 +27,9 @@ const lerpColor = (color1: Color, color2: Color, amount: number): Color => ({
 const cloneColor = (color: Color): Color => ({ ...color });
 
 // Define colors (same as original component)
-const baseColor = createColor(0x757573); // Gray (formerly brown areas)
-const patchColor = createColor(0x616159); // Darker gray patches on mountain sides
-const patchColor2 = createColor(0x6e6e68); // Medium gray patches on mountain sides
+const baseColor = createColor(0x656563); // Gray (formerly brown areas) - slightly darker
+const patchColor = createColor(0x515149); // Darker gray patches on mountain sides - slightly darker
+const patchColor2 = createColor(0x5e5e58); // Medium gray patches on mountain sides - slightly darker
 const peakColor = createColor(0x34752a); // Green peaks
 const peakColor2 = createColor(0x317a26); // Darker green for peak variation
 const peakColor3 = createColor(0x2d961d); // Bright green for peak variation

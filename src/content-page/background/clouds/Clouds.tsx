@@ -144,7 +144,7 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
     const baseHue = 200; // Blue base
     const hueVariation = (random() - 0.5) * 20; // ±10 hue variation
     const saturation = 20 + random() * 15; // 20-35% saturation
-    const lightness = 85 + random() * 10; // 85-95% lightness
+    const lightness = 95 + random() * 4; // 95-99% lightness
     
     return `hsl(${baseHue + hueVariation}, ${saturation}%, ${lightness}%)`;
   }, [seed]);
@@ -226,7 +226,7 @@ const Clouds: React.FC = () => {
   }, []);
   
   return (
-    <group position={[0, -20, -600]}>
+    <group position={[0, -10, -600]}>
       {cloudInstances.map((cloud, index) => (
         <Cloud
           key={index}

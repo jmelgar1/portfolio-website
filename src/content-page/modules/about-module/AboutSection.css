@@ -1,0 +1,17 @@
+/* About Section Styles */
+.about-section {
+  position: relative;
+  min-height: 100vh;
+  margin: -1rem -3rem -3rem -3rem; /* Counteract page-content padding */
+}
+
+
+.about-content-wrapper {
+  position: relative;
+  z-index: 2;
+  padding: 1rem 3rem 3rem 3rem; /* Apply padding here for content spacing */
+}
+
+.about-content {
+  max-width: 800px;
+}

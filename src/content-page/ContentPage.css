@@ -1,0 +1,18 @@
+.portfolio-sections section {
+  min-height: 100vh;
+}
+
+.portfolio-sections section:first-child {
+  padding-top: 0.5rem;
+}
+
+.portfolio-sections h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #4da6ff;
+}
+
+.portfolio-sections .content {
+  font-size: 1.2rem;
+  line-height: 1.8;
+}

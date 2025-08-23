@@ -85,13 +85,3 @@ body {
 }
 
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .section-title {
-    font-size: 2rem;
-  }
-
-  .section-content {
-    padding: 0 15px;
-  }
-}

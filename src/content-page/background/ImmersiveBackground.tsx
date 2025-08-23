@@ -49,7 +49,7 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
           {/* Atmospheric gradient background */}
           <div className="atmospheric-gradient-background"></div>
           {/* Background that scrolls with content */}
-          <div className="overlay-starfield-background">
+          <div className="threejs-components-container">
             <Canvas
               camera={{ position: [0, 0, 5], fov: 45 }}
               gl={{

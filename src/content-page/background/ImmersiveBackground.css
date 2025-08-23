@@ -45,7 +45,7 @@
   pointer-events: none;
 }
 
-.overlay-starfield-background {
+.threejs-components-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -109,7 +109,6 @@
 .page-content-wrapper {
   position: relative;
   padding: 0rem 0rem 0rem 3rem;
-  color: white;
   z-index: 3;
 }
 

@@ -1,6 +1,59 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import {
+  RANDOM_MULTIPLIER,
+  RANDOM_INCREMENT,
+  RANDOM_MODULUS,
+  BASE_CLOUD_RADIUS,
+  CLOUD_TYPE_PARAMS,
+  BULGE_PATTERN_STRENGTH,
+  BULGE_RANDOM_STRENGTH,
+  BULGE_NEGATIVE_THRESHOLD,
+  BULGE_NEGATIVE_FACTOR,
+  BULGE_PHI_MULTIPLIER,
+  DISPLACEMENT_WEIGHT_2,
+  DISPLACEMENT_WEIGHT_3,
+  WARP_STRENGTH,
+  WARP_PHI_MULTIPLIER,
+  WARP_THETA_MULTIPLIER,
+  COLOR_SEED_OFFSET,
+  BASE_HUE,
+  HUE_VARIATION_RANGE,
+  SATURATION_BASE,
+  SATURATION_RANGE,
+  LIGHTNESS_BASE,
+  LIGHTNESS_RANGE,
+  ANIMATION_SPEED_MULTIPLIER,
+  RESET_POSITION_RIGHT,
+  RESET_POSITION_LEFT,
+  FLOATING_MOTION_FREQUENCY,
+  FLOATING_MOTION_POSITION_FACTOR,
+  FLOATING_MOTION_AMPLITUDE,
+  CLOUD_OPACITY,
+  CLOUD_ROUGHNESS,
+  CLOUD_METALNESS,
+  CLOUD_ALPHA_TEST,
+  TOTAL_CLOUDS,
+  MASTER_SEED,
+  CLOUD_X_RANGE,
+  CLOUD_X_OFFSET,
+  CLOUD_X_RANDOMNESS,
+  CLOUD_Y_MIN,
+  CLOUD_Y_RANGE,
+  CLOUD_Z_MIN,
+  CLOUD_Z_RANGE,
+  CLOUD_SCALE_MIN,
+  CLOUD_SCALE_RANGE,
+  CLOUD_SPEED_MIN,
+  CLOUD_SPEED_RANGE,
+  CLOUD_SEED_BASE,
+  CLOUD_SEED_RANGE,
+  GROUP_Y_OFFSET,
+  GROUP_Z_OFFSET,
+  SCALE_PRECISION_MULTIPLIER,
+  SPEED_PRECISION_MULTIPLIER,
+} from './cloudConstants';
 
 // Individual Cloud Component
 interface CloudProps {
@@ -18,8 +71,8 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
   const seededRandom = (seed: number) => {
     let value = seed;
     return () => {
-      value = (value * 9301 + 49297) % 233280;
-      return value / 233280;
+      value = (value * RANDOM_MULTIPLIER + RANDOM_INCREMENT) % RANDOM_MODULUS;
+      return value / RANDOM_MODULUS;
     };
   };
   
@@ -32,51 +85,51 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
       switch (type) {
         case 'puffy':
           return {
-            segments: Math.floor(random() * 4) + 14,
-            noiseScale1: 0.4 + random() * 0.5,
-            noiseScale2: 0.2 + random() * 0.3,
-            noiseScale3: 0.05 + random() * 0.1,
-            flattenAmount: 0.85 + random() * 0.1, // Reduced flattening: 0.85-0.95
-            asymmetryX: 0.8 + random() * 0.4, // 0.8-1.2 asymmetric blob
-            asymmetryY: 0.9 + random() * 0.2, // 0.9-1.1 slight variation
-            asymmetryZ: 0.8 + random() * 0.4, // 0.8-1.2 asymmetric blob
-            bulgeFreq: Math.floor(random() * 3) + 2, // 2-4 bulges around cloud
+            segments: Math.floor(random() * CLOUD_TYPE_PARAMS.PUFFY.SEGMENTS_RANGE) + CLOUD_TYPE_PARAMS.PUFFY.SEGMENTS_MIN,
+            noiseScale1: CLOUD_TYPE_PARAMS.PUFFY.NOISE_SCALE_1_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.NOISE_SCALE_1_RANGE,
+            noiseScale2: CLOUD_TYPE_PARAMS.PUFFY.NOISE_SCALE_2_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.NOISE_SCALE_2_RANGE,
+            noiseScale3: CLOUD_TYPE_PARAMS.PUFFY.NOISE_SCALE_3_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.NOISE_SCALE_3_RANGE,
+            flattenAmount: CLOUD_TYPE_PARAMS.PUFFY.FLATTEN_AMOUNT_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.FLATTEN_AMOUNT_RANGE, // Reduced flattening: 0.85-0.95
+            asymmetryX: CLOUD_TYPE_PARAMS.PUFFY.ASYMMETRY_X_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.ASYMMETRY_X_RANGE, // 0.8-1.2 asymmetric blob
+            asymmetryY: CLOUD_TYPE_PARAMS.PUFFY.ASYMMETRY_Y_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.ASYMMETRY_Y_RANGE, // 0.9-1.1 slight variation
+            asymmetryZ: CLOUD_TYPE_PARAMS.PUFFY.ASYMMETRY_Z_BASE + random() * CLOUD_TYPE_PARAMS.PUFFY.ASYMMETRY_Z_RANGE, // 0.8-1.2 asymmetric blob
+            bulgeFreq: Math.floor(random() * CLOUD_TYPE_PARAMS.PUFFY.BULGE_FREQ_RANGE) + CLOUD_TYPE_PARAMS.PUFFY.BULGE_FREQ_MIN, // 2-4 bulges around cloud
           };
         case 'wispy':
           return {
-            segments: Math.floor(random() * 3) + 10,
-            noiseScale1: 0.6 + random() * 0.8,
-            noiseScale2: 0.3 + random() * 0.4,
-            noiseScale3: 0.1 + random() * 0.2,
-            flattenAmount: 0.7 + random() * 0.2, // Less extreme: 0.7-0.9
-            asymmetryX: 1.5 + random() * 0.8, // 1.5-2.3 stretched blob
-            asymmetryY: 0.4 + random() * 0.3, // 0.4-0.7 thinner
-            asymmetryZ: 0.7 + random() * 0.4, // 0.7-1.1 varied depth
-            bulgeFreq: Math.floor(random() * 2) + 1, // 1-2 main wisps
+            segments: Math.floor(random() * CLOUD_TYPE_PARAMS.WISPY.SEGMENTS_RANGE) + CLOUD_TYPE_PARAMS.WISPY.SEGMENTS_MIN,
+            noiseScale1: CLOUD_TYPE_PARAMS.WISPY.NOISE_SCALE_1_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.NOISE_SCALE_1_RANGE,
+            noiseScale2: CLOUD_TYPE_PARAMS.WISPY.NOISE_SCALE_2_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.NOISE_SCALE_2_RANGE,
+            noiseScale3: CLOUD_TYPE_PARAMS.WISPY.NOISE_SCALE_3_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.NOISE_SCALE_3_RANGE,
+            flattenAmount: CLOUD_TYPE_PARAMS.WISPY.FLATTEN_AMOUNT_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.FLATTEN_AMOUNT_RANGE, // Less extreme: 0.7-0.9
+            asymmetryX: CLOUD_TYPE_PARAMS.WISPY.ASYMMETRY_X_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.ASYMMETRY_X_RANGE, // 1.5-2.3 stretched blob
+            asymmetryY: CLOUD_TYPE_PARAMS.WISPY.ASYMMETRY_Y_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.ASYMMETRY_Y_RANGE, // 0.4-0.7 thinner
+            asymmetryZ: CLOUD_TYPE_PARAMS.WISPY.ASYMMETRY_Z_BASE + random() * CLOUD_TYPE_PARAMS.WISPY.ASYMMETRY_Z_RANGE, // 0.7-1.1 varied depth
+            bulgeFreq: Math.floor(random() * CLOUD_TYPE_PARAMS.WISPY.BULGE_FREQ_RANGE) + CLOUD_TYPE_PARAMS.WISPY.BULGE_FREQ_MIN, // 1-2 main wisps
           };
         case 'dense':
           return {
-            segments: Math.floor(random() * 3) + 16,
-            noiseScale1: 0.2 + random() * 0.3,
-            noiseScale2: 0.1 + random() * 0.15,
-            noiseScale3: 0.02 + random() * 0.05,
-            flattenAmount: 0.9 + random() * 0.08, // Minimal: 0.9-0.98
-            asymmetryX: 0.85 + random() * 0.3, // 0.85-1.15 compact blob
-            asymmetryY: 1.0 + random() * 0.3, // 1.0-1.3 slightly taller
-            asymmetryZ: 0.85 + random() * 0.3, // 0.85-1.15 compact blob
-            bulgeFreq: Math.floor(random() * 4) + 3, // 3-6 dense bumps
+            segments: Math.floor(random() * CLOUD_TYPE_PARAMS.DENSE.SEGMENTS_RANGE) + CLOUD_TYPE_PARAMS.DENSE.SEGMENTS_MIN,
+            noiseScale1: CLOUD_TYPE_PARAMS.DENSE.NOISE_SCALE_1_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.NOISE_SCALE_1_RANGE,
+            noiseScale2: CLOUD_TYPE_PARAMS.DENSE.NOISE_SCALE_2_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.NOISE_SCALE_2_RANGE,
+            noiseScale3: CLOUD_TYPE_PARAMS.DENSE.NOISE_SCALE_3_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.NOISE_SCALE_3_RANGE,
+            flattenAmount: CLOUD_TYPE_PARAMS.DENSE.FLATTEN_AMOUNT_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.FLATTEN_AMOUNT_RANGE, // Minimal: 0.9-0.98
+            asymmetryX: CLOUD_TYPE_PARAMS.DENSE.ASYMMETRY_X_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.ASYMMETRY_X_RANGE, // 0.85-1.15 compact blob
+            asymmetryY: CLOUD_TYPE_PARAMS.DENSE.ASYMMETRY_Y_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.ASYMMETRY_Y_RANGE, // 1.0-1.3 slightly taller
+            asymmetryZ: CLOUD_TYPE_PARAMS.DENSE.ASYMMETRY_Z_BASE + random() * CLOUD_TYPE_PARAMS.DENSE.ASYMMETRY_Z_RANGE, // 0.85-1.15 compact blob
+            bulgeFreq: Math.floor(random() * CLOUD_TYPE_PARAMS.DENSE.BULGE_FREQ_RANGE) + CLOUD_TYPE_PARAMS.DENSE.BULGE_FREQ_MIN, // 3-6 dense bumps
           };
         case 'elongated':
           return {
-            segments: Math.floor(random() * 4) + 12,
-            noiseScale1: 0.3 + random() * 0.4,
-            noiseScale2: 0.15 + random() * 0.25,
-            noiseScale3: 0.05 + random() * 0.1,
-            flattenAmount: 0.8 + random() * 0.15, // Moderate: 0.8-0.95
-            asymmetryX: 2.0 + random() * 1.0, // 2.0-3.0 very stretched
-            asymmetryY: 0.6 + random() * 0.3, // 0.6-0.9 lower profile
-            asymmetryZ: 0.8 + random() * 0.3, // 0.8-1.1 varied depth
-            bulgeFreq: Math.floor(random() * 3) + 2, // 2-4 elongated segments
+            segments: Math.floor(random() * CLOUD_TYPE_PARAMS.ELONGATED.SEGMENTS_RANGE) + CLOUD_TYPE_PARAMS.ELONGATED.SEGMENTS_MIN,
+            noiseScale1: CLOUD_TYPE_PARAMS.ELONGATED.NOISE_SCALE_1_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.NOISE_SCALE_1_RANGE,
+            noiseScale2: CLOUD_TYPE_PARAMS.ELONGATED.NOISE_SCALE_2_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.NOISE_SCALE_2_RANGE,
+            noiseScale3: CLOUD_TYPE_PARAMS.ELONGATED.NOISE_SCALE_3_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.NOISE_SCALE_3_RANGE,
+            flattenAmount: CLOUD_TYPE_PARAMS.ELONGATED.FLATTEN_AMOUNT_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.FLATTEN_AMOUNT_RANGE, // Moderate: 0.8-0.95
+            asymmetryX: CLOUD_TYPE_PARAMS.ELONGATED.ASYMMETRY_X_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.ASYMMETRY_X_RANGE, // 2.0-3.0 very stretched
+            asymmetryY: CLOUD_TYPE_PARAMS.ELONGATED.ASYMMETRY_Y_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.ASYMMETRY_Y_RANGE, // 0.6-0.9 lower profile
+            asymmetryZ: CLOUD_TYPE_PARAMS.ELONGATED.ASYMMETRY_Z_BASE + random() * CLOUD_TYPE_PARAMS.ELONGATED.ASYMMETRY_Z_RANGE, // 0.8-1.1 varied depth
+            bulgeFreq: Math.floor(random() * CLOUD_TYPE_PARAMS.ELONGATED.BULGE_FREQ_RANGE) + CLOUD_TYPE_PARAMS.ELONGATED.BULGE_FREQ_MIN, // 2-4 elongated segments
           };
         default:
           return getCloudTypeParams('puffy');
@@ -84,7 +137,7 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
     };
     
     const params = getCloudTypeParams(cloudType);
-    const geometry = new THREE.SphereGeometry(2 * scale, params.segments, params.segments);
+    const geometry = new THREE.SphereGeometry(BASE_CLOUD_RADIUS * scale, params.segments, params.segments);
     const positions = geometry.attributes.position.array as Float32Array;
     
     // Apply deformation to create varied blob-like cloud shapes
@@ -97,8 +150,8 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
       const phi = Math.acos(vertex.y / distance); // Vertical angle
       
       // Create bulge patterns based on cloud type
-      const bulgePattern = Math.sin(theta * params.bulgeFreq) * Math.sin(phi * params.bulgeFreq * 0.7);
-      const bulgeFactor = 1.0 + (bulgePattern * 0.3 + random() * 0.2) * (random() > 0.3 ? 1 : -0.5);
+      const bulgePattern = Math.sin(theta * params.bulgeFreq) * Math.sin(phi * params.bulgeFreq * BULGE_PHI_MULTIPLIER);
+      const bulgeFactor = 1.0 + (bulgePattern * BULGE_PATTERN_STRENGTH + random() * BULGE_RANDOM_STRENGTH) * (random() > BULGE_NEGATIVE_THRESHOLD ? 1 : BULGE_NEGATIVE_FACTOR);
       
       // Multiple layers of displacement for organic shape
       const displacement1 = (random() - 0.5) * params.noiseScale1 * scale * bulgeFactor;
@@ -106,7 +159,7 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
       const displacement3 = (random() - 0.5) * params.noiseScale3 * scale;
       
       // Combine displacements with different weights
-      const totalDisplacement = displacement1 + displacement2 * 0.7 + displacement3 * 0.3;
+      const totalDisplacement = displacement1 + displacement2 * DISPLACEMENT_WEIGHT_2 + displacement3 * DISPLACEMENT_WEIGHT_3;
       
       // Apply displacement along the normal direction
       vertex.normalize().multiplyScalar(distance + totalDisplacement);
@@ -122,8 +175,8 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
       vertex.y *= params.asymmetryY;
       
       // Add subtle asymmetric warping for more organic blob shapes
-      const warpX = Math.sin(phi * 2) * 0.1 * scale * (random() - 0.5);
-      const warpZ = Math.cos(theta * 1.5) * 0.1 * scale * (random() - 0.5);
+      const warpX = Math.sin(phi * WARP_PHI_MULTIPLIER) * WARP_STRENGTH * scale * (random() - 0.5);
+      const warpZ = Math.cos(theta * WARP_THETA_MULTIPLIER) * WARP_STRENGTH * scale * (random() - 0.5);
       vertex.x += warpX;
       vertex.z += warpZ;
       
@@ -140,11 +193,11 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
   
   // Generate random cloud color variation using seed
   const cloudColor = useMemo(() => {
-    const random = seededRandom(seed + 1000); // Different seed for color
-    const baseHue = 200; // Blue base
-    const hueVariation = (random() - 0.5) * 20; // ±10 hue variation
-    const saturation = 5 + random() * 10; // 5-15% saturation
-    const lightness = 97 + random() * 3; // 97-100% lightness
+    const random = seededRandom(seed + COLOR_SEED_OFFSET); // Different seed for color
+    const baseHue = BASE_HUE; // Blue base
+    const hueVariation = (random() - 0.5) * HUE_VARIATION_RANGE; // ±10 hue variation
+    const saturation = SATURATION_BASE + random() * SATURATION_RANGE; // 5-15% saturation
+    const lightness = LIGHTNESS_BASE + random() * LIGHTNESS_RANGE; // 97-100% lightness
     
     return `hsl(${baseHue + hueVariation}, ${saturation}%, ${lightness}%)`;
   }, [seed]);
@@ -153,15 +206,15 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
   // Animation loop for left-to-right movement
   useFrame((state, delta) => {
     if (meshRef.current) {
-      meshRef.current.position.x += speed * delta * 10;
+      meshRef.current.position.x += speed * delta * ANIMATION_SPEED_MULTIPLIER;
       
       // Reset position when cloud moves too far right (accounting for cloud width)
-      if (meshRef.current.position.x > 150) {
-        meshRef.current.position.x = -150;
+      if (meshRef.current.position.x > RESET_POSITION_RIGHT) {
+        meshRef.current.position.x = RESET_POSITION_LEFT;
       }
       
       // Add subtle floating motion
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.5 + position[0] * 0.1) * 0.5;
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * FLOATING_MOTION_FREQUENCY + position[0] * FLOATING_MOTION_POSITION_FACTOR) * FLOATING_MOTION_AMPLITUDE;
     }
   });
   
@@ -170,13 +223,13 @@ const Cloud: React.FC<CloudProps> = ({ position, scale = 1, speed = 0.5, seed = 
       <meshStandardMaterial
         color={cloudColor}
         transparent
-        opacity={0.9}
+        opacity={CLOUD_OPACITY}
         side={THREE.FrontSide}
-        roughness={1.0}
-        metalness={0.0}
+        roughness={CLOUD_ROUGHNESS}
+        metalness={CLOUD_METALNESS}
         depthWrite={false}
         depthTest={true}
-        alphaTest={0.1}
+        alphaTest={CLOUD_ALPHA_TEST}
       />
     </mesh>
   );
@@ -186,37 +239,37 @@ const Clouds: React.FC = () => {
   // Generate clouds using algorithm instead of hardcoded values
   const cloudInstances = useMemo(() => {
     const clouds = [];
-    const numClouds = 44; // Same number as before
+    const numClouds = TOTAL_CLOUDS; // Same number as before
     const seededRandom = (seed: number) => {
       let value = seed;
       return () => {
-        value = (value * 9301 + 49297) % 233280;
-        return value / 233280;
+        value = (value * RANDOM_MULTIPLIER + RANDOM_INCREMENT) % RANDOM_MODULUS;
+        return value / RANDOM_MODULUS;
       };
     };
     
-    const masterRandom = seededRandom(12345); // Master seed for consistent generation
+    const masterRandom = seededRandom(MASTER_SEED); // Master seed for consistent generation
     
     for (let i = 0; i < numClouds; i++) {
       // Generate deterministic but varied positions
-      const xRange = 480; // Total range from -240 to 240
-      const x = -240 + (i / (numClouds - 1)) * xRange + (masterRandom() - 0.5) * 80; // Distributed with some randomness
-      const y = -25 + masterRandom() * 65; // Range from -25 to 40
-      const z = -25 + masterRandom() * 50; // Range from -25 to 25
+      const xRange = CLOUD_X_RANGE; // Total range from -240 to 240
+      const x = CLOUD_X_OFFSET + (i / (numClouds - 1)) * xRange + (masterRandom() - 0.5) * CLOUD_X_RANDOMNESS; // Distributed with some randomness
+      const y = CLOUD_Y_MIN + masterRandom() * CLOUD_Y_RANGE; // Range from -25 to 40
+      const z = CLOUD_Z_MIN + masterRandom() * CLOUD_Z_RANGE; // Range from -25 to 25
       
       // Generate varied scales (4.16 to 9.0 range - increased minimum by 30%)
-      const scale = 4.16 + masterRandom() * 4.84;
+      const scale = CLOUD_SCALE_MIN + masterRandom() * CLOUD_SCALE_RANGE;
       
       // Generate varied speeds (0.2 to 0.8 range from original)
-      const speed = 0.2 + masterRandom() * 0.6;
+      const speed = CLOUD_SPEED_MIN + masterRandom() * CLOUD_SPEED_RANGE;
       
       // Generate unique seed for each cloud
-      const seed = Math.floor(masterRandom() * 100000) + 10000;
+      const seed = Math.floor(masterRandom() * CLOUD_SEED_RANGE) + CLOUD_SEED_BASE;
       
       clouds.push({
         position: [x, y, z] as [number, number, number],
-        scale: Math.round(scale * 10) / 10, // Round to 1 decimal
-        speed: Math.round(speed * 100) / 100, // Round to 2 decimals
+        scale: Math.round(scale * SCALE_PRECISION_MULTIPLIER) / SCALE_PRECISION_MULTIPLIER, // Round to 1 decimal
+        speed: Math.round(speed * SPEED_PRECISION_MULTIPLIER) / SPEED_PRECISION_MULTIPLIER, // Round to 2 decimals
         seed,
         cloudType: 'elongated' as const
       });
@@ -226,7 +279,7 @@ const Clouds: React.FC = () => {
   }, []);
   
   return (
-    <group position={[0, -10, -600]}>
+    <group position={[0, GROUP_Y_OFFSET, GROUP_Z_OFFSET]}>
       {cloudInstances.map((cloud, index) => (
         <Cloud
           key={index}

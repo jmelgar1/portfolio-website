@@ -4,9 +4,7 @@ import "./SocialButtons.css";
 
 const GITHUB_URL = "https://github.com/jmelgar1"; 
 const LINKEDIN_URL = "https://www.linkedin.com/in/josh-melgar/";
-const PORTFOLIO_SERVICE = import.meta.env.VITE_PORTFOLIO_SERVICE;
-const RESUME_ENDPOINT = import.meta.env.VITE_RESUME_URL;
-const RESUME_URL = `${PORTFOLIO_SERVICE}${RESUME_ENDPOINT}`;
+const RESUME_URL = import.meta.env.VITE_RESUME_URL;
 
 const SocialButtons = () => {
   const handleResumeClick = async () => {

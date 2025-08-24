@@ -21,9 +21,10 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   const [terrainSeed] = useState(() => Math.random() * 1000);
   
   // Refs for dynamic height calculation
-  const pageContentRef = useRef<HTMLDivElement>(null);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
   const threejsContainerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState('430vh');
+  const [gradientHeight, setGradientHeight] = useState('430vh');
 
   const handleClose = () => {
     closeOverlay();
@@ -39,9 +40,10 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
 
   // Function to update Three.js container height based on content
   const updateContainerHeight = () => {
-    if (pageContentRef.current) {
-      const contentHeight = pageContentRef.current.scrollHeight;
+    if (contentWrapperRef.current) {
+      const contentHeight = contentWrapperRef.current.scrollHeight;
       setContainerHeight(`${contentHeight}px`);
+      setGradientHeight(`${contentHeight}px`);
     }
   };
 
@@ -82,9 +84,9 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
           ×
         </button>
         {/* Scrollable content */}
-        <div className="page-content" ref={pageContentRef}>
+        <div className="page-content">
           {/* Atmospheric gradient background */}
-          <div className="atmospheric-gradient-background"></div>
+          <div className="atmospheric-gradient-background" style={{ height: gradientHeight }}></div>
           {/* Background that scrolls with content */}
           <div 
             className="threejs-components-container"
@@ -140,7 +142,7 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
               </Suspense>
             </Canvas>
           </div>
-          <div className="page-content-wrapper">
+          <div className="page-content-wrapper" ref={contentWrapperRef}>
             {children}
           </div>
         </div>

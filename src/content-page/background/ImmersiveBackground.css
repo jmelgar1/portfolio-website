@@ -28,7 +28,6 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 3900px;
   /* Space to atmosphere gradient - blue reaches bottom of scroll */
   background: linear-gradient(
     to bottom,
@@ -53,8 +52,6 @@
   width: 100vw;
   z-index: 1;
   pointer-events: none;
-  /* Background scrolls with content and covers all sections */
-  /* Height is now dynamically set via JavaScript */
 }
 
 .overlay-content {

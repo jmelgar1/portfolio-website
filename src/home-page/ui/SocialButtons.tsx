@@ -4,11 +4,25 @@ import "./SocialButtons.css";
 
 const GITHUB_URL = "https://github.com/jmelgar1"; 
 const LINKEDIN_URL = "https://www.linkedin.com/in/josh-melgar/";
+const RESUME_URL = import.meta.env.VITE_RESUME_URL;
 
 const SocialButtons = () => {
+  const handleResumeClick = async () => {
+    try {
+      const response = await fetch(RESUME_URL);
+      const data = await response.json();
+      
+      if (data.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error fetching resume URL:', error);
+    }
+  };
+
   return (
     <div className="bottom-left-buttons">
-      <button className="resume-button">
+      <button className="resume-button" onClick={handleResumeClick}>
         MY RESUME
       </button>
       <button 

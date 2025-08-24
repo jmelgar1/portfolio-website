@@ -8,6 +8,13 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      '/api': {
+        target: 'https://portfolio-api-dev.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      }
+    }
   },
   build: {
     outDir: "build",

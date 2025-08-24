@@ -1,6 +1,6 @@
 export interface EnvConfig {
   apiUrl: string;
-  environment: 'local' | 'development' | 'production';
+  environment: 'local' | 'dev' | 'prod';
 }
 
 const getEnvConfig = (): EnvConfig => {
@@ -13,7 +13,7 @@ const getEnvConfig = (): EnvConfig => {
 
   return {
     apiUrl,
-    environment: environment || 'development',
+    environment: environment || 'dev',
   };
 };
 

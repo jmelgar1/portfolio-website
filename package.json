@@ -21,9 +21,12 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
+    "start": "vite --mode local",
+    "dev": "vite --mode dev",
+    "dev:local": "vite --mode local",
+    "build": "vite build --mode prod",
+    "build:dev": "vite build --mode dev",
+    "build:local": "vite build --mode local",
     "preview": "vite preview",
     "test": "vitest"
   },

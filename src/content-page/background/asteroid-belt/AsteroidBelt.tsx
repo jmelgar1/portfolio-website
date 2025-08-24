@@ -1,6 +1,33 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import {
+  ASTEROID_COUNT,
+  ASTEROID_SIZE_MIN,
+  ASTEROID_SIZE_MAX,
+  ASTEROID_BASE_RADIUS,
+  ASTEROID_SPEED_MIN,
+  ASTEROID_SPEED_VARIATION,
+  ASTEROID_DENSITY,
+  DAMPING_FACTOR,
+  SPAWN_AREA,
+  TARGET_AREA,
+  HORIZONTAL_PATH,
+  EXIT_BOUNDARIES,
+  COLLISION_DETECTION_FACTOR,
+  COLLISION_SEPARATION_FACTOR,
+  COLLISION_COOLDOWN_MS,
+  COLLISION_RESTITUTION,
+  SEPARATION_FORCE_MULTIPLIER,
+  NOISE_CONFIG,
+  SPHERE_GEOMETRY,
+  ROTATION_SPEED_MULTIPLIER,
+  FADE_ANIMATION,
+  ASTEROID_MATERIAL,
+  DIRECTIONAL_LIGHT,
+  DISTRIBUTION,
+  MASS_CALCULATION
+} from './asteroidConstants';
 
 interface AsteroidData {
   id: number;
@@ -138,7 +165,7 @@ function createAsteroidGeometry(seed: number, baseRadius: number = 0.5): THREE.B
   const noise = sharedNoise;
   
   // Create base sphere geometry with moderate detail for performance
-  const geometry = new THREE.SphereGeometry(baseRadius, 16, 12);
+  const geometry = new THREE.SphereGeometry(baseRadius, SPHERE_GEOMETRY.WIDTH_SEGMENTS, SPHERE_GEOMETRY.HEIGHT_SEGMENTS);
   const positionAttribute = geometry.getAttribute('position');
   const positions = positionAttribute.array as Float32Array;
   
@@ -149,18 +176,18 @@ function createAsteroidGeometry(seed: number, baseRadius: number = 0.5): THREE.B
     const z = positions[i + 2];
     
     // Create seeded variation by offsetting noise coordinates
-    const seedOffset = seed * 1000;
-    const noiseScale = 3.0;
-    const displacementScale = 0.15;
+    const seedOffset = seed * NOISE_CONFIG.SEED_OFFSET_MULTIPLIER;
+    const noiseScale = NOISE_CONFIG.SCALE;
+    const displacementScale = NOISE_CONFIG.DISPLACEMENT_SCALE;
     
     // Generate fractal noise for realistic asteroid surface
     const displacement = noise.fractalNoise3D(
       (x + seedOffset) * noiseScale,
       (y + seedOffset) * noiseScale,
       (z + seedOffset) * noiseScale,
-      3, // octaves
-      0.6, // persistence
-      2.0  // lacunarity
+      NOISE_CONFIG.OCTAVES,
+      NOISE_CONFIG.PERSISTENCE,
+      NOISE_CONFIG.LACUNARITY
     ) * displacementScale;
     
     // Calculate normalized direction and apply displacement
@@ -188,13 +215,13 @@ function checkCollision(a1: AsteroidData, a2: AsteroidData): boolean {
   const dy = a1.position.y - a2.position.y;
   const dz = a1.position.z - a2.position.z;
   const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  const minDistance = (a1.size + a2.size) * 0.35; // Very tight collision detection - asteroids actually touch
+  const minDistance = (a1.size + a2.size) * COLLISION_DETECTION_FACTOR; // Very tight collision detection - asteroids actually touch
   return distance < minDistance;
 }
 
 function handleCollision(a1: AsteroidData, a2: AsteroidData, currentTime: number): void {
   // Collision cooldown to prevent rapid re-collision (60fps = ~16.67ms per frame)
-  const collisionCooldown = 100; // 100ms cooldown
+  const collisionCooldown = COLLISION_COOLDOWN_MS;
   if (currentTime - a1.lastCollisionTime < collisionCooldown || 
       currentTime - a2.lastCollisionTime < collisionCooldown) {
     return;
@@ -208,8 +235,8 @@ function handleCollision(a1: AsteroidData, a2: AsteroidData, currentTime: number
   
   if (distance === 0) {
     // Handle edge case where asteroids are at exactly the same position
-    a1.velocity.x += (Math.random() - 0.5) * 2;
-    a2.velocity.x -= (Math.random() - 0.5) * 2;
+    a1.velocity.x += (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER;
+    a2.velocity.x -= (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER;
     return;
   }
   
@@ -230,7 +257,7 @@ function handleCollision(a1: AsteroidData, a2: AsteroidData, currentTime: number
   if (dvn > 0) return;
   
   // Collision restitution (how bouncy the collision is)
-  const restitution = 0.5; // Slightly more bouncy for better visual feedback
+  const restitution = COLLISION_RESTITUTION; // Slightly more bouncy for better visual feedback
   
   // Simplified mass calculation for better performance
   const totalMass = a1.mass + a2.mass;
@@ -252,11 +279,11 @@ function handleCollision(a1: AsteroidData, a2: AsteroidData, currentTime: number
   a2.velocity.z += impulseZ / a2.mass;
   
   // Gentle separation using velocity adjustment instead of position manipulation
-  const minDistance = (a1.size + a2.size) * 0.4;
+  const minDistance = (a1.size + a2.size) * COLLISION_SEPARATION_FACTOR;
   const overlap = minDistance - distance;
   if (overlap > 0) {
     // Apply gentle separation force through velocity, not position
-    const separationForce = overlap * 2.0; // Gentle separation multiplier
+    const separationForce = overlap * SEPARATION_FORCE_MULTIPLIER; // Gentle separation multiplier
     const a1Ratio = a2.mass / totalMass;
     const a2Ratio = a1.mass / totalMass;
     
@@ -284,48 +311,48 @@ const AsteroidBelt: React.FC = () => {
   useMemo(() => {
     asteroidData.current = [];
     
-    // Generate 59 irregular positions along the path
+    // Generate irregular positions along the path
     const positions: number[] = [];
-    for (let i = 0; i < 59; i++) {
+    for (let i = 0; i < ASTEROID_COUNT; i++) {
       // Create clusters and gaps for more realistic distribution
-      const baseProgress = i / 58;
-      const clusterVariation = (Math.random() - 0.5) * 0.03; // Small random variation
+      const baseProgress = i / (ASTEROID_COUNT - 1);
+      const clusterVariation = (Math.random() - 0.5) * DISTRIBUTION.CLUSTER_VARIATION; // Small random variation
       positions.push(Math.max(0, Math.min(1, baseProgress + clusterVariation)));
     }
     positions.sort((a, b) => a - b); // Ensure they're ordered
     
-    for (let i = 0; i < 59; i++) {
+    for (let i = 0; i < ASTEROID_COUNT; i++) {
       const progress = positions[i]; // Use irregular spacing for initial distribution
-      const size = 0.15 + Math.random() * 0.4;
+      const size = ASTEROID_SIZE_MIN + Math.random() * (ASTEROID_SIZE_MAX - ASTEROID_SIZE_MIN);
       const seed = Math.random();
       
       // For initial spawn: distribute along the horizontal path for immediate visibility
-      const horizontalPathStartX = -25;  // Left side off-screen
-      const horizontalPathEndX = 25;     // Right side off-screen
-      const horizontalPathY = 7;         // Center Y position between sections
-      const horizontalPathYVariation = 2; // Y variation range (+/- 1 unit)
+      const horizontalPathStartX = HORIZONTAL_PATH.START_X;
+      const horizontalPathEndX = HORIZONTAL_PATH.END_X;
+      const horizontalPathY = HORIZONTAL_PATH.CENTER_Y;
+      const horizontalPathYVariation = HORIZONTAL_PATH.Y_VARIATION;
       
       // Position along horizontal path based on progress
-      const initialX = horizontalPathStartX + (progress * (horizontalPathEndX - horizontalPathStartX)) + (Math.random() - 0.5) * 2;
+      const initialX = horizontalPathStartX + (progress * (horizontalPathEndX - horizontalPathStartX)) + (Math.random() - 0.5) * DISTRIBUTION.POSITION_RANDOMNESS;
       const initialY = horizontalPathY + (Math.random() - 0.5) * horizontalPathYVariation;
-      const initialZ = -25;
+      const initialZ = SPAWN_AREA.Z;
       
       // Calculate velocity for horizontal movement (left to right)
-      const targetAreaX = { min: 20, max: 25 }; // Right side off-screen
-      const targetAreaY = { min: 6, max: 8 };  // Same general area as path (tighter spread)
+      const targetAreaX = TARGET_AREA.X;
+      const targetAreaY = TARGET_AREA.Y;
       
-      const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
-      const targetY = targetAreaY.min + Math.random() * (targetAreaY.max - targetAreaY.min);
+      const targetX = targetAreaX.MIN + Math.random() * (targetAreaX.MAX - targetAreaX.MIN);
+      const targetY = targetAreaY.MIN + Math.random() * (targetAreaY.MAX - targetAreaY.MIN);
       
       const directionX = targetX - initialX;
       const directionY = targetY - initialY;
       const distance = Math.sqrt(directionX * directionX + directionY * directionY);
       
-      const speed = 2.0 + Math.random() * 0.8;
+      const speed = ASTEROID_SPEED_MIN + Math.random() * ASTEROID_SPEED_VARIATION;
       
       // Calculate mass based on size
-      const volume = (4/3) * Math.PI * Math.pow(size * 0.25, 3);
-      const density = 2.5;
+      const volume = MASS_CALCULATION.VOLUME_FACTOR * Math.PI * Math.pow(size * MASS_CALCULATION.SIZE_SCALING_FACTOR, 3);
+      const density = ASTEROID_DENSITY;
       const mass = volume * density;
       
       asteroidData.current.push({
@@ -336,17 +363,17 @@ const AsteroidBelt: React.FC = () => {
         size,
         xOffset: 0,
         rotationSpeed: {
-          x: (Math.random() - 0.5) * 2,
-          y: (Math.random() - 0.5) * 2,
-          z: (Math.random() - 0.5) * 2,
+          x: (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER,
+          y: (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER,
+          z: (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER,
         },
         moveSpeed: speed,
-        geometry: createAsteroidGeometry(seed, 0.25),
+        geometry: createAsteroidGeometry(seed, ASTEROID_BASE_RADIUS),
         seed,
         velocity: {
           x: (directionX / distance) * speed,
           y: (directionY / distance) * speed,
-          z: (Math.random() - 0.5) * 0.1,
+          z: (Math.random() - 0.5) * DISTRIBUTION.Z_VARIATION,
         },
         position: {
           x: initialX,
@@ -369,8 +396,8 @@ const AsteroidBelt: React.FC = () => {
       fadeStartTime.current = elapsedTime;
     }
     
-    const fadeDelay = 0.6; // Match the content fade-in delay (0.6s)
-    const fadeDuration = 0.4; // Match the content fade-in duration (0.4s)
+    const fadeDelay = FADE_ANIMATION.DELAY; // Match the content fade-in delay
+    const fadeDuration = FADE_ANIMATION.DURATION; // Match the content fade-in duration
     const timeSinceStart = elapsedTime - fadeStartTime.current;
     
     if (timeSinceStart >= fadeDelay) {
@@ -381,10 +408,10 @@ const AsteroidBelt: React.FC = () => {
     }
     
     // Define exit boundaries that match our new horizontal spawn/target areas
-    const exitTop = 10;      // Above horizontal belt
-    const exitRight = 30;    // Right of target area
-    const exitLeft = -30;    // Left of spawn area  
-    const exitBottom = -10;  // Below horizontal belt
+    const exitTop = EXIT_BOUNDARIES.TOP;
+    const exitRight = EXIT_BOUNDARIES.RIGHT;
+    const exitLeft = EXIT_BOUNDARIES.LEFT;
+    const exitBottom = EXIT_BOUNDARIES.BOTTOM;
     
     // Update each asteroid with straight-line movement
     asteroidData.current.forEach((data) => {
@@ -394,41 +421,41 @@ const AsteroidBelt: React.FC = () => {
       data.position.z += data.velocity.z * delta;
       
       // Only apply very light damping to Z to prevent depth drift
-      data.velocity.z *= 0.998;
+      data.velocity.z *= DAMPING_FACTOR;
       
       // Reset when asteroid exits the screen boundaries
       if (data.position.y > exitTop || data.position.x > exitRight || 
           data.position.x < exitLeft || data.position.y < exitBottom) {
         
         // Define larger spawn area on left side to maintain belt coverage
-        const spawnAreaX = { min: -25, max: -20 }; // Left side off-screen
-        const spawnAreaY = { min: 6, max: 8 }; // Horizontal belt Y range (tighter spread)
-        const spawnAreaZ = -25;
+        const spawnAreaX = SPAWN_AREA.X;
+        const spawnAreaY = SPAWN_AREA.Y;
+        const spawnAreaZ = SPAWN_AREA.Z;
         
         // Target area for horizontal movement (right side)
-        const targetAreaX = { min: 20, max: 25 }; // Right side off-screen
-        const targetAreaY = { min: 6, max: 8 }; // Same horizontal belt Y range (tighter spread)
+        const targetAreaX = TARGET_AREA.X;
+        const targetAreaY = TARGET_AREA.Y;
         
         // Generate completely new asteroid properties (treat as new asteroid)
-        const newSize = 0.15 + Math.random() * 0.4; // New random size
+        const newSize = ASTEROID_SIZE_MIN + Math.random() * (ASTEROID_SIZE_MAX - ASTEROID_SIZE_MIN); // New random size
         const newSeed = Math.random(); // New unique seed
         
         // Calculate new mass based on new size
-        const volume = (4/3) * Math.PI * Math.pow(newSize * 0.25, 3);
-        const density = 2.5;
+        const volume = MASS_CALCULATION.VOLUME_FACTOR * Math.PI * Math.pow(newSize * MASS_CALCULATION.SIZE_SCALING_FACTOR, 3);
+        const density = ASTEROID_DENSITY;
         const newMass = volume * density;
         
         // Spawn in fixed area with separation
-        const spawnX = spawnAreaX.min + Math.random() * (spawnAreaX.max - spawnAreaX.min);
-        const spawnY = spawnAreaY.min + Math.random() * (spawnAreaY.max - spawnAreaY.min);
+        const spawnX = spawnAreaX.MIN + Math.random() * (spawnAreaX.MAX - spawnAreaX.MIN);
+        const spawnY = spawnAreaY.MIN + Math.random() * (spawnAreaY.MAX - spawnAreaY.MIN);
         
         data.position.x = spawnX;
         data.position.y = spawnY;
         data.position.z = spawnAreaZ;
         
         // Calculate velocity vector from spawn position to random target on right side
-        const targetX = targetAreaX.min + Math.random() * (targetAreaX.max - targetAreaX.min);
-        const targetY = targetAreaY.min + Math.random() * (targetAreaY.max - targetAreaY.min);
+        const targetX = targetAreaX.MIN + Math.random() * (targetAreaX.MAX - targetAreaX.MIN);
+        const targetY = targetAreaY.MIN + Math.random() * (targetAreaY.MAX - targetAreaY.MIN);
         
         // Calculate direction vector for horizontal movement
         const directionX = targetX - spawnX;
@@ -436,20 +463,20 @@ const AsteroidBelt: React.FC = () => {
         const distance = Math.sqrt(directionX * directionX + directionY * directionY);
         
         // Normalize and apply consistent speed
-        const speed = 2.0 + Math.random() * 0.8; // Speed between 2.0 and 2.8
+        const speed = ASTEROID_SPEED_MIN + Math.random() * ASTEROID_SPEED_VARIATION; // Speed between 2.0 and 2.8
         data.velocity.x = (directionX / distance) * speed;
         data.velocity.y = (directionY / distance) * speed;
-        data.velocity.z = (Math.random() - 0.5) * 0.1; // Small z variation
+        data.velocity.z = (Math.random() - 0.5) * DISTRIBUTION.Z_VARIATION; // Small z variation
         
         // Update all properties to make this a "new" asteroid
         data.size = newSize;
         data.seed = newSeed;
         data.mass = newMass;
-        data.geometry = createAsteroidGeometry(newSeed, 0.25); // Generate new geometry
+        data.geometry = createAsteroidGeometry(newSeed, ASTEROID_BASE_RADIUS); // Generate new geometry
         data.rotationSpeed = {
-          x: (Math.random() - 0.5) * 2, // New rotation speeds
-          y: (Math.random() - 0.5) * 2,
-          z: (Math.random() - 0.5) * 2,
+          x: (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER, // New rotation speeds
+          y: (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER,
+          z: (Math.random() - 0.5) * ROTATION_SPEED_MULTIPLIER,
         };
         data.lastCollisionTime = 0; // Reset collision timer
       }
@@ -501,22 +528,22 @@ const AsteroidBelt: React.FC = () => {
   // Create realistic asteroid materials
   const asteroidMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(0.4, 0.35, 0.3), // Rocky brownish-gray color
-      roughness: 0.9, // Very rough surface for realistic asteroid appearance
-      metalness: 0.1, // Slight metallic properties for mineral content
+      color: new THREE.Color(ASTEROID_MATERIAL.COLOR.R, ASTEROID_MATERIAL.COLOR.G, ASTEROID_MATERIAL.COLOR.B), // Rocky brownish-gray color
+      roughness: ASTEROID_MATERIAL.ROUGHNESS, // Very rough surface for realistic asteroid appearance
+      metalness: ASTEROID_MATERIAL.METALNESS, // Slight metallic properties for mineral content
       transparent: true, // Enable transparency for fade effect
       opacity: 0, // Start invisible
     });
   }, []);
 
   const asteroids = [];
-  for (let i = 0; i < 59; i++) {
+  for (let i = 0; i < ASTEROID_COUNT; i++) {
     if (asteroidData.current[i]) {
       asteroids.push(
         <mesh 
           key={i}
           ref={(el) => (asteroidRefs.current[i] = el)}
-          position={[0, 0, -25]} // Initial position, will be updated in useFrame
+          position={[0, 0, SPAWN_AREA.Z]} // Initial position, will be updated in useFrame
           geometry={asteroidData.current[i].geometry}
           material={asteroidMaterial}
         />
@@ -528,9 +555,9 @@ const AsteroidBelt: React.FC = () => {
     <>
       {asteroids}
       <directionalLight
-        position={[10, 0, 0]}
-        intensity={0.6}
-        color={0xffffff}
+        position={[DIRECTIONAL_LIGHT.POSITION.X, DIRECTIONAL_LIGHT.POSITION.Y, DIRECTIONAL_LIGHT.POSITION.Z]}
+        intensity={DIRECTIONAL_LIGHT.INTENSITY}
+        color={DIRECTIONAL_LIGHT.COLOR}
         castShadow={false}
       />
     </>

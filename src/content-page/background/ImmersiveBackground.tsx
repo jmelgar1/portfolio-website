@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
 import { useOverlay } from "../context/NavigationOverlayContext";
@@ -19,6 +19,11 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
   
   // Generate a new random seed each time the overlay loads
   const [terrainSeed] = useState(() => Math.random() * 1000);
+  
+  // Refs for dynamic height calculation
+  const pageContentRef = useRef<HTMLDivElement>(null);
+  const threejsContainerRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState('430vh');
 
   const handleClose = () => {
     closeOverlay();
@@ -31,6 +36,38 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
       handleClose();
     }
   };
+
+  // Function to update Three.js container height based on content
+  const updateContainerHeight = () => {
+    if (pageContentRef.current) {
+      const contentHeight = pageContentRef.current.scrollHeight;
+      setContainerHeight(`${contentHeight}px`);
+    }
+  };
+
+  // Update height on mount and when content changes
+  useEffect(() => {
+    // Initial height calculation
+    const timer = setTimeout(updateContainerHeight, 100);
+    
+    // Update on window resize
+    const handleResize = () => {
+      updateContainerHeight();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Update height when children change
+  useEffect(() => {
+    const timer = setTimeout(updateContainerHeight, 100);
+    return () => clearTimeout(timer);
+  }, [children]);
 
   React.useEffect(() => {
     window.addEventListener("keydown", handleEscapeKey);
@@ -45,11 +82,15 @@ const OverlayPage = ({ children }: OverlayPageProps) => {
           ×
         </button>
         {/* Scrollable content */}
-        <div className="page-content">
+        <div className="page-content" ref={pageContentRef}>
           {/* Atmospheric gradient background */}
           <div className="atmospheric-gradient-background"></div>
           {/* Background that scrolls with content */}
-          <div className="threejs-components-container">
+          <div 
+            className="threejs-components-container"
+            ref={threejsContainerRef}
+            style={{ height: containerHeight }}
+          >
             <Canvas
               camera={{ position: [0, 0, 5], fov: 45 }}
               gl={{

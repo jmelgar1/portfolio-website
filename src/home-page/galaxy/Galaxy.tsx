@@ -63,6 +63,16 @@ const Galaxy: React.FC<GalaxyProps> = ({
     seed: number;
   }>({ type: 'spiral', seed: 12345 });
 
+  // Intersection system state
+  const [intersectionState, setIntersectionState] = useState({
+    isIntersecting: false,
+    intersectionCenter: new THREE.Vector3(),
+    intersectionRadius: 5.0, // Increased radius for wider effect
+    intersectionForce: 0
+  });
+  const [originalPositions, setOriginalPositions] = useState<Float32Array | null>(null);
+  const [displacedPositions, setDisplacedPositions] = useState<Float32Array | null>(null);
+
   // Simple random galaxy generation (like Minecraft worlds)
   const generateRandomGalaxy = useMemo(() => {
     return (type: GalaxyType, seed?: number) => {
@@ -184,6 +194,102 @@ const Galaxy: React.FC<GalaxyProps> = ({
     };
   };
 
+  // Proper 3D ray-casting to get accurate intersection with galaxy
+  const getIntersectionPoint = (mouseX: number, mouseY: number): THREE.Vector3 | null => {
+    if (!galaxyRef.current) return null;
+
+    // Create raycaster from camera through mouse position
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(mouseX, mouseY);
+    raycaster.setFromCamera(mouse, camera);
+    
+    // Get galaxy's world position and rotation
+    galaxyRef.current.updateMatrixWorld(true);
+    const galaxyWorldPosition = new THREE.Vector3();
+    galaxyRef.current.getWorldPosition(galaxyWorldPosition);
+    
+    // Create a plane at the galaxy's world position, oriented towards the camera
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    const galaxyPlane = new THREE.Plane(cameraDirection, -cameraDirection.dot(galaxyWorldPosition));
+    
+    // Find intersection point with the galaxy plane
+    const worldIntersection = new THREE.Vector3();
+    const hasIntersection = raycaster.ray.intersectPlane(galaxyPlane, worldIntersection);
+    
+    if (!hasIntersection) return null;
+    
+    // Transform world intersection to galaxy's local space
+    const galaxyWorldMatrixInverse = new THREE.Matrix4();
+    galaxyWorldMatrixInverse.copy(galaxyRef.current.matrixWorld).invert();
+    
+    const localIntersection = worldIntersection.clone();
+    localIntersection.applyMatrix4(galaxyWorldMatrixInverse);
+    
+    return localIntersection;
+  };
+
+  // Check if mouse is intersecting with galaxy bounds (expanded to full screen)
+  const checkGalaxyIntersection = (mouseX: number, mouseY: number): boolean => {
+    // Allow intersection anywhere on screen to cover the full galaxy extent
+    // Galaxy particles can extend quite far, especially during rotations
+    return Math.abs(mouseX) < 1.0 && Math.abs(mouseY) < 1.0; // Full screen coverage
+  };
+
+  // Apply intersection forces to particles (optimized)
+  const applyIntersectionForces = (positions: Float32Array, intersectionCenter: THREE.Vector3, force: number, radius: number): Float32Array => {
+    // Use current positions as the baseline - this allows the effect to work even during transformations
+    const result = new Float32Array(positions.length);
+    result.set(positions); // Start with current positions
+    
+    const radiusSquared = radius * radius; // Avoid sqrt in distance check
+    const centerX = intersectionCenter.x;
+    const centerY = intersectionCenter.y;
+    const centerZ = intersectionCenter.z;
+    
+    let particlesAffected = 0;
+    
+    for (let i = 0; i < positions.length; i += 3) {
+      const particleX = positions[i];
+      const particleY = positions[i + 1];
+      const particleZ = positions[i + 2];
+      
+      // Fast distance squared check
+      const deltaX = particleX - centerX;
+      const deltaY = particleY - centerY;
+      const deltaZ = particleZ - centerZ;
+      const distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+      
+      if (distanceSquared < radiusSquared && distanceSquared > 0.001) { // Avoid division by zero
+        const distance = Math.sqrt(distanceSquared);
+        
+        // Calculate falloff with gentler curve for wider effective area
+        const normalizedDistance = distance / radius;
+        const falloff = Math.pow(1 - normalizedDistance, 1.5); // Gentler falloff for wider effect
+        const pushForce = force * falloff;
+        
+        // Calculate normalized push direction (away from intersection center)
+        const invDistance = 1 / distance;
+        const pushDirX = deltaX * invDistance;
+        const pushDirY = deltaY * invDistance;
+        const pushDirZ = deltaZ * invDistance;
+        
+        // Apply displacement
+        result[i] = particleX + pushDirX * pushForce;
+        result[i + 1] = particleY + pushDirY * pushForce;
+        result[i + 2] = particleZ + pushDirZ * pushForce;
+        
+        particlesAffected++;
+      }
+    }
+    
+    if (particlesAffected > 0) {
+      console.log(`💥 Displaced ${particlesAffected} particles with force ${force.toFixed(2)}`);
+    }
+    
+    return result;
+  };
+
   // Calculate galaxy bounds and dimensions
   const calculateGalaxyBounds = (positions: Float32Array) => {
     if (positions.length === 0) return null;
@@ -225,6 +331,55 @@ const Galaxy: React.FC<GalaxyProps> = ({
     
     return { type: selectedType, seed: randomSeed };
   };
+
+  // Mouse intersection detection
+  useEffect(() => {
+    const isIntersecting = checkGalaxyIntersection(mousePosition.x, mousePosition.y);
+    const intersectionPoint = getIntersectionPoint(mousePosition.x, mousePosition.y);
+    
+    if (isIntersecting && intersectionPoint) {
+      console.log('🎯 Ray-cast intersection:', {
+        mousePos: { x: mousePosition.x.toFixed(3), y: mousePosition.y.toFixed(3) },
+        galaxyWorldPos: galaxyRef.current ? {
+          x: galaxyRef.current.position.x.toFixed(2),
+          y: galaxyRef.current.position.y.toFixed(2),
+          z: galaxyRef.current.position.z.toFixed(2)
+        } : null,
+        galaxyRotation: galaxyRef.current ? {
+          x: (galaxyRef.current.rotation.x * 180 / Math.PI).toFixed(1),
+          y: (galaxyRef.current.rotation.y * 180 / Math.PI).toFixed(1),
+          z: (galaxyRef.current.rotation.z * 180 / Math.PI).toFixed(1)
+        } : null,
+        localIntersection: { 
+          x: intersectionPoint.x.toFixed(2), 
+          y: intersectionPoint.y.toFixed(2), 
+          z: intersectionPoint.z.toFixed(2) 
+        }
+      });
+      
+      setIntersectionState(prev => ({
+        ...prev,
+        isIntersecting: true,
+        intersectionCenter: intersectionPoint,
+        intersectionForce: Math.min(prev.intersectionForce + 0.1, 2.0) // Faster buildup, lower max for testing
+      }));
+    } else {
+      setIntersectionState(prev => ({
+        ...prev,
+        isIntersecting: false,
+        intersectionForce: Math.max(prev.intersectionForce - 0.05, 0) // Faster decay
+      }));
+    }
+  }, [mousePosition]);
+
+  // Store original positions when galaxy changes
+  useEffect(() => {
+    if (currentGalaxy && !originalPositions) {
+      setOriginalPositions(new Float32Array(currentGalaxy.positions));
+    } else if (currentGalaxy && originalPositions) {
+      setOriginalPositions(new Float32Array(currentGalaxy.positions));
+    }
+  }, [currentGalaxy]);
 
   // Simple transformation system
   useEffect(() => {
@@ -415,7 +570,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
       const progress = currentTransformationProgress;
       const gentleProgress = progress; // Linear for smoothness
       
-      const interpolatedPositions = interpolatePositions(
+      let interpolatedPositions = interpolatePositions(
         fromShape.positions,
         toShape.positions,
         gentleProgress,
@@ -438,6 +593,25 @@ const Galaxy: React.FC<GalaxyProps> = ({
         interpolatedPositions[i] += distortionX;
         interpolatedPositions[i + 1] += distortionY; 
         interpolatedPositions[i + 2] += distortionZ;
+      }
+
+      // Apply intersection forces if active (during transformation)
+      if (intersectionState.intersectionForce > 0) {
+        console.log('⚡ Applying intersection force during transformation:', {
+          force: intersectionState.intersectionForce,
+          center: intersectionState.intersectionCenter,
+          radius: intersectionState.intersectionRadius
+        });
+        
+        // Use larger radius during transformations to ensure full coverage
+        const dynamicRadius = Math.max(intersectionState.intersectionRadius, 8.0);
+        
+        interpolatedPositions = applyIntersectionForces(
+          interpolatedPositions,
+          intersectionState.intersectionCenter,
+          intersectionState.intersectionForce,
+          dynamicRadius
+        );
       }
 
       // Update buffer attributes
@@ -470,29 +644,78 @@ const Galaxy: React.FC<GalaxyProps> = ({
           });
         }
       }
-    } else if (onDebugUpdate && positionAttributeRef.current) {
-      // Update debug info for current stable galaxy
-      const positions = positionAttributeRef.current.array as Float32Array;
-      const bounds = calculateGalaxyBounds(positions);
-      if (bounds) {
-        onDebugUpdate({
-          type: currentGalaxyState.type,
-          seed: currentGalaxyState.seed,
-          width: bounds.width,
-          height: bounds.height,
-          depth: bounds.depth,
-          minX: bounds.minX,
-          maxX: bounds.maxX,
-          minY: bounds.minY,
-          maxY: bounds.maxY,
-          minZ: bounds.minZ,
-          maxZ: bounds.maxZ,
-          totalParticles: NUM_STARS,
-          transformationProgress: currentTransformationProgress,
-          mouseVelocity: mouseVelocity,
-          isTransforming: false,
-          cameraInfo: getCameraInfo()
+    } else if (positionAttributeRef.current && originalPositions) {
+      // Handle intersection forces on stable galaxy (no transformation)
+      let currentPositions = positionAttributeRef.current.array as Float32Array;
+      
+      if (intersectionState.intersectionForce > 0) {
+        console.log('⚡ Applying intersection force:', {
+          force: intersectionState.intersectionForce,
+          center: intersectionState.intersectionCenter,
+          radius: intersectionState.intersectionRadius
         });
+        
+        // Use larger radius for stable galaxy to ensure full coverage
+        const dynamicRadius = Math.max(intersectionState.intersectionRadius, 8.0);
+        
+        // Apply intersection forces to current galaxy
+        const newDisplacedPositions = applyIntersectionForces(
+          currentPositions,
+          intersectionState.intersectionCenter,
+          intersectionState.intersectionForce,
+          dynamicRadius
+        );
+        
+        setDisplacedPositions(newDisplacedPositions);
+        positionAttributeRef.current.array.set(newDisplacedPositions);
+        positionAttributeRef.current.needsUpdate = true;
+        currentPositions = newDisplacedPositions;
+      } else if (intersectionState.intersectionForce === 0 && displacedPositions) {
+        // Gradually return to original positions
+        const returnSpeed = 0.05;
+        const returnedPositions = new Float32Array(originalPositions.length);
+        
+        for (let i = 0; i < originalPositions.length; i++) {
+          const current = currentPositions[i];
+          const original = originalPositions[i];
+          const diff = original - current;
+          returnedPositions[i] = current + diff * returnSpeed;
+        }
+        
+        positionAttributeRef.current.array.set(returnedPositions);
+        positionAttributeRef.current.needsUpdate = true;
+        currentPositions = returnedPositions;
+        
+        // Check if we're close enough to original positions to stop the return animation
+        const maxDiff = Math.max(...Array.from(currentPositions).map((pos, i) => Math.abs(pos - originalPositions[i])));
+        if (maxDiff < 0.001) {
+          setDisplacedPositions(null);
+        }
+      }
+      
+      // Update debug info if callback provided
+      if (onDebugUpdate) {
+        const bounds = calculateGalaxyBounds(currentPositions);
+        if (bounds) {
+          onDebugUpdate({
+            type: currentGalaxyState.type,
+            seed: currentGalaxyState.seed,
+            width: bounds.width,
+            height: bounds.height,
+            depth: bounds.depth,
+            minX: bounds.minX,
+            maxX: bounds.maxX,
+            minY: bounds.minY,
+            maxY: bounds.maxY,
+            minZ: bounds.minZ,
+            maxZ: bounds.maxZ,
+            totalParticles: NUM_STARS,
+            transformationProgress: currentTransformationProgress,
+            mouseVelocity: mouseVelocity,
+            isTransforming: false,
+            cameraInfo: getCameraInfo()
+          });
+        }
       }
     }
   });

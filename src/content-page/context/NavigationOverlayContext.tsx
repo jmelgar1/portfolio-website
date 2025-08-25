@@ -24,12 +24,6 @@ interface PreservedGalaxyState {
       positions: number[]; // Float32Array as regular array for serialization
       colors: number[];    // Float32Array as regular array for serialization
     };
-    // Central core particles - exact positions and colors
-    centralCore: {
-      positions: number[];
-      colors: number[];
-      starCount: number;
-    };
     // Current transformation state for interpolation
     currentGalaxyData: {
       positions: number[];

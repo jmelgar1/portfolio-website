@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useContext } from "react";
+import React, { useMemo, useRef, useContext, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { generateStarInFrustum } from "./util";
@@ -40,6 +40,24 @@ const Starfield: React.FC<StarfieldProps> = ({
   const groupRef = useRef<THREE.Group>(null);
   const twinklingMaterialRefs = useRef<(THREE.PointsMaterial | null)[]>([]);
   
+  // Track window dimensions for responsive starfield generation
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+    height: typeof window !== 'undefined' ? window.innerHeight : 1080
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // Safely get mouse position - use context directly and fallback to default if no MouseProvider
   const mouseContext = useContext(MouseContext);
   const mousePosition = mouseContext?.mousePosition || { x: 0, y: 0 };
@@ -49,8 +67,8 @@ const Starfield: React.FC<StarfieldProps> = ({
     const FIXED_DEPTH = 200; // All stars at the same depth level
     const parallaxOffset = staticMode ? 0 : 30; // No parallax expansion for static mode
     
-    // Calculate aspect ratio from viewport or custom value
-    const aspectRatio = customAspectRatio || (viewport ? viewport.width / viewport.height : undefined);
+    // Calculate aspect ratio from window dimensions, custom value, or viewport
+    const aspectRatio = customAspectRatio || (viewport ? viewport.width / viewport.height : windowDimensions.width / windowDimensions.height);
 
     // Create static stars
     const staticPositions = new Float32Array(STATIC_STAR_COUNT * 3);
@@ -86,7 +104,7 @@ const Starfield: React.FC<StarfieldProps> = ({
     }
 
     return { staticPositions, groups };
-  }, [STATIC_STAR_COUNT, TWINKLE_GROUP_COUNT, shouldTwinkle, staticMode, fov, cameraOrientation]);
+  }, [STATIC_STAR_COUNT, TWINKLE_GROUP_COUNT, shouldTwinkle, staticMode, fov, cameraOrientation, windowDimensions.width, windowDimensions.height, customAspectRatio, viewport]);
 
   // Handle mouse-based movement with parallax effect and twinkling animation
   useFrame(({ clock }) => {

@@ -65,6 +65,16 @@ export const MouseProvider: React.FC<MouseProviderProps> = ({ children }) => {
       
       const smoothedVelocity = velocityHistory.current.reduce((sum, v) => sum + v, 0) / velocityHistory.current.length;
       
+      // Debug velocity ranges to help tune damping
+      if (smoothedVelocity > 0.1) {
+        console.log('🐭 Mouse velocity:', {
+          raw: instantVelocity.toFixed(3),
+          smoothed: smoothedVelocity.toFixed(3),
+          distance: distance.toFixed(4),
+          deltaTime: deltaTime + 'ms'
+        });
+      }
+      
       setMousePosition({ x, y });
       setMouseVelocity(smoothedVelocity);
       setLastMouseActivity(currentTime);

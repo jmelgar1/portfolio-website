@@ -10,7 +10,6 @@ import {
   interpolateColors
 } from "./utils/galaxyShapes";
 import { generateOptimizedGalaxyShape, GalaxyPositions } from "./utils/OptimizedGalaxyShapes";
-import { FastSeededRandom } from "./utils/FastSeededRandom";
 import { useMousePosition } from "../stars/star-field/context/MouseContext";
 import { useOverlay } from "../../content-page/context/NavigationOverlayContext";
 import type { CameraInfo } from "../ui/debug/GalaxyDebugOverlay";
@@ -213,7 +212,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
     }
     
     if (particlesAffected > 0) {
-      console.log(`💥 Displaced ${particlesAffected} particles with force ${force.toFixed(2)}`);
+      console.log(`💥 Displaced ${particlesAffected} particles with force ${force.toFixed(2)} (radius: ${radius.toFixed(1)})`);
     }
     
     return result;
@@ -286,11 +285,22 @@ const Galaxy: React.FC<GalaxyProps> = ({
         }
       });
       
+      // Calculate velocity-based force reduction (slower cursor = stronger force)
+      const velocityDamping = Math.max(0.1, 1 - (mouseVelocity * 0.15)); // Significantly higher multiplier
+      const maxForce = 2.0 * velocityDamping; // Scale max force based on velocity
+      
+      console.log('🚀 Velocity-based damping:', {
+        rawVelocity: mouseVelocity.toFixed(3),
+        damping: velocityDamping.toFixed(3),
+        maxForce: maxForce.toFixed(3),
+        reductionPercent: ((1 - velocityDamping) * 100).toFixed(1) + '%'
+      });
+      
       setIntersectionState(prev => ({
         ...prev,
         isIntersecting: true,
         intersectionCenter: intersectionPoint,
-        intersectionForce: Math.min(prev.intersectionForce + 0.1, 2.0) // Faster buildup, lower max for testing
+        intersectionForce: Math.min(prev.intersectionForce + 0.1, maxForce)
       }));
     } else {
       setIntersectionState(prev => ({

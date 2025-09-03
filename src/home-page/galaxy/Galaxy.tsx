@@ -14,6 +14,13 @@ import { useMousePosition } from "../stars/star-field/context/MouseContext";
 import { useOverlay } from "../../content-page/context/NavigationOverlayContext";
 import type { CameraInfo } from "../ui/debug/GalaxyDebugOverlay";
 
+// Orbital motion data structure
+interface OrbitalMotionData {
+  velocities: Float32Array; // Angular velocities for each particle (radians per frame)
+  radii: Float32Array;      // Distance from galactic center for each particle
+  angles: Float32Array;     // Current orbital angles for each particle
+}
+
 interface GalaxyProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
@@ -91,6 +98,11 @@ const Galaxy: React.FC<GalaxyProps> = ({
 
   // Track if component is mounting from preserved state
   const [isRestoringFromPreserved, setIsRestoringFromPreserved] = useState(false);
+
+  // Orbital motion system state
+  const [currentOrbitalMotion, setCurrentOrbitalMotion] = useState<OrbitalMotionData | null>(null);
+  const [targetOrbitalMotion, setTargetOrbitalMotion] = useState<OrbitalMotionData | null>(null);
+  const orbitalTimeRef = useRef<number>(0); // Track orbital animation time
   
 
 
@@ -260,6 +272,178 @@ const Galaxy: React.FC<GalaxyProps> = ({
     return { type: selectedType, seed: randomSeed };
   };
 
+  // Calculate orbital motion data for a galaxy
+  const calculateOrbitalMotion = (positions: Float32Array, galaxyType: GalaxyType): OrbitalMotionData => {
+    const numParticles = positions.length / 3;
+    const velocities = new Float32Array(numParticles);
+    const radii = new Float32Array(numParticles);
+    const angles = new Float32Array(numParticles);
+
+    // Orbital motion parameters based on galaxy type
+    const getOrbitalParams = (type: GalaxyType) => {
+      switch (type) {
+        case 'spiral':
+          return {
+            baseSpeed: 0.01,           // Base orbital speed for spiral galaxies
+            coreStabilityRadius: 1.5,   // Core particles are more stable
+            maxOrbitalRadius: 8.0,      // Beyond this, particles barely rotate
+            velocityDecayPower: 0.6,    // How quickly velocity drops with distance
+            coreSpeedMultiplier: 0.3    // Core moves slower than expected
+          };
+        case 'elliptical':
+          return {
+            baseSpeed: 0.005,           // Ellipticals rotate slower overall
+            coreStabilityRadius: 2.0,   // Larger stable core
+            maxOrbitalRadius: 10.0,     // Larger extent
+            velocityDecayPower: 0.8,    // Steeper velocity decline
+            coreSpeedMultiplier: 0.1    // Very slow core rotation
+          };
+        case 'irregular':
+          return {
+            baseSpeed: 0.003,          // Intermediate speed
+            coreStabilityRadius: 1.0,   // Smaller, more chaotic core
+            maxOrbitalRadius: 6.0,      // Smaller overall
+            velocityDecayPower: 0.5,    // Shallower decay (more chaotic)
+            coreSpeedMultiplier: 0.5    // More active core
+          };
+      }
+    };
+
+    const params = getOrbitalParams(galaxyType);
+
+    for (let i = 0; i < numParticles; i++) {
+      const i3 = i * 3;
+      const x = positions[i3];
+      //NOT USED: const y = positions[i3 + 1];
+      const z = positions[i3 + 2];
+
+      // Calculate distance from galactic center (in XZ plane for primary rotation)
+      const radius = Math.sqrt(x * x + z * z);
+      radii[i] = radius;
+
+      // Calculate initial orbital angle
+      angles[i] = Math.atan2(z, x);
+
+      // Calculate orbital velocity using realistic galactic rotation curve
+      let angularVelocity = 0;
+
+      if (radius < params.coreStabilityRadius) {
+        // Core region: solid body rotation (velocity increases linearly with radius)
+        const normalizedRadius = radius / params.coreStabilityRadius;
+        angularVelocity = params.baseSpeed * params.coreSpeedMultiplier * normalizedRadius;
+      } else if (radius < params.maxOrbitalRadius) {
+        // Outer region: differential rotation (velocity decreases with distance)
+        const beyondCore = radius - params.coreStabilityRadius;
+        const maxBeyondCore = params.maxOrbitalRadius - params.coreStabilityRadius;
+        const normalizedDistance = beyondCore / maxBeyondCore;
+        
+        // Use power law decay for realistic velocity profile
+        const decayFactor = Math.pow(1 - normalizedDistance, params.velocityDecayPower);
+        angularVelocity = params.baseSpeed * decayFactor;
+      } else {
+        // Very distant particles: minimal rotation
+        angularVelocity = params.baseSpeed * 0.05;
+      }
+
+      // Add some randomness to avoid perfectly uniform rotation
+      const randomFactor = 0.8 + Math.random() * 0.4; // ±20% variation
+      angularVelocity *= randomFactor;
+
+      // Ensure all particles rotate in the same direction (counterclockwise when viewed from above)
+      velocities[i] = Math.abs(angularVelocity);
+    }
+
+    return { velocities, radii, angles };
+  };
+
+  // Apply orbital motion to particle positions
+  const applyOrbitalMotion = (
+    positions: Float32Array, 
+    orbitalData: OrbitalMotionData, 
+    deltaTime: number
+  ): Float32Array => {
+    const result = new Float32Array(positions.length);
+    const numParticles = positions.length / 3;
+
+    for (let i = 0; i < numParticles; i++) {
+      const i3 = i * 3;
+      const y = positions[i3 + 1]; // Y position stays mostly unchanged for planar rotation
+
+      const radius = orbitalData.radii[i];
+      
+      // Skip calculation for particles at center or with negligible velocity
+      if (radius < 0.001 || orbitalData.velocities[i] < 0.00001) {
+        // Copy original positions for stationary particles
+        result[i3] = positions[i3];
+        result[i3 + 1] = y;
+        result[i3 + 2] = positions[i3 + 2];
+        continue;
+      }
+      
+      // Calculate updated orbital angle (without modifying the original data)
+      const currentAngle = orbitalData.angles[i];
+      const newAngle = currentAngle + orbitalData.velocities[i] * deltaTime;
+
+      // Calculate new position based on updated orbital angle
+      const newX = radius * Math.cos(newAngle);
+      const newZ = radius * Math.sin(newAngle);
+
+      result[i3] = newX;
+      result[i3 + 1] = y; // Preserve Y position for planar rotation
+      result[i3 + 2] = newZ;
+    }
+
+    return result;
+  };
+
+  // Update orbital angles in place (separate function for managing state)
+  const updateOrbitalAngles = (
+    orbitalData: OrbitalMotionData, 
+    deltaTime: number,
+    intersectionForce: number = 0
+  ): void => {
+    // Early exit if no motion needed
+    if (deltaTime === 0) return;
+    
+    // Reduce orbital motion when intersection forces are active
+    const forceReduction = Math.max(0.1, 1 - intersectionForce * 0.5);
+    const adjustedDeltaTime = deltaTime * forceReduction;
+    
+    // Skip updates if deltaTime is negligible after reduction
+    if (adjustedDeltaTime < 0.0001) return;
+    
+    for (let i = 0; i < orbitalData.angles.length; i++) {
+      // Skip particles with negligible velocity
+      if (orbitalData.velocities[i] < 0.00001) continue;
+      
+      orbitalData.angles[i] += orbitalData.velocities[i] * adjustedDeltaTime;
+      
+      // Keep angles in [0, 2π] range for numerical stability
+      if (orbitalData.angles[i] > Math.PI * 2) {
+        orbitalData.angles[i] -= Math.PI * 2;
+      }
+    }
+  };
+
+  // Interpolate between two orbital motion datasets during transformations
+  const interpolateOrbitalMotion = (
+    from: OrbitalMotionData,
+    to: OrbitalMotionData,
+    progress: number
+  ): OrbitalMotionData => {
+    const velocities = new Float32Array(from.velocities.length);
+    const radii = new Float32Array(from.radii.length);
+    const angles = new Float32Array(from.angles.length);
+
+    for (let i = 0; i < velocities.length; i++) {
+      velocities[i] = from.velocities[i] + (to.velocities[i] - from.velocities[i]) * progress;
+      radii[i] = from.radii[i] + (to.radii[i] - from.radii[i]) * progress;
+      angles[i] = from.angles[i] + (to.angles[i] - from.angles[i]) * progress;
+    }
+
+    return { velocities, radii, angles };
+  };
+
   // Mouse intersection detection
   useEffect(() => {
     const isIntersecting = checkGalaxyIntersection(mousePosition.x, mousePosition.y);
@@ -331,6 +515,10 @@ const Galaxy: React.FC<GalaxyProps> = ({
         // Pre-generate target galaxy
         const targetGalaxyData = getGalaxy(newTarget.type, newTarget.seed);
         setTargetGalaxy(targetGalaxyData);
+        
+        // Generate orbital motion data for target galaxy
+        const targetOrbitalData = calculateOrbitalMotion(targetGalaxyData.positions, newTarget.type);
+        setTargetOrbitalMotion(targetOrbitalData);
       }
       
       // Progress towards target
@@ -342,6 +530,7 @@ const Galaxy: React.FC<GalaxyProps> = ({
         if (newProgress >= 1.0) {
           setCurrentGalaxyState(transformationTarget);
           setCurrentGalaxy(targetGalaxy);
+          setCurrentOrbitalMotion(targetOrbitalMotion);
           
           const nextTarget = generateRandomTarget();
           setTransformationTarget(nextTarget);
@@ -362,6 +551,12 @@ const Galaxy: React.FC<GalaxyProps> = ({
             const spiralTarget = { type: 'spiral' as GalaxyType, seed: Math.floor(Math.random() * 100000) };
             setTransformationTarget(spiralTarget);
             setCurrentTransformationProgress(0.001);
+            
+            // Generate target orbital data for spiral
+            const spiralGalaxyData = getGalaxy(spiralTarget.type, spiralTarget.seed);
+            setTargetGalaxy(spiralGalaxyData);
+            const spiralOrbitalData = calculateOrbitalMotion(spiralGalaxyData.positions, spiralTarget.type);
+            setTargetOrbitalMotion(spiralOrbitalData);
           }
           return prev;
         });
@@ -372,7 +567,9 @@ const Galaxy: React.FC<GalaxyProps> = ({
 
 
   // Animation frame for real-time transformation
-  useFrame(() => {
+  useFrame((state, delta) => {
+    // Update orbital animation time
+    orbitalTimeRef.current += delta;
     if (galaxyRef.current) {
       // Handle overlay transition animations
       if (overlayState.transitionPhase === 'expanding') {
@@ -544,6 +741,30 @@ const Galaxy: React.FC<GalaxyProps> = ({
         );
       }
 
+      // Apply orbital motion during transformation (skip during overlay transitions for performance)
+      if (currentOrbitalMotion && targetOrbitalMotion && currentTransformationProgress > 0 && 
+          overlayState.transitionPhase !== 'expanding' && overlayState.transitionPhase !== 'fading') {
+        // Update orbital angles first
+        updateOrbitalAngles(currentOrbitalMotion, delta * 60, intersectionState.intersectionForce);
+        if (targetOrbitalMotion) {
+          updateOrbitalAngles(targetOrbitalMotion, delta * 60, intersectionState.intersectionForce);
+        }
+        
+        // Interpolate orbital motion data based on transformation progress
+        const interpolatedOrbital = interpolateOrbitalMotion(
+          currentOrbitalMotion,
+          targetOrbitalMotion,
+          gentleProgress
+        );
+        
+        // Apply orbital motion to the interpolated positions
+        interpolatedPositions = applyOrbitalMotion(
+          interpolatedPositions,
+          interpolatedOrbital,
+          0 // No additional delta since we already updated angles
+        );
+      }
+
       // Update buffer attributes
       positionAttributeRef.current.array.set(interpolatedPositions);
       positionAttributeRef.current.needsUpdate = true;
@@ -622,6 +843,22 @@ const Galaxy: React.FC<GalaxyProps> = ({
           setDisplacedPositions(null);
         }
       }
+
+      // Apply orbital motion to stable galaxy (no transformation, skip during overlay transitions for performance)
+      if (currentOrbitalMotion && overlayState.transitionPhase !== 'expanding' && overlayState.transitionPhase !== 'fading') {
+        // Update the orbital angles for the current galaxy
+        updateOrbitalAngles(currentOrbitalMotion, delta * 60, intersectionState.intersectionForce);
+        
+        // Apply orbital motion to get new positions
+        currentPositions = applyOrbitalMotion(
+          currentPositions,
+          currentOrbitalMotion,
+          0 // No additional delta since we already updated angles
+        );
+        
+        positionAttributeRef.current.array.set(currentPositions);
+        positionAttributeRef.current.needsUpdate = true;
+      }
       
       // Update debug info if callback provided
       if (onDebugUpdate) {
@@ -680,12 +917,22 @@ const Galaxy: React.FC<GalaxyProps> = ({
       const restoredGalaxy = createGalaxyFromSnapshot(snapshot.mainGalaxy);
       setCurrentGalaxy(restoredGalaxy);
       
+      // Restore orbital motion for current galaxy
+      const restoredOrbitalMotion = calculateOrbitalMotion(restoredGalaxy.positions, preserved.currentGalaxyState.type);
+      setCurrentOrbitalMotion(restoredOrbitalMotion);
+      
       // Restore transformation galaxies if they exist
       if (snapshot.currentGalaxyData) {
-        setCurrentGalaxy(createGalaxyFromSnapshot(snapshot.currentGalaxyData));
+        const currentRestored = createGalaxyFromSnapshot(snapshot.currentGalaxyData);
+        setCurrentGalaxy(currentRestored);
+        const currentOrbitalMotion = calculateOrbitalMotion(currentRestored.positions, preserved.currentGalaxyState.type);
+        setCurrentOrbitalMotion(currentOrbitalMotion);
       }
       if (snapshot.targetGalaxyData && preserved.transformationProgress > 0) {
-        setTargetGalaxy(createGalaxyFromSnapshot(snapshot.targetGalaxyData));
+        const targetRestored = createGalaxyFromSnapshot(snapshot.targetGalaxyData);
+        setTargetGalaxy(targetRestored);
+        const targetOrbitalMotion = calculateOrbitalMotion(targetRestored.positions, preserved.transformationTarget.type);
+        setTargetOrbitalMotion(targetOrbitalMotion);
       }
       
       return restoredGalaxy;
@@ -693,6 +940,11 @@ const Galaxy: React.FC<GalaxyProps> = ({
       // Default initialization
       const initialGalaxy = getGalaxy('spiral', 12345);
       setCurrentGalaxy(initialGalaxy);
+      
+      // Initialize orbital motion for default spiral galaxy
+      const initialOrbitalMotion = calculateOrbitalMotion(initialGalaxy.positions, 'spiral');
+      setCurrentOrbitalMotion(initialOrbitalMotion);
+      
       return initialGalaxy;
     }
   }, [overlayState.preservedGalaxyState]);
